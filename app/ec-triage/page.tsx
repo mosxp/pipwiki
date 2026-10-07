@@ -670,22 +670,74 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-medium leading-6 text-ink">{children}</p>;
 }
 
+const commonInducers = [
+  "apalutamide",
+  "aprepitant",
+  "armodafinil",
+  "belzutifan",
+  "bosentan",
+  "brigatinib",
+  "carbamazepine",
+  "corticosteroids",
+  "dabrafenib",
+  "efavirenz",
+  "encorafenib",
+  "enzalutamide",
+  "etravirine",
+  "lorlatinib",
+  "lumacaftor",
+  "modafinil",
+  "nevirapine",
+  "phenobarbital",
+  "phenytoin",
+  "rifabutin",
+  "rifampicin",
+  "ritonavir",
+  "rufinamide",
+  "St John's wort",
+  "vemurafenib",
+];
+
+function InducerList() {
+  return (
+    <details className="group mt-1.5">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-moss underline decoration-moss/40 underline-offset-4 hover:decoration-moss [&::-webkit-details-marker]:hidden">
+        <span
+          aria-hidden="true"
+          className="text-[10px] leading-none transition-transform group-open:rotate-90"
+        >
+          ▸
+        </span>
+        Show common inducers
+      </summary>
+      <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 rounded-md bg-sidebar px-3 py-2.5 text-xs leading-5 text-ink sm:grid-cols-3">
+        {commonInducers.map((name) => (
+          <li key={name}>{name}</li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
 function RadioGroup<T extends string>({
   label,
   name,
   value,
   options,
   onChange,
+  children,
 }: {
   label: string;
   name: string;
   value: T;
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
+  children?: React.ReactNode;
 }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
+      {children}
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((option) => {
           const checked = value === option.value;
@@ -1351,12 +1403,14 @@ export default function EcTriagePage() {
               </label>
             ) : null}
             <RadioGroup
-              label="CYP3A4 inducer in the past 4 weeks? Epilepsy medicines, St John's wort, griseofulvin, or another inducer."
+              label="CYP3A4 inducer in the past 4 weeks?"
               name="cyp3a4"
               value={form.cyp3a4}
               onChange={(value) => set("cyp3a4", value)}
               options={yesNoOptions()}
-            />
+            >
+              <InducerList />
+            </RadioGroup>
             <RadioGroup
               label="Crohn's disease, severe diarrhoea, or recent vomiting?"
               name="malabsorption"
