@@ -38,6 +38,7 @@ function normalizePath(pathname: string) {
 
 const clinicalTools = [
   { href: "/ec-triage", title: "Emergency contraception" },
+  { href: "/hc-triage", title: "Hormonal contraception" },
 ];
 
 export function WikiShell({
