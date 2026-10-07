@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Literata } from "next/font/google";
+import { AuthWrapper } from "@/components/AuthWrapper";
 import { WikiShell } from "@/components/wiki-shell";
 import { getAllNotes } from "@/lib/notes";
 import "./globals.css";
@@ -39,7 +40,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${literata.variable} h-full antialiased`}
     >
       <body className="h-full overflow-hidden bg-paper font-sans text-ink">
-        <WikiShell notes={notes}>{children}</WikiShell>
+        <AuthWrapper>
+          <WikiShell notes={notes}>{children}</WikiShell>
+        </AuthWrapper>
       </body>
     </html>
   );
