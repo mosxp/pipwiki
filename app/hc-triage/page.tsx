@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Disclaimer } from "@/components/disclaimer";
 import type { jsPDF } from "jspdf";
 import type { UserOptions } from "jspdf-autotable";
@@ -912,6 +912,69 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-medium leading-6 text-ink">{children}</p>;
 }
 
+function InfoTip({ text }: { text: string }) {
+  const tipId = useId();
+  const hideTimer = useRef<number | null>(null);
+  const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const visible = open || pinned;
+
+  function show() {
+    if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    setOpen(true);
+  }
+
+  function scheduleHide() {
+    if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    hideTimer.current = window.setTimeout(() => setOpen(false), 120);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <span className="print:hidden inline-block align-middle" onMouseEnter={show} onMouseLeave={scheduleHide}>
+        <button
+          type="button"
+          aria-label="Clinical criteria"
+          aria-expanded={visible}
+          aria-describedby={visible ? tipId : undefined}
+          onClick={() => setPinned((value) => !value)}
+          onFocus={show}
+          onBlur={() => {
+            setOpen(false);
+            setPinned(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            setOpen(false);
+            setPinned(false);
+          }}
+          className="ml-1.5 inline-flex size-4 items-center justify-center rounded-full border border-ink-soft/40 text-[10px] leading-none font-medium text-ink-soft hover:border-ink-soft hover:text-ink"
+        >
+          i
+        </button>
+      </span>
+      {visible ? (
+        <span
+          id={tipId}
+          role="tooltip"
+          onMouseEnter={show}
+          onMouseLeave={scheduleHide}
+          onMouseDown={(event) => event.preventDefault()}
+          className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
+        >
+          {text}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 function RadioGroup<T extends string>({
   label,
   name,
@@ -921,6 +984,7 @@ function RadioGroup<T extends string>({
   children,
   hint,
   notice,
+  info,
 }: {
   label: string;
   name: string;
@@ -930,10 +994,14 @@ function RadioGroup<T extends string>({
   children?: React.ReactNode;
   hint?: string;
   notice?: string;
+  info?: string;
 }) {
   return (
-    <fieldset>
-      <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
+    <fieldset className="overflow-visible">
+      <legend className="text-sm font-medium leading-6 text-ink">
+        {label}
+        {info ? <InfoTip text={info} /> : null}
+      </legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       {children}
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -1990,6 +2058,7 @@ export default function HcTriagePage() {
               value={form.pcos}
               onChange={(value) => set("pcos", value)}
               options={yesNoOptions()}
+              info="Look for unassessed clinical signs such as hirsutism, severe acne, or irregular periods."
             />
             <RadioGroup
               label="Potentially pregnant?"
@@ -1997,6 +2066,7 @@ export default function HcTriagePage() {
               value={form.pregnant}
               onChange={(value) => set("pregnant", value)}
               options={yesNoOptions()}
+              info="Patient has had unprotected sex and has not been using their contraceptive method reliably and consistently (note: tests can give a false negative if unprotected sex was <21 days ago)."
             />
           </Section>
 
@@ -2007,6 +2077,7 @@ export default function HcTriagePage() {
               value={form.sti}
               onChange={(value) => set("sti", value)}
               options={yesNoOptions()}
+              info="Genitourinary symptoms (e.g., changes in discharge, lower abdominal pain, pain during sex, unusual bleeding, dysuria, genital skin problems), OR sexually active with new/multiple partners, unprotected sex, or uncertain partner status."
             />
             <RadioGroup
               label="Is a cervical screening test indicated?"
@@ -2014,6 +2085,7 @@ export default function HcTriagePage() {
               value={form.cst}
               onChange={(value) => set("cst", value)}
               options={yesNoOptions()}
+              info="Patient has not had a CST in the previous 5 years."
             />
             <RadioGroup
               label="Possible reproductive coercion, sexual abuse, or sexual violence?"
@@ -2021,6 +2093,7 @@ export default function HcTriagePage() {
               value={form.coercion}
               onChange={(value) => set("coercion", value)}
               options={yesNoOptions()}
+              info="Provide non-judgemental support. Do not pressure to disclose unless there is immediate risk. Offer referral to 1800RESPECT or local services."
             />
           </Section>
 
