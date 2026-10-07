@@ -540,6 +540,9 @@ function UsualCare() {
       <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-5 text-ink">
         <li>
           <span className="font-medium">Analgesia:</span> Ibuprofen 400mg orally, every 8 hours for up to 3 days (max 2.4g in 24 hours).
+          <p className="mt-1 text-xs leading-snug text-amber-700">
+            Caution / Avoid in: Pregnancy, trying to conceive, elderly, asthma, dehydration, heart failure, hypertension, cardiovascular disease, coagulation disorders, active/history of GI bleeding or ulcers, inflammatory bowel disease, renal or severe hepatic impairment, prior NSAID hypersensitivity, and upcoming surgery.
+          </p>
         </li>
         <li>
           <span className="font-medium">Hydration:</span> Increase water intake up to 1.5 L daily.
