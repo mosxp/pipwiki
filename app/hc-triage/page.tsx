@@ -39,6 +39,8 @@ type FormState = {
   heightCm: string;
   ukmec4: YesNo;
   ukmec3: YesNo;
+  ukmec4Checks: string[];
+  ukmec3Checks: string[];
   unexplainedBleeding: YesNo;
   pcos: YesNo;
   pregnant: YesNo;
@@ -70,6 +72,8 @@ const emptyForm: FormState = {
   heightCm: "",
   ukmec4: "",
   ukmec3: "",
+  ukmec4Checks: [],
+  ukmec3Checks: [],
   unexplainedBleeding: "",
   pcos: "",
   pregnant: "",
@@ -482,6 +486,7 @@ function applyProductName(current: FormState, productName: string): FormState {
     onList: match.kind === "approved" ? "yes" : "no",
     product,
     continuity: match.product ? continuityFor(match.product, current.continuity) : current.continuity,
+    ...(match.product ? ukmecForProduct(current, match.product) : {}),
   };
 }
 
@@ -547,6 +552,29 @@ function listsFor(product: Product) {
     };
   }
   return null;
+}
+
+function keptChecks(checks: string[], items: string[] | undefined) {
+  if (!items) return [];
+  return checks.filter((item) => items.includes(item));
+}
+
+function ukmecAnswerAfterListChange(previous: string[], next: string[], answer: YesNo): YesNo {
+  if (next.length > 0) return "yes";
+  if (previous.length > 0) return "no";
+  return answer;
+}
+
+function ukmecForProduct(current: FormState, product: Product) {
+  const lists = listsFor(product);
+  const ukmec4Checks = keptChecks(current.ukmec4Checks, lists?.ukmec4);
+  const ukmec3Checks = keptChecks(current.ukmec3Checks, lists?.ukmec3);
+  return {
+    ukmec4Checks,
+    ukmec3Checks,
+    ukmec4: ukmecAnswerAfterListChange(current.ukmec4Checks, ukmec4Checks, current.ukmec4),
+    ukmec3: ukmecAnswerAfterListChange(current.ukmec3Checks, ukmec3Checks, current.ukmec3),
+  };
 }
 
 function durationFailed(age: number | null, months: number | null, stabilised: YesNo) {
@@ -688,14 +716,20 @@ function derive(form: FormState): Outcome {
     flags.push({
       tone: "alert",
       title: "UKMEC 4",
-      detail: "A UKMEC 4 condition applies. Immediate referral to the GP.",
+      detail:
+        form.ukmec4Checks.length > 0
+          ? `${form.ukmec4Checks.join("; ")}. Immediate referral to the GP.`
+          : "A UKMEC 4 condition applies. Immediate referral to the GP.",
     });
   }
   if (form.ukmec3 === "yes") {
     flags.push({
       tone: "alert",
       title: "UKMEC 3",
-      detail: "A UKMEC 3 condition applies. Immediate referral to the GP.",
+      detail:
+        form.ukmec3Checks.length > 0
+          ? `${form.ukmec3Checks.join("; ")}. Immediate referral to the GP.`
+          : "A UKMEC 3 condition applies. Immediate referral to the GP.",
     });
   }
   if (form.unexplainedBleeding === "yes") {
@@ -765,7 +799,9 @@ function derive(form: FormState): Outcome {
     });
   }
 
-  const dirty = Object.values(form).some((value) => value !== "");
+  const dirty = Object.values(form).some((value) =>
+    Array.isArray(value) ? value.length > 0 : value !== "",
+  );
   const finished = gatesAnswered(form, age);
   let recommendation: Recommendation = { kind: "idle" };
 
@@ -847,6 +883,7 @@ function RadioGroup<T extends string>({
   onChange,
   children,
   hint,
+  notice,
 }: {
   label: string;
   name: string;
@@ -855,13 +892,14 @@ function RadioGroup<T extends string>({
   onChange: (value: T) => void;
   children?: React.ReactNode;
   hint?: string;
+  notice?: string;
 }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       {children}
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap items-center gap-2">
         {options.map((option) => {
           const checked = value === option.value;
           return (
@@ -884,6 +922,7 @@ function RadioGroup<T extends string>({
             </label>
           );
         })}
+        {notice ? <p className="min-w-48 flex-1 text-sm leading-5 text-amber-600">{notice}</p> : null}
       </div>
     </fieldset>
   );
@@ -957,21 +996,41 @@ function TextArea({
   );
 }
 
+const ukmecReviewNotice = "Please review and select the specific criteria from the expanded list above.";
+
 function CriterionList({
   label,
   items,
   group,
   note,
+  checked,
+  onToggle,
+  open,
+  onOpenChange,
 }: {
   label: string;
   items: string[];
   group?: string;
   note?: string;
+  checked: string[];
+  onToggle: (item: string) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   return (
-    <details className="group mt-1.5">
+    <details
+      className="group mt-1.5"
+      open={open}
+      onToggle={(event) => onOpenChange(event.currentTarget.open)}
+    >
       <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm text-moss underline decoration-moss/40 underline-offset-4 hover:decoration-moss [&::-webkit-details-marker]:hidden">
-        <span aria-hidden="true" className="text-[10px] leading-none transition-transform group-open:rotate-90">
+        <span
+          aria-hidden="true"
+          className={[
+            "text-[10px] leading-none transition-transform",
+            open ? "rotate-90" : "",
+          ].join(" ")}
+        >
           ▸
         </span>
         {label}
@@ -979,10 +1038,39 @@ function CriterionList({
       {items.length > 0 ? (
         <div className="mt-2 rounded-md bg-sidebar px-3 py-2.5">
           {group ? <p className="text-[11px] tracking-[0.12em] text-ink-soft uppercase">{group}</p> : null}
-          <ul className="mt-1.5 space-y-1 text-xs leading-5 text-ink">
-            {items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
+          <ul className="mt-1.5 space-y-0.5">
+            {items.map((item) => {
+              const isChecked = checked.includes(item);
+              return (
+                <li key={item}>
+                  <label className="flex cursor-pointer items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink hover:bg-paper/70">
+                    <span className="relative mt-0.5 inline-flex size-4 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => onToggle(item)}
+                        className="peer size-4 appearance-none rounded-full border border-moss/50 bg-paper checked:border-moss checked:bg-moss focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+                      />
+                      <svg
+                        viewBox="0 0 16 16"
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 hidden size-4 text-paper-raised peer-checked:block"
+                      >
+                        <path
+                          d="M4 8.2 6.6 10.8 12 5.2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    {item}
+                  </label>
+                </li>
+              );
+            })}
           </ul>
           {note ? <p className="mt-2 text-xs leading-5 text-ink-soft">{note}</p> : null}
         </div>
@@ -1199,6 +1287,12 @@ function yesNoText(value: YesNo) {
   return "Not answered";
 }
 
+function ukmecRecord(value: YesNo, checks: string[]) {
+  const answer = yesNoText(value);
+  if (checks.length === 0) return answer;
+  return `${answer}. ${checks.join("; ")}`;
+}
+
 function formatWhen(iso: string) {
   const [year, month, day] = iso.split("-").map(Number);
   if (!year || !month || !day) return iso;
@@ -1254,8 +1348,8 @@ function consultationRows(form: FormState, outcome: Outcome): string[][] {
     ["Weight", form.weightKg.trim() ? `${form.weightKg.trim()} kg` : "Not answered"],
     ["Height", form.heightCm.trim() ? `${form.heightCm.trim()} cm` : "Not answered"],
     ["BMI", bmi],
-    ["UKMEC 4", yesNoText(form.ukmec4)],
-    ["UKMEC 3", yesNoText(form.ukmec3)],
+    ["UKMEC 4", ukmecRecord(form.ukmec4, form.ukmec4Checks)],
+    ["UKMEC 3", ukmecRecord(form.ukmec3, form.ukmec3Checks)],
     ["Unexplained bleeding or related symptoms", yesNoText(form.unexplainedBleeding)],
     ["Unassessed PCOS signs", yesNoText(form.pcos)],
     ["Potentially pregnant", yesNoText(form.pregnant)],
@@ -1435,6 +1529,8 @@ function stabilisationHint(age: number | null) {
 export default function HcTriagePage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [reportNote, setReportNote] = useState<string | null>(null);
+  const [ukmec4Open, setUkmec4Open] = useState(false);
+  const [ukmec3Open, setUkmec3Open] = useState(false);
   const outcome = derive(form);
   const age = readNumber(form.age);
   const criteria = listsFor(form.product);
@@ -1448,11 +1544,46 @@ export default function HcTriagePage() {
       ...current,
       product,
       continuity: continuityFor(product, current.continuity),
+      ...ukmecForProduct(current, product),
     }));
   }
 
   function setProductName(productName: string) {
     setForm((current) => applyProductName(current, productName));
+  }
+
+  function toggleUkmec(kind: "ukmec4" | "ukmec3", item: string) {
+    const checksKey = kind === "ukmec4" ? "ukmec4Checks" : "ukmec3Checks";
+    setForm((current) => {
+      const selected = current[checksKey].includes(item)
+        ? current[checksKey].filter((entry) => entry !== item)
+        : [...current[checksKey], item];
+      return {
+        ...current,
+        [checksKey]: selected,
+        [kind]: selected.length > 0 ? "yes" : "no",
+      };
+    });
+  }
+
+  function setUkmec(kind: "ukmec4" | "ukmec3", value: YesNo) {
+    const checksKey = kind === "ukmec4" ? "ukmec4Checks" : "ukmec3Checks";
+    const selected = form[checksKey];
+    if (value === "yes") {
+      if (selected.length === 0) {
+        if (kind === "ukmec4") setUkmec4Open(true);
+        else setUkmec3Open(true);
+      }
+      set(kind, "yes");
+      return;
+    }
+    setForm((current) => ({ ...current, [kind]: "no", [checksKey]: [] }));
+  }
+
+  function clearAnswers() {
+    setForm(emptyForm);
+    setUkmec4Open(false);
+    setUkmec3Open(false);
   }
 
   async function printConsultationRecord() {
@@ -1694,27 +1825,41 @@ export default function HcTriagePage() {
               label="Does a UKMEC 4 condition apply?"
               name="ukmec4"
               value={form.ukmec4}
-              onChange={(value) => set("ukmec4", value)}
+              onChange={(value) => setUkmec("ukmec4", value)}
               options={yesNoOptions()}
+              notice={
+                form.ukmec4 === "yes" && form.ukmec4Checks.length === 0 ? ukmecReviewNotice : undefined
+              }
             >
               <CriterionList
                 label="Show UKMEC 4 conditions"
                 group={criteria?.group}
                 items={criteria?.ukmec4 ?? []}
+                checked={form.ukmec4Checks}
+                onToggle={(item) => toggleUkmec("ukmec4", item)}
+                open={ukmec4Open}
+                onOpenChange={setUkmec4Open}
               />
             </RadioGroup>
             <RadioGroup
               label="Does a UKMEC 3 condition apply?"
               name="ukmec3"
               value={form.ukmec3}
-              onChange={(value) => set("ukmec3", value)}
+              onChange={(value) => setUkmec("ukmec3", value)}
               options={yesNoOptions()}
+              notice={
+                form.ukmec3 === "yes" && form.ukmec3Checks.length === 0 ? ukmecReviewNotice : undefined
+              }
             >
               <CriterionList
                 label="Show UKMEC 3 conditions"
                 group={criteria?.group}
                 items={criteria?.ukmec3 ?? []}
                 note={criteria?.note}
+                checked={form.ukmec3Checks}
+                onToggle={(item) => toggleUkmec("ukmec3", item)}
+                open={ukmec3Open}
+                onOpenChange={setUkmec3Open}
               />
             </RadioGroup>
             <RadioGroup
@@ -1814,7 +1959,7 @@ export default function HcTriagePage() {
           {outcome.dirty ? (
             <button
               type="button"
-              onClick={() => setForm(emptyForm)}
+              onClick={clearAnswers}
               className="mt-4 text-sm text-ink-soft underline decoration-line underline-offset-4 hover:text-ink"
             >
               Clear answers
