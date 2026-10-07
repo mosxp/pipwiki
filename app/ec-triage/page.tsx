@@ -1177,6 +1177,14 @@ export default function EcTriagePage() {
         <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">
           Emergency contraception
         </h1>
+        <a
+          href="/ec-blank-questionnaire.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 inline-flex items-center rounded-md border border-moss/40 bg-transparent px-3.5 py-2 text-sm font-medium text-moss print:hidden hover:border-moss hover:bg-[var(--step-bg)]"
+        >
+          Print Blank Questionnaire
+        </a>
         <p className="mt-4 text-base leading-7 text-ink-soft">
           Work through the consultation. Referral flags and the product choice
           update from the protocol as you answer. Nothing is saved.
