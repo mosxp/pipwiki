@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Disclaimer } from "@/components/disclaimer";
 import type { jsPDF } from "jspdf";
 import type { UserOptions } from "jspdf-autotable";
@@ -148,34 +148,342 @@ const depotUkmec3 = [
   "History of ischaemic heart disease, stroke, or TIA",
 ];
 
-const medicineGroups = [
+type CatalogProduct = "cocp" | "pop" | "ring" | "depot" | "implant" | "iud";
+
+type MedicineEntry = {
+  name: string;
+  product: CatalogProduct;
+  status: "approved" | "excluded";
+  alias?: boolean;
+};
+
+type MedicineMatch =
+  | { kind: "empty" }
+  | { kind: "pending" }
+  | { kind: "unlisted" }
+  | { kind: "approved"; product: Product }
+  | { kind: "excluded"; product: Product | "" };
+
+function listed(product: CatalogProduct, names: string[], status: MedicineEntry["status"] = "approved"): MedicineEntry[] {
+  return names.map((name) => ({ name, product, status }));
+}
+
+const medicineCatalog: MedicineEntry[] = [
+  ...listed("cocp", [
+    "Zoely",
+    "Yaz",
+    "Yana",
+    "Rosie",
+    "Brooke",
+    "Bella",
+    "Femme-Tab ED 20/100",
+    "Micronelle 20 ED",
+    "Microgynon 20 ED",
+    "Loette",
+    "Nextstellis",
+    "Yasmin",
+    "Yelena",
+    "Rosalee",
+    "Brooklynn",
+    "Isabelle",
+    "Petibelle",
+    "Femme-Tab ED 30/150",
+    "Micronelle 30 ED",
+    "Microgynon 30 ED",
+    "Monofeme",
+    "Levlen",
+    "Lenest 30",
+    "Leveth 150/30",
+    "Evelyn 150/30",
+    "Eleanor 150/30",
+    "Seasonique",
+    "Marvelon",
+    "Madeline",
+    "Valette",
+    "Minulet",
+    "Estelle-35",
+    "Diane-35",
+    "Brenda-35",
+    "Jene-35",
+    "Juliet-35",
+    "Norimin",
+    "Brevinor",
+    "Norimin-1",
+    "Brevinor-1",
+    "Pirmella",
+    "Triquilar ED",
+    "Trifeme",
+    "Triphasil",
+    "Logynon ED",
+    "Qlaira",
+  ]),
+  { name: "Femme-Tab ED", product: "cocp", status: "approved", alias: true },
+  ...listed("pop", ["Noriday 28-Day", "Microlut", "Slinda", "Lucinda"]),
+  ...listed("ring", ["NuvaRing"]),
+  ...listed("depot", ["Depo-Provera", "Depo-Ralovera"]),
+  ...listed("cocp", ["Microgynon 50"], "excluded"),
+  { name: "Microgynon 50 ED", product: "cocp", status: "excluded", alias: true },
+  ...listed("implant", ["Implanon NXT"], "excluded"),
+  ...listed("iud", ["Kyleena", "Mirena"], "excluded"),
+];
+
+const medicineSections: {
+  title: string;
+  groups: {
+    title?: string;
+    rows: { estrogen: string; progestogen: string; brands: string; note?: string }[];
+  }[];
+}[] = [
   {
-    heading: "Combined pills",
-    items: [
-      "Zoely",
-      "Yaz, Yana, Rosie, Brooke, Bella",
-      "Femme-Tab ED 20/100, Micronelle 20 ED, Microgynon 20 ED, Loette",
-      "Nextstellis",
-      "Yasmin, Yelena, Rosalee, Brooklynn, Isabelle, Petibelle",
-      "Femme-Tab ED 30/150, Micronelle 30 ED, Microgynon 30 ED, Monofeme, Levlen, Lenest 30, Leveth 150/30, Evelyn 150/30, Eleanor 150/30",
-      "Seasonique",
-      "Marvelon, Madeline",
-      "Valette",
-      "Minulet",
-      "Estelle-35, Diane-35, Brenda-35, Jene-35, Juliet-35",
-      "Norimin, Brevinor",
-      "Norimin-1, Brevinor-1, Pirmella",
-      "Triquilar ED, Trifeme, Triphasil, Logynon ED",
-      "Qlaira",
+    title: "Combined oral contraceptives",
+    groups: [
+      {
+        title: "Low estrogen",
+        rows: [
+          {
+            estrogen: "Estradiol 1.5 mg",
+            progestogen: "Nomegestrol 2.5 mg",
+            brands: "(24+4) Zoely",
+            note: "Higher incidences of missed withdrawal bleeds (the frequency increased over time), breakthrough bleeding or spotting, acne, and weight gain.",
+          },
+          {
+            estrogen: "EE 20 mcg",
+            progestogen: "Drospirenone 3 mg",
+            brands: "(24+4) Yaz, Yana, Rosie, Brooke, Bella",
+            note: "The shortened hormone-free interval may increase contraceptive effectiveness by further suppressing ovarian function.",
+          },
+          {
+            estrogen: "EE 20 mcg",
+            progestogen: "Levonorgestrel 100 mcg",
+            brands: "(21+7) Femme-Tab ED 20/100, Micronelle 20 ED, Microgynon 20 ED, Loette",
+          },
+        ],
+      },
+      {
+        title: "Standard estrogen",
+        rows: [
+          {
+            estrogen: "Estetrol 14.2 mg",
+            progestogen: "Drospirenone 3 mg",
+            brands: "(24+4) Nextstellis",
+          },
+          {
+            estrogen: "EE 30 mcg",
+            progestogen: "Drospirenone 3 mg",
+            brands: "(21+7) Yasmin, Yelena, Rosalee, Brooklynn, Isabelle, Petibelle",
+          },
+          {
+            estrogen: "EE 30 mcg",
+            progestogen: "Levonorgestrel 150 mcg",
+            brands: "(21+7) Femme-Tab ED 30/150, Micronelle 30 ED, Microgynon 30 ED, Monofeme, Levlen, Lenest 30, Leveth 150/30, Evelyn 150/30, Eleanor 150/30",
+          },
+          {
+            estrogen: "EE 30 mcg for 84 days, then EE 10 mcg for 7 days",
+            progestogen: "Levonorgestrel 150 mcg",
+            brands: "(84+7) Seasonique",
+            note: "Seasonique does not have a hormone-free interval, unlike other combined pills.",
+          },
+          {
+            estrogen: "EE 30 mcg",
+            progestogen: "Desogestrel 150 mcg",
+            brands: "(21+7) Marvelon, Madeline",
+          },
+          {
+            estrogen: "EE 30 mcg",
+            progestogen: "Dienogest 2 mg",
+            brands: "(21+7) Valette",
+          },
+          {
+            estrogen: "EE 30 mcg",
+            progestogen: "Gestodene 75 mcg",
+            brands: "(21+7) Minulet",
+          },
+          {
+            estrogen: "EE 35 mcg",
+            progestogen: "Cyproterone 2 mg",
+            brands: "(21+7) Estelle-35, Diane-35, Brenda-35, Jene-35, Juliet-35",
+            note: "Associated with an increased risk of VTE compared with other combined pills. Indicated for androgenisation with contraception. Without androgenic symptoms, use another combined pill. Meningioma has been reported. In pregnancy, cyproterone could theoretically cause feminisation of a male fetus.",
+          },
+          {
+            estrogen: "EE 35 mcg",
+            progestogen: "Norethisterone 0.5 mg",
+            brands: "(21+7) Norimin, Brevinor",
+          },
+          {
+            estrogen: "EE 35 mcg",
+            progestogen: "Norethisterone 1 mg",
+            brands: "(21+7) Norimin-1, Brevinor-1, Pirmella",
+          },
+        ],
+      },
+      {
+        title: "Tri-phasic",
+        rows: [
+          {
+            estrogen: "EE 30 / 40 / 30 mcg",
+            progestogen: "Levonorgestrel 50 / 75 / 125 mcg",
+            brands: "(21+7) Triquilar ED, Trifeme, Triphasil, Logynon ED",
+            note: "6 tablets, then 5, then 10.",
+          },
+        ],
+      },
+      {
+        title: "4-phasic",
+        rows: [
+          {
+            estrogen: "Estradiol valerate",
+            progestogen: "Dienogest",
+            brands: "(26+2) Qlaira",
+            note: "Phases (estradiol valerate / dienogest): 3 mg/nil ×2, 2 mg/2 mg ×5, 2 mg/3 mg ×17, 1 mg/nil ×2. Compared with placebo, Qlaira is effective for heavy menstrual bleeding. A missed period occurs more often with Qlaira.",
+          },
+        ],
+      },
     ],
   },
   {
-    heading: "Progestogen-only pills",
-    items: ["Noriday 28-Day", "Microlut", "Slinda, Lucinda"],
+    title: "Progestogen-only pills",
+    groups: [
+      {
+        rows: [
+          { estrogen: "None", progestogen: "Norethisterone 350 mcg", brands: "(28) Noriday 28-Day" },
+          { estrogen: "None", progestogen: "Levonorgestrel 30 mcg", brands: "(28) Microlut" },
+          { estrogen: "None", progestogen: "Drospirenone 4 mg", brands: "(24+4) Slinda, Lucinda" },
+        ],
+      },
+    ],
   },
-  { heading: "Vaginal ring", items: ["NuvaRing"] },
-  { heading: "Depot injection", items: ["Depo-Provera, Depo-Ralovera"] },
+  {
+    title: "Vaginal ring",
+    groups: [
+      {
+        rows: [
+          {
+            estrogen: "EE 2.7 mg (15 mcg/24 hours)",
+            progestogen: "Etonogestrel 11.7 mg (120 mcg/24 hours)",
+            brands: "NuvaRing",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Depot injection",
+    groups: [
+      {
+        rows: [
+          {
+            estrogen: "None",
+            progestogen: "Medroxyprogesterone 150 mg/mL injection",
+            brands: "Depo-Provera, Depo-Ralovera",
+            note: "A pharmacist with suitable premises and competency in deep intramuscular injection may administer the depot.",
+          },
+        ],
+      },
+    ],
+  },
 ];
+
+function normMedicine(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKC")
+    .replace(/®/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/ +/g, " ");
+}
+
+function compactMedicine(value: string) {
+  return normMedicine(value).replace(/ /g, "");
+}
+
+function formProduct(product: CatalogProduct): Product | "" {
+  if (product === "cocp" || product === "pop" || product === "ring" || product === "depot") return product;
+  return "";
+}
+
+function matchFrom(entry: MedicineEntry): MedicineMatch {
+  const product = formProduct(entry.product);
+  if (entry.status === "approved" && product) return { kind: "approved", product };
+  return { kind: "excluded", product };
+}
+
+function resolveMedicine(raw: string): MedicineMatch {
+  const query = normMedicine(raw);
+  const packed = compactMedicine(raw);
+  if (!query) return { kind: "empty" };
+
+  const exact = medicineCatalog.find(
+    (item) => normMedicine(item.name) === query || compactMedicine(item.name) === packed,
+  );
+  if (exact) return matchFrom(exact);
+
+  const prefixes = medicineCatalog.filter((item) => {
+    if (item.alias) return false;
+    return normMedicine(item.name).startsWith(query) || compactMedicine(item.name).startsWith(packed);
+  });
+  if (prefixes.length === 0) return { kind: "unlisted" };
+  if (packed.length < 4) return { kind: "pending" };
+  if (prefixes.length === 1) return matchFrom(prefixes[0]);
+
+  const products = new Set(prefixes.map((item) => item.product));
+  const statuses = new Set(prefixes.map((item) => item.status));
+  if (statuses.size === 1 && products.size === 1) return matchFrom(prefixes[0]);
+  return { kind: "pending" };
+}
+
+function searchMedicines(raw: string) {
+  const query = normMedicine(raw);
+  const packed = compactMedicine(raw);
+  if (!query) return [];
+  return medicineCatalog
+    .filter((item) => !item.alias)
+    .filter(
+      (item) => normMedicine(item.name).includes(query) || compactMedicine(item.name).includes(packed),
+    )
+    .slice(0, 8);
+}
+
+function catalogLabel(product: CatalogProduct) {
+  if (product === "cocp") return "Combined pill";
+  if (product === "pop") return "Progestogen-only pill";
+  if (product === "ring") return "Vaginal ring";
+  if (product === "depot") return "Depot injection";
+  if (product === "implant") return "Implant";
+  return "Intrauterine device";
+}
+
+function continuityFor(product: Product, continuity: Continuity): Continuity {
+  if (product === "cocp" || product === "pop" || product === "ring") {
+    if (continuity === "continuous" || continuity === "short-break" || continuity === "long-break") {
+      return continuity;
+    }
+    return "";
+  }
+  if (product === "depot") {
+    if (continuity === "depo-due" || continuity === "depo-late") return continuity;
+    return "";
+  }
+  return "";
+}
+
+function applyProductName(current: FormState, productName: string): FormState {
+  const match = resolveMedicine(productName);
+  if (match.kind === "empty" || match.kind === "pending") {
+    return { ...current, productName, onList: "" };
+  }
+  if (match.kind === "unlisted") {
+    return { ...current, productName, onList: "no" };
+  }
+  const product = match.product || current.product;
+  return {
+    ...current,
+    productName,
+    onList: match.kind === "approved" ? "yes" : "no",
+    product,
+    continuity: match.product ? continuityFor(match.product, current.continuity) : current.continuity,
+  };
+}
 
 function readNumber(value: string): number | null {
   const trimmed = value.trim();
@@ -687,6 +995,111 @@ function CriterionList({
   );
 }
 
+function ProductNameField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const listId = useId();
+  const inputId = useId();
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const matches = searchMedicines(value);
+  const index = matches.length === 0 ? 0 : Math.min(active, matches.length - 1);
+  const showList = open && value.trim().length > 0;
+
+  function choose(name: string) {
+    onChange(name);
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative">
+      <label htmlFor={inputId} className="text-sm font-medium leading-6 text-ink">
+        Product name
+      </label>
+      <input
+        id={inputId}
+        value={value}
+        onChange={(event) => {
+          onChange(event.target.value);
+          setOpen(true);
+          setActive(0);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setOpen(false);
+            return;
+          }
+          if (!showList || matches.length === 0) return;
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            setActive(Math.min(index + 1, matches.length - 1));
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            setActive(Math.max(index - 1, 0));
+          } else if (event.key === "Enter" && matches[index]) {
+            event.preventDefault();
+            choose(matches[index].name);
+          }
+        }}
+        placeholder="Start typing a brand"
+        className={inputClass}
+        autoComplete="off"
+        spellCheck={false}
+        role="combobox"
+        aria-expanded={showList}
+        aria-controls={listId}
+        aria-autocomplete="list"
+        aria-activedescendant={showList && matches[index] ? `${listId}-${index}` : undefined}
+      />
+      <span className="mt-1.5 block text-xs text-ink-soft">
+        An approved brand sets the medicines list to Yes. An excluded or unknown brand sets it to No.
+      </span>
+      {showList ? (
+        <ul
+          id={listId}
+          role="listbox"
+          className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-line bg-paper-raised shadow-sm"
+        >
+          {matches.length === 0 ? (
+            <li className="px-3 py-2 text-sm text-ink-soft">No listed brand. This sets the medicines list to No.</li>
+          ) : (
+            matches.map((item, itemIndex) => (
+              <li key={item.name} id={`${listId}-${itemIndex}`} role="option" aria-selected={itemIndex === index}>
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => choose(item.name)}
+                  className={[
+                    "block w-full px-3 py-2 text-left",
+                    itemIndex === index ? "bg-sidebar" : "bg-paper-raised",
+                  ].join(" ")}
+                >
+                  <span className="block text-sm text-ink">{item.name}</span>
+                  <span
+                    className={[
+                      "mt-0.5 block text-xs",
+                      item.status === "excluded" ? "text-[var(--alert)]" : "text-ink-soft",
+                    ].join(" ")}
+                  >
+                    {catalogLabel(item.product)}
+                    {item.status === "excluded" ? " · Excluded from program" : ""}
+                  </span>
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function MedicinesList() {
   return (
     <details className="group mt-1.5">
@@ -696,21 +1109,80 @@ function MedicinesList() {
         </span>
         Show the medicines list
       </summary>
-      <div className="mt-2 space-y-3 rounded-md bg-sidebar px-3 py-2.5 text-xs leading-5 text-ink">
-        {medicineGroups.map((group) => (
-          <div key={group.heading}>
-            <p className="text-[11px] tracking-[0.12em] text-ink-soft uppercase">{group.heading}</p>
-            <ul className="mt-1 space-y-1">
-              {group.items.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-        <p className="text-ink-soft">
-          Excluded: 50 mcg ethinylestradiol pills such as Microgynon 50, Implanon NXT, Kyleena, and Mirena.
-          Cyproterone pills are for androgenisation with contraception. Without androgenic symptoms, use another pill.
-        </p>
+      <div className="mt-2 min-w-0">
+        <div className="overflow-x-auto rounded-md border border-line">
+          <table className="w-full border-collapse text-left text-sm text-ink">
+            <thead>
+              <tr className="bg-sidebar">
+                <th scope="col" className="border border-line px-2.5 py-2 font-medium">
+                  Category / Estrogen dose
+                </th>
+                <th scope="col" className="border border-line px-2.5 py-2 font-medium">
+                  Progestogen
+                </th>
+                <th scope="col" className="border border-line px-2.5 py-2 font-medium">
+                  Brands
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {medicineSections.flatMap((section) => {
+                const rows = [
+                  <tr key={section.title}>
+                    <th
+                      colSpan={3}
+                      scope="colgroup"
+                      className="border border-line bg-[var(--step-bg)] px-2.5 py-2 text-left text-[11px] font-medium tracking-[0.12em] text-moss uppercase"
+                    >
+                      {section.title}
+                    </th>
+                  </tr>,
+                ];
+                for (const group of section.groups) {
+                  if (group.title) {
+                    rows.push(
+                      <tr key={`${section.title}-${group.title}`}>
+                        <th
+                          colSpan={3}
+                          scope="colgroup"
+                          className="border border-line bg-sidebar px-2.5 py-1.5 text-left text-xs font-medium text-ink"
+                        >
+                          {group.title}
+                        </th>
+                      </tr>,
+                    );
+                  }
+                  group.rows.forEach((row, index) => {
+                    rows.push(
+                      <tr key={row.brands} className={index % 2 === 1 ? "bg-sidebar" : "bg-paper-raised"}>
+                        <td className="border border-line px-2.5 py-2 align-top">{row.estrogen}</td>
+                        <td className="border border-line px-2.5 py-2 align-top">{row.progestogen}</td>
+                        <td className="border border-line px-2.5 py-2 align-top">
+                          {row.brands}
+                          {row.note ? <p className="mt-1 text-xs leading-5 text-ink-soft">{row.note}</p> : null}
+                        </td>
+                      </tr>,
+                    );
+                  });
+                }
+                return rows;
+              })}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-3 rounded-md border border-[var(--alert)]/30 bg-[var(--alert-bg)] px-3 py-2.5">
+          <p className="text-[11px] font-medium tracking-[0.12em] text-[var(--alert)] uppercase">
+            Excluded from program
+          </p>
+          <ul className="mt-1.5 space-y-1 text-xs leading-5 text-ink">
+            <li>
+              Combined pills with a high estrogen dose (50 mcg ethinylestradiol or equivalent), including Microgynon 50.
+              These are not routinely recommended for contraception because of an unacceptable risk of VTE.
+            </li>
+            <li>Etonogestrel subdermal implant: Implanon NXT.</li>
+            <li>Levonorgestrel intrauterine devices: Kyleena and Mirena.</li>
+          </ul>
+        </div>
       </div>
     </details>
   );
@@ -972,21 +1444,15 @@ export default function HcTriagePage() {
   }
 
   function setProduct(product: Product) {
-    setForm((current) => {
-      const oral = product === "cocp" || product === "pop" || product === "ring";
-      const continuity = oral
-        ? current.continuity === "continuous" ||
-          current.continuity === "short-break" ||
-          current.continuity === "long-break"
-          ? current.continuity
-          : ""
-        : product === "depot"
-          ? current.continuity === "depo-due" || current.continuity === "depo-late"
-            ? current.continuity
-            : ""
-          : "";
-      return { ...current, product, continuity };
-    });
+    setForm((current) => ({
+      ...current,
+      product,
+      continuity: continuityFor(product, current.continuity),
+    }));
+  }
+
+  function setProductName(productName: string) {
+    setForm((current) => applyProductName(current, productName));
   }
 
   async function printConsultationRecord() {
@@ -1074,16 +1540,7 @@ export default function HcTriagePage() {
                 { value: "depot", label: "Depot injection" },
               ]}
             />
-            <label className="block">
-              <FieldLabel>Product name</FieldLabel>
-              <input
-                value={form.productName}
-                onChange={(event) => set("productName", event.target.value)}
-                placeholder="Brand or formulation"
-                className={inputClass}
-                autoComplete="off"
-              />
-            </label>
+            <ProductNameField value={form.productName} onChange={setProductName} />
             <RadioGroup
               label="Is it on the approved medicines list?"
               name="on-list"
