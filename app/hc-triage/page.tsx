@@ -530,6 +530,11 @@ function highCombinedBp(product: Product, systolic: number | null, diastolic: nu
   return (systolic != null && systolic >= 160) || (diastolic != null && diastolic >= 100);
 }
 
+function highCombinedBmi(product: Product, bmi: number | null) {
+  if (!combinedMethod(product)) return false;
+  return bmi != null && bmi > 35;
+}
+
 function productLabel(product: Product) {
   if (product === "cocp") return "Combined oral contraceptive";
   if (product === "pop") return "Progestogen-only pill";
@@ -725,13 +730,23 @@ function derive(form: FormState): Outcome {
     });
   }
 
+  const highBmi = highCombinedBmi(form.product, bmi);
   const exclusions = [
     form.ukmec4 === "yes" ? "UKMEC 4" : "",
     form.ukmec3 === "yes" ? "UKMEC 3" : "",
+    highBmi ? "BMI more than 35" : "",
     form.unexplainedBleeding === "yes" ? "unexplained bleeding" : "",
     form.pcos === "yes" ? "PCOS signs that have not been assessed" : "",
     form.pregnant === "yes" ? "possible pregnancy" : "",
   ].filter(Boolean);
+  if (highBmi) {
+    flags.push({
+      tone: "alert",
+      title: "BMI",
+      detail:
+        "BMI over 35 kg/m² with a combined pill or vaginal ring. UKMEC 3. Immediate referral to the GP.",
+    });
+  }
   if (form.ukmec4 === "yes") {
     flags.push({
       tone: "alert",
@@ -1905,11 +1920,18 @@ export default function HcTriagePage() {
               suffix="cm"
               hint={outcome.heightHint ?? "BMI is reviewed at least annually."}
             />
-            <div className="rounded-md border border-line bg-paper px-3 py-2.5">
-              <p className="text-[11px] tracking-[0.12em] text-ink-soft uppercase">BMI</p>
-              <p className="mt-1 text-sm text-ink">
-                {outcome.bmi != null ? `${outcome.bmi.toFixed(1)} kg/m²` : "— kg/m²"}
-              </p>
+            <div>
+              <div className="rounded-md border border-line bg-paper px-3 py-2.5">
+                <p className="text-[11px] tracking-[0.12em] text-ink-soft uppercase">BMI</p>
+                <p className="mt-1 text-sm text-ink">
+                  {outcome.bmi != null ? `${outcome.bmi.toFixed(1)} kg/m²` : "— kg/m²"}
+                </p>
+              </div>
+              {highCombinedBmi(form.product, outcome.bmi) ? (
+                <p className="mt-1.5 text-xs leading-5 text-amber-600">
+                  UKMEC 3 for a combined pill or vaginal ring: BMI over 35 kg/m². Refer to the GP.
+                </p>
+              ) : null}
             </div>
           </Section>
 
