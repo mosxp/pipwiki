@@ -512,6 +512,49 @@ function CheckGroup({
   );
 }
 
+const referralPhrases = [
+  "Immediate referral to Emergency Department",
+  "Immediate referral to the emergency department",
+  "Immediate referral to the GP",
+];
+
+function ReferralText({ text }: { text: string }) {
+  const parts = text.split(
+    /(Immediate referral to Emergency Department|Immediate referral to the emergency department|Immediate referral to the GP)/g,
+  );
+  return parts.map((part, index) =>
+    referralPhrases.includes(part) ? (
+      <span key={index} className="font-bold text-red-600">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
+function UsualCare() {
+  return (
+    <div className="mt-3 rounded-md border border-orange-200/80 bg-white/70 px-3 py-2.5">
+      <p className="text-sm font-medium text-ink">Usual care</p>
+      <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-5 text-ink">
+        <li>
+          <span className="font-medium">Analgesia:</span> Ibuprofen 400mg orally, every 8 hours for up to 3 days (max 2.4g in 24 hours).
+        </li>
+        <li>
+          <span className="font-medium">Hydration:</span> Increase water intake up to 1.5 L daily.
+        </li>
+        <li>
+          <span className="font-medium">Advice:</span> Provide CMI and/or Self-Care Fact Card, and advise on recognising worsening signs (e.g., fever &gt;38°C, rigors, back pain, vomiting).
+        </li>
+        <li>
+          <span className="font-medium">Follow-up:</span> If symptoms persist after 48 hours of conservative management, return to pharmacy to reconsider antibiotic therapy.
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function FlagCard({ flag }: { flag: Flag }) {
   const alert = flag.tone === "alert";
   return (
@@ -529,7 +572,9 @@ function FlagCard({ flag }: { flag: Flag }) {
       >
         {flag.title}
       </h3>
-      <p className="mt-1.5 text-sm leading-6 text-ink">{flag.detail}</p>
+      <p className="mt-1.5 text-sm leading-6 text-ink">
+        <ReferralText text={flag.detail} />
+      </p>
     </article>
   );
 }
@@ -977,9 +1022,12 @@ export default function UtiTriagePage() {
                   {alertName(recommendation.kind)}
                 </p>
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
-                  {recommendation.title}
+                  <ReferralText text={recommendation.title} />
                 </h3>
-                <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
+                <p className="mt-1.5 text-sm leading-6 text-ink">
+                  <ReferralText text={recommendation.detail} />
+                </p>
+                {recommendation.kind === "gp" ? <UsualCare /> : null}
               </article>
             ) : null}
             {outcome.showPathway ? <TreatmentPathway /> : null}
