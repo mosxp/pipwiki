@@ -8,4 +8,5 @@ export type NoteMeta = {
 
 export type Note = NoteMeta & {
   contentHtml: string;
+  handout: string | null;
 };

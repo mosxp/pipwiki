@@ -72,8 +72,18 @@ async function NoteArticle({ params }: NotePageProps) {
           Updated {formatNoteDate(note.updated)}
         </p>
       ) : null}
+      {note.handout ? (
+        <a
+          href={`/${note.handout}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-flex items-center rounded-md bg-moss px-3.5 py-2 text-sm font-medium text-paper-raised"
+        >
+          Print Patient Handout
+        </a>
+      ) : null}
       <div
-        className="note mt-10"
+        className={`note ${note.handout ? "mt-8" : "mt-10"}`}
         dangerouslySetInnerHTML={{ __html: note.contentHtml }}
       />
       <Disclaimer />

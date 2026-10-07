@@ -16,6 +16,16 @@ function asText(value: unknown, fallback = ""): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
+function asHandout(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+
+  const name = value.trim();
+  if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\.pdf$/.test(name)) return null;
+  if (name.includes("..")) return null;
+
+  return name;
+}
+
 function asDate(value: unknown): string {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return value.toISOString().slice(0, 10);
@@ -151,6 +161,7 @@ export const getNote = cache(async (slug: string): Promise<Note | null> => {
 
   return {
     ...toMeta(slug, data),
+    handout: asHandout(data.handout),
     contentHtml: processed.toString(),
   };
 });

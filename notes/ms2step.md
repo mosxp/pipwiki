@@ -3,6 +3,7 @@ title: MS-2-Step
 category: Counselling
 summary: Patient counselling checklist and protocol for MS-2-Step dispensing.
 updated: "2026-10-07"
+handout: "ms2step-handout.pdf"
 ---
 
 Do you mind if I ask you a few questions, so I can get a better idea of what is best from my experience?
