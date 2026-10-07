@@ -977,11 +977,9 @@ export default function UtiTriagePage() {
                   {alertName(recommendation.kind)}
                 </p>
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
-                  {recommendation.kind === "pending" || recommendation.kind === "idle" ? "" : recommendation.title}
+                  {recommendation.title}
                 </h3>
-                <p className="mt-1.5 text-sm leading-6 text-ink">
-                  {recommendation.kind === "pending" || recommendation.kind === "idle" ? "" : recommendation.detail}
-                </p>
+                <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
               </article>
             ) : null}
             {outcome.showPathway ? <TreatmentPathway /> : null}
