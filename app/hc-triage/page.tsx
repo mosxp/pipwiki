@@ -34,7 +34,8 @@ type FormState = {
   bleedingChanges: string;
   healthChanges: string;
   smoking: Smoking;
-  bloodPressure: string;
+  systolicBP: number | null;
+  diastolicBP: number | null;
   weightKg: string;
   heightCm: string;
   ukmec4: YesNo;
@@ -67,7 +68,8 @@ const emptyForm: FormState = {
   bleedingChanges: "",
   healthChanges: "",
   smoking: "",
-  bloodPressure: "",
+  systolicBP: null,
+  diastolicBP: null,
   weightKg: "",
   heightCm: "",
   ukmec4: "",
@@ -519,6 +521,15 @@ function oralOrRing(product: Product) {
   return product === "cocp" || product === "pop" || product === "ring";
 }
 
+function combinedMethod(product: Product) {
+  return product === "cocp" || product === "ring";
+}
+
+function highCombinedBp(product: Product, systolic: number | null, diastolic: number | null) {
+  if (!combinedMethod(product)) return false;
+  return (systolic != null && systolic >= 160) || (diastolic != null && diastolic >= 100);
+}
+
 function productLabel(product: Product) {
   if (product === "cocp") return "Combined oral contraceptive";
   if (product === "pop") return "Progestogen-only pill";
@@ -680,6 +691,15 @@ function derive(form: FormState): Outcome {
       detail: "The last review was more than 2 years ago. Refer to the GP.",
     });
   }
+  if (highCombinedBp(form.product, form.systolicBP, form.diastolicBP)) {
+    hard.push("Blood pressure is UKMEC 4 for combined hormonal contraception.");
+    flags.push({
+      tone: "alert",
+      title: "Blood pressure",
+      detail:
+        "Systolic 160 mmHg or higher, or diastolic 100 mmHg or higher, with a combined pill or vaginal ring. UKMEC 4. Refer to the GP.",
+    });
+  }
 
   const stableDetail = durationFailed(age, months, form.stabilised);
   if (stableDetail) {
@@ -799,9 +819,11 @@ function derive(form: FormState): Outcome {
     });
   }
 
-  const dirty = Object.values(form).some((value) =>
-    Array.isArray(value) ? value.length > 0 : value !== "",
-  );
+  const dirty = Object.values(form).some((value) => {
+    if (value == null) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== "";
+  });
   const finished = gatesAnswered(form, age);
   let recommendation: Recommendation = { kind: "idle" };
 
@@ -1276,6 +1298,13 @@ function MedicinesList() {
   );
 }
 
+function bloodPressureText(systolic: number | null, diastolic: number | null) {
+  if (systolic == null && diastolic == null) return "Not answered";
+  const sys = systolic == null ? "—" : String(systolic);
+  const dia = diastolic == null ? "—" : String(diastolic);
+  return `${sys}/${dia} mmHg`;
+}
+
 function shown(value: string) {
   const trimmed = value.trim();
   return trimmed || "Not answered";
@@ -1344,7 +1373,7 @@ function consultationRows(form: FormState, outcome: Outcome): string[][] {
     ["Changes in bleeding", shown(form.bleedingChanges)],
     ["Changes in health", shown(form.healthChanges)],
     ["Smoking or vaping", smokingText(form.smoking)],
-    ["Blood pressure", shown(form.bloodPressure)],
+    ["Blood pressure", bloodPressureText(form.systolicBP, form.diastolicBP)],
     ["Weight", form.weightKg.trim() ? `${form.weightKg.trim()} kg` : "Not answered"],
     ["Height", form.heightCm.trim() ? `${form.heightCm.trim()} cm` : "Not answered"],
     ["BMI", bmi],
@@ -1818,19 +1847,51 @@ export default function HcTriagePage() {
                 { value: "both", label: "Both" },
               ]}
             />
-            <label className="block">
-              <FieldLabel>Blood pressure</FieldLabel>
-              <input
-                value={form.bloodPressure}
-                onChange={(event) => set("bloodPressure", event.target.value)}
-                placeholder="For example, 122/76"
-                className={inputClass}
-                autoComplete="off"
-              />
+            <fieldset>
+              <legend className="text-sm font-medium leading-6 text-ink">Blood pressure</legend>
+              <div className="mt-2 flex items-end gap-2">
+                <label className="block min-w-0 flex-1">
+                  <span className="text-xs text-ink-soft">Systolic</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={form.systolicBP ?? ""}
+                    onChange={(event) => set("systolicBP", readNumber(event.target.value))}
+                    placeholder="120"
+                    className="mt-1 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-moss"
+                    autoComplete="off"
+                  />
+                </label>
+                <span className="mb-2 text-ink-soft" aria-hidden="true">
+                  /
+                </span>
+                <label className="block min-w-0 flex-1">
+                  <span className="text-xs text-ink-soft">Diastolic</span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    step={1}
+                    value={form.diastolicBP ?? ""}
+                    onChange={(event) => set("diastolicBP", readNumber(event.target.value))}
+                    placeholder="80"
+                    className="mt-1 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-moss"
+                    autoComplete="off"
+                  />
+                </label>
+                <span className="mb-2 text-xs text-ink-soft">mmHg</span>
+              </div>
               <span className="mt-1.5 block text-xs text-ink-soft">
                 Measure at least annually. A reading from the last 12 months is acceptable if health is unchanged.
               </span>
-            </label>
+              {highCombinedBp(form.product, form.systolicBP, form.diastolicBP) ? (
+                <p className="mt-1.5 text-xs leading-5 text-red-700">
+                  UKMEC 4 for a combined pill or vaginal ring: systolic 160 mmHg or higher, or diastolic 100 mmHg or higher. Refer to the GP.
+                </p>
+              ) : null}
+            </fieldset>
             <NumberField
               label="Weight"
               value={form.weightKg}
