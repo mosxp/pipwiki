@@ -9,44 +9,23 @@ Do you mind if I ask you a few questions, so I can get a better idea of what is 
 
 ## Before dispensing
 
-**Can I ask who it is for?**
-
-Is this medication for you, or for someone else?
-
-**Has the pregnancy been confirmed by ultrasound?**
-
-**Must be yes.** The pregnancy **must be in the uterus**, not ectopic.
-
-**How long has the pregnancy been?**
-
-**Must be under 63 days.**
-
-**Do you currently have an IUD?**
-
-**Must be no.**
-
-## Do you have any of these?
-
-Each answer **must be no**.
-
-- A bleeding problem
-- A problem with the adrenal gland
-- Long-term corticosteroids, or blood thinners
-- Being **unable** to get emergency medical care in the next 14 days
+| Question | Criteria |
+| --- | --- |
+| Can I ask who it is for? | Is this medication for you, or for someone else? |
+| Has the pregnancy been confirmed by ultrasound? | **MUST be YES** and in the uterus, not ectopic |
+| How long has the pregnancy been? | **MUST be under 63 days** |
+| Do you currently have an IUD? | **MUST be NO** |
+| Do you have a bleeding problem? | **MUST be NO** |
+| Do you have a problem with your adrenal gland? | **MUST be NO** |
+| Have you taken corticosteroids for a long time, or do you take blood thinners? | **MUST be NO** |
+| Are you unable to get emergency medical care in the next 14 days? | **MUST be NO** |
 
 ## How to take MS-2 Step
 
-### Step 1 — mifepristone
-
-- Swallow **one mifepristone tablet** with **a glass of water**.
-- Take it **on an empty stomach**: 2 hours before or 2 hours after a meal.
-
-### Step 2 — misoprostol
-
-- **36 to 48 hours** after the mifepristone, take **four misoprostol tablets** at the same time.
-- **Hold** the 4 tablets in the mouth, **between the cheek and gum, for 30 minutes**.
-- Then **swallow** any remaining fragments with water.
-- Take them **on an empty stomach**: 2 hours before or 2 hours after a meal.
+| Step | Instructions |
+| --- | --- |
+| Step 1 | Swallow **one mifepristone tablet** with **a glass of water**. Take it **on an empty stomach**, 2 hours before or 2 hours after a meal. |
+| Step 2 | **36 to 48 hours** after the mifepristone, take **four misoprostol tablets** at the same time. **Hold** them between the cheek and gum for **30 minutes**, then **swallow** any fragments with water. Take them **on an empty stomach**, 2 hours before or 2 hours after a meal. |
 
 If the step 2 tablets are forgotten and it is **more than 48 hours** after the step 1 tablet, **contact the doctor immediately**.
 
