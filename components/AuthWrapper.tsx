@@ -52,7 +52,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
             }}
             className="cursor-pointer font-serif text-[15px] tracking-wide text-ink-soft"
           >
-            private website
+            unlock
           </button>
           {open ? (
             <form
