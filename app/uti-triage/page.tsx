@@ -591,7 +591,8 @@ function TreatmentPathway() {
       <div className="mt-3 space-y-3 text-sm leading-6 text-ink">
         <div>
           <p className="font-medium">1st line. Nitrofurantoin 100 mg every 6 hours for 5 days (supply 20 capsules).</p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
+          <p className="mt-1 text-xs font-bold text-ink">Contraindications:</p>
+          <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
             <li>Previous serious adverse reaction to nitrofurantoin.</li>
             <li>G6PD, enolase, or glutathione peroxidase deficiency.</li>
             <li>Severe renal impairment.</li>
@@ -600,7 +601,8 @@ function TreatmentPathway() {
         </div>
         <div>
           <p className="font-medium">2nd line. Fosfomycin 3 g as a single dose at night (supply 1 sachet).</p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
+          <p className="mt-1 text-xs font-bold text-ink">Contraindications:</p>
+          <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
             <li>Previous serious adverse reaction or hypersensitivity to fosfomycin.</li>
             <li>Severe renal impairment.</li>
             <li>Not recommended with fructose intolerance, glucose-galactose malabsorption, or sucrase-isomaltose insufficiency.</li>
@@ -611,7 +613,8 @@ function TreatmentPathway() {
           <p className="mt-1 text-xs leading-5 text-amber-700">
             Avoid if trimethoprim was used in the past 3 months, or if a trimethoprim-resistant E. coli was isolated in that time.
           </p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
+          <p className="mt-1 text-xs font-bold text-ink">Contraindications:</p>
+          <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-xs leading-5 text-ink-soft">
             <li>Previous serious adverse reaction to a trimethoprim-containing medicine.</li>
             <li>Megaloblastic anaemia or another cause of folate deficiency, another severe blood disorder, or porphyria.</li>
             <li>Hyperkalaemia, or treatment with methotrexate, phenytoin, or lamivudine.</li>
@@ -619,9 +622,18 @@ function TreatmentPathway() {
         </div>
         <div>
           <p className="font-medium">Conservative management</p>
-          <p className="mt-1 text-xs leading-5 text-ink-soft">
-            Ibuprofen 400 mg orally every 8 hours for up to 3 days (maximum 2.4 g in 24 hours), as first-line care for a patient without immune compromise. If symptoms continue after 48 hours, return for review and consider an antibiotic. Increasing water intake up to 1.5 L daily may reduce recurrent UTI when usual intake is below 1.5 L per day.
-          </p>
+          <ul className="mt-1 list-disc space-y-1.5 pl-4">
+            <li>
+              Ibuprofen 400 mg orally every 8 hours for up to 3 days (maximum 2.4 g in 24 hours), as first-line care for a patient without immune compromise.
+              <p className="mt-1 text-xs leading-snug text-amber-700">
+                Caution / Avoid in: Pregnancy, trying to conceive, elderly, asthma, dehydration, heart failure, hypertension, cardiovascular disease, coagulation disorders, active/history of GI bleeding or ulcers, inflammatory bowel disease, renal or severe hepatic impairment, prior NSAID hypersensitivity, and upcoming surgery.
+              </p>
+            </li>
+            <li>
+              Increasing water intake up to 1.5 L daily may reduce recurrent UTI when usual intake is below 1.5 L per day.
+            </li>
+            <li>If symptoms continue after 48 hours, return for review and consider an antibiotic.</li>
+          </ul>
         </div>
         <p className="text-xs leading-5 text-red-700">
           Avoid alkalinising agents with nitrofurantoin or fosfomycin. They may significantly reduce antibiotic efficacy.
