@@ -1494,6 +1494,38 @@ function buildConsultationReport(
   return doc;
 }
 
+function UkmecReferenceCards({
+  criteria,
+}: {
+  criteria: NonNullable<ReturnType<typeof listsFor>>;
+}) {
+  const combined = criteria.group === "Combined hormonal contraception";
+  return (
+    <div className="mt-3 space-y-3 print:hidden">
+      <article className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-red-900">
+        <h3 className="text-sm font-bold text-red-800">UKMEC 4</h3>
+        <p className="mt-0.5 text-[11px] leading-4 text-red-800/80">{criteria.group}</p>
+        <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs leading-5">
+          {criteria.ukmec4.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        {combined && criteria.note ? <p className="mt-2 text-xs leading-5">{criteria.note}</p> : null}
+      </article>
+      <article className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900">
+        <h3 className="text-sm font-bold text-orange-800">UKMEC 3</h3>
+        <p className="mt-0.5 text-[11px] leading-4 text-orange-800/80">{criteria.group}</p>
+        <ul className="mt-1.5 list-disc space-y-0.5 pl-4 text-xs leading-5">
+          {criteria.ukmec3.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+        {!combined && criteria.note ? <p className="mt-2 text-xs leading-5">{criteria.note}</p> : null}
+      </article>
+    </div>
+  );
+}
+
 function FlagCard({ flag }: { flag: Flag }) {
   const alert = flag.tone === "alert";
   return (
@@ -1956,6 +1988,7 @@ export default function HcTriagePage() {
               </article>
             ) : null}
           </div>
+          {criteria ? <UkmecReferenceCards criteria={criteria} /> : null}
           {outcome.dirty ? (
             <button
               type="button"
