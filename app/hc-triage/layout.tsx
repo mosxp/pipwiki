@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Hormonal contraception",
+  title: "Resupply of Hormonal Contraception",
   description:
     "Interactive consultation triage for resupply of hormonal contraception.",
 };

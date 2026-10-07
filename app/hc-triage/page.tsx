@@ -1759,7 +1759,7 @@ export default function HcTriagePage() {
       <header className="max-w-2xl">
         <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">Clinical tool</p>
         <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">
-          Hormonal contraception
+          Resupply of Hormonal Contraception
         </h1>
         <a
           href="/hc-blank-questionnaire.pdf"
