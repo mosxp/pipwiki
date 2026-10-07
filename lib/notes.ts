@@ -2,9 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { cache } from "react";
 import matter from "gray-matter";
+import { defaultSchema, type Schema } from "hast-util-sanitize";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
+import type { Blockquote, Nodes, Root } from "mdast";
 import type { Note, NoteMeta } from "@/lib/types";
 
 const notesDirectory = path.join(process.cwd(), "notes");
@@ -79,6 +81,62 @@ export function getNoteSlugs(): string[] {
   return getAllNotes().map((note) => note.slug);
 }
 
+const calloutMarker = /^\[!(ALERT|STEP|SUMMARY)\]\s*/;
+
+const calloutSchema: Schema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    blockquote: [
+      "cite",
+      [
+        "className",
+        "callout",
+        "callout-alert",
+        "callout-step",
+        "callout-summary",
+      ],
+    ],
+  },
+};
+
+function remarkCallouts() {
+  return (tree: Root) => {
+    walkCallouts(tree);
+  };
+}
+
+function walkCallouts(node: Nodes) {
+  if (node.type === "blockquote") {
+    tagCallout(node);
+  }
+
+  if ("children" in node && node.children) {
+    for (const child of node.children) walkCallouts(child);
+  }
+}
+
+function tagCallout(node: Blockquote) {
+  const paragraph = node.children[0];
+  if (paragraph?.type !== "paragraph") return;
+
+  const text = paragraph.children[0];
+  if (text?.type !== "text") return;
+
+  const match = calloutMarker.exec(text.value);
+  if (!match) return;
+
+  node.data = {
+    hProperties: {
+      className: ["callout", `callout-${match[1].toLowerCase()}`],
+    },
+  };
+
+  text.value = text.value.slice(match[0].length);
+  if (!text.value) paragraph.children.shift();
+  if (paragraph.children.length === 0) node.children.shift();
+}
+
 export const getNote = cache(async (slug: string): Promise<Note | null> => {
   const filePath = noteFilePath(slug);
   if (!filePath || !fs.existsSync(filePath)) return null;
@@ -87,7 +145,8 @@ export const getNote = cache(async (slug: string): Promise<Note | null> => {
   const { data, content } = matter(file);
   const processed = await remark()
     .use(remarkGfm)
-    .use(remarkHtml)
+    .use(remarkCallouts)
+    .use(remarkHtml, { sanitize: calloutSchema })
     .process(content);
 
   return {

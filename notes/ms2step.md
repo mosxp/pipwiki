@@ -29,30 +29,39 @@ Do you mind if I ask you a few questions, so I can get a better idea of what is 
 
 If the step 2 tablets are forgotten and it is **more than 48 hours** after the step 1 tablet, **contact the doctor immediately**.
 
+---
+
 ## What to expect
 
-### After step 1
+### Step 1
 
-After mifepristone, normal activities can usually continue.
+> [!STEP]
+> After mifepristone, normal activities can usually continue.
+>
+> **Vaginal bleeding** usually starts **1 to 2 days after** the mifepristone tablet.
 
-**Vaginal bleeding** usually starts **1 to 2 days after** the mifepristone tablet.
+### Step 2
 
-### After step 2
+> [!STEP]
+> After the misoprostol tablets, **stay at home and rest for 3 hours**.
+>
+> - **Vaginal bleeding** usually starts **within 4 hours**.
+> - It can be light to heavy, and is usually heavier than a usual period.
+> - Bleeding lasts **10 to 16 days** on average, and may last **up to 6 weeks**.
+> - If bleeding **does not occur**, **contact the doctor straight away**.
+>
+> Cramping and pain may also occur, and can be mild to severe.
 
-After the misoprostol tablets, **stay at home and rest for 3 hours**.
+> [!ALERT]
+> **Stay within a 2-hour drive of a hospital for 14 days** after starting MS-2 Step, in case of heavy bleeding or complications.
 
-- **Vaginal bleeding** usually starts **within 4 hours**.
-- It can be light to heavy, and is usually heavier than a usual period.
-- Bleeding lasts **10 to 16 days** on average, and may last **up to 6 weeks**.
-- If bleeding **does not occur**, **contact the doctor straight away**.
-
-Cramping and pain may also occur, and can be mild to severe.
-
-**Stay within a 2-hour drive of a hospital for 14 days** after starting MS-2 Step, in case of heavy bleeding or complications.
+---
 
 ## Risks and side effects
 
 Before taking this medicine, I would like to inform you of the risks and the expected side effects, if that is ok.
+
+### Usual side effects
 
 Like all medicines, MS-2 Step can have side effects. These are usually minor and temporary, and can include:
 
@@ -63,15 +72,21 @@ Like all medicines, MS-2 Step can have side effects. These are usually minor and
 - Flushing
 - Shivering or chills
 
-Complications and risks are rare. **See a doctor and get checked** if any of these happen:
+### Red flags
 
-- **Heavy bleeding filling more than 2 pads an hour, for 2 hours in a row**
-- Large **clots** the size of a fist
-- **Severe pain**
-- Feeling weak, or nausea, vomiting, or diarrhoea **for more than 24 hours after the misoprostol**
-- **Fevers or chills** that are **ongoing**, or a temperature **above 38 degrees**
-- **Smelly or abnormal vaginal discharge**
+> [!ALERT]
+> Complications and risks are rare. **See a doctor and get checked** if any of these happen:
+>
+> - **Heavy bleeding filling more than 2 pads an hour, for 2 hours in a row**
+> - Large **clots** the size of a fist
+> - **Severe pain**
+> - Feeling weak, or nausea, vomiting, or diarrhoea **for more than 24 hours after the misoprostol**
+> - **Fevers or chills** that are **ongoing**, or a temperature **above 38 degrees**
+> - **Smelly or abnormal vaginal discharge**
+
+---
 
 ## Follow-up
 
-Arrange a follow-up appointment **14 to 21 days after the first dose** of MS-2 Step, to confirm that the termination is complete.
+> [!SUMMARY]
+> Arrange a follow-up appointment **14 to 21 days after the first dose** of MS-2 Step, to confirm that the termination is complete.
