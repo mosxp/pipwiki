@@ -29,6 +29,17 @@ function linkClass(active: boolean) {
   ].join(" ");
 }
 
+function normalizePath(pathname: string) {
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
+const clinicalTools = [
+  { href: "/ec-triage", title: "Emergency contraception" },
+];
+
 export function WikiShell({
   notes,
   children,
@@ -58,6 +69,7 @@ export function WikiShell({
   }, [open]);
 
   const needle = query.trim().toLocaleLowerCase();
+  const path = normalizePath(pathname);
   const visible = needle
     ? notes.filter((note) =>
         [note.title, note.category, note.summary].some((field) =>
@@ -66,6 +78,12 @@ export function WikiShell({
       )
     : notes;
   const groups = groupByCategory(visible);
+  const tools = needle
+    ? clinicalTools.filter((tool) => {
+        const haystack = `clinical tools ${tool.title} triage`.toLocaleLowerCase();
+        return haystack.includes(needle);
+      })
+    : clinicalTools;
 
   return (
     <div className="flex h-full min-h-0">
@@ -132,7 +150,31 @@ export function WikiShell({
           aria-label="Notes"
           className="min-h-0 flex-1 overflow-y-auto px-3 pb-4"
         >
-          {groups.length === 0 ? (
+          {tools.length > 0 ? (
+            <section className="mb-5">
+              <h2 className="px-2.5 pb-1 text-[11px] font-medium tracking-[0.16em] text-ink-soft uppercase">
+                Clinical Tools
+              </h2>
+              <ul>
+                {tools.map((tool) => {
+                  const active = path === tool.href;
+                  return (
+                    <li key={tool.href}>
+                      <Link
+                        href={tool.href}
+                        aria-current={active ? "page" : undefined}
+                        className={linkClass(active)}
+                      >
+                        {tool.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+
+          {groups.length === 0 && tools.length === 0 ? (
             <p className="px-2.5 py-4 text-sm leading-6 text-ink-soft">
               {notes.length === 0
                 ? "No Markdown files in notes/ yet."
@@ -147,7 +189,7 @@ export function WikiShell({
                 <ul>
                   {group.notes.map((note) => {
                     const href = `/notes/${note.slug}`;
-                    const active = pathname === href;
+                    const active = path === href;
 
                     return (
                       <li key={note.slug}>
