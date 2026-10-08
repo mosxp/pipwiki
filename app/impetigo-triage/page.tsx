@@ -182,7 +182,6 @@ function derive(form: FormState): Outcome {
   const redFlags = clinicalSelections(form.redFlags);
   const gpItems = clinicalSelections(form.risks);
   const severeItems = clinicalSelections(form.severeSymptoms);
-  const uncertainDiagnosis = form.severeSymptoms.includes(uncertainDiagnosisLabel);
   const ageOut = age != null && age < 2;
   const extentMultiple = form.extent === "multiple";
   const notImpetigo = form.initialSymptoms === "no";
@@ -235,7 +234,6 @@ function derive(form: FormState): Outcome {
       detail: differentialDetail,
     };
   } else if (hardGp) {
-    showOral = true;
     recommendation = {
       kind: "gp",
       title: "Refer to GP",
@@ -262,13 +260,7 @@ function derive(form: FormState): Outcome {
     };
   }
 
-  const showUsualCare =
-    form.initialSymptoms !== "no" &&
-    !uncertainDiagnosis &&
-    (recommendation.kind === "ed" ||
-      recommendation.kind === "gp" ||
-      recommendation.kind === "concurrent" ||
-      recommendation.kind === "treat");
+  const showUsualCare = recommendation.kind === "concurrent" || recommendation.kind === "treat";
 
   return { flags, recommendation, showLocal, showOral, showUsualCare, dirty };
 }
@@ -638,10 +630,9 @@ function primaryAction(outcome: Outcome) {
 
 function treatmentPathway(outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
-  if (outcome.showOral) return outcome.showUsualCare ? oralTreatmentPdf : oralTreatmentPdf.replace(`\n\n${usualCarePdf}`, "");
-  if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "differential") {
-    const blocked = "Not indicated. Do not supply antibiotics under this protocol.";
-    return outcome.showUsualCare ? `${blocked}\n\n${usualCarePdf}` : blocked;
+  if (outcome.showOral) return oralTreatmentPdf;
+  if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "gp" || outcome.recommendation.kind === "differential") {
+    return "Not indicated. Do not supply antibiotics under this protocol.";
   }
   return "Not indicated";
 }
