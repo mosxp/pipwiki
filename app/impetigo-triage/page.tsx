@@ -18,6 +18,7 @@ type FormState = {
   extent: Extent;
   redFlags: string[];
   risks: string[];
+  severeSymptoms: string[];
 };
 
 const noneLabel = "None of the above";
@@ -39,6 +40,23 @@ const redFlagItems: CheckItem[] = [
   {
     label:
       "Generalised erythema that covers 90% or more of the skin surface, especially when associated with systemic symptoms",
+  },
+];
+
+const uncertainDiagnosisLabel =
+  "A clear diagnosis of impetigo cannot be made (i.e. uncertain diagnosis of uncomplicated non-bullous impetigo), and/or other/co-occurring secondary conditions are suspected that cannot be treated in the community pharmacy setting";
+
+const severeSymptomItems: CheckItem[] = [
+  { label: "Signs of bullous impetigo (large, flaccid blisters)" },
+  { label: "Signs that impetigo is widespread, severe and/or has ecthyma (ulceration, induration) present" },
+  { label: "Chronic sores or ulcers" },
+  {
+    label:
+      "The patient presents with generalised erythema that covers 90% or more of the skin surface, but the patient is otherwise well, with no systemic features.",
+  },
+  {
+    label: uncertainDiagnosisLabel,
+    info: "e.g., Infected atopic or discoid eczema, herpes simplex virus (HSV-1), varicella (chickenpox), herpes zoster (shingles), cellulitis, scabies, psoriasis, folliculitis or acne, contact dermatitis, dermatophytosis (tinea), candidiasis, thermal burns, and molluscum contagiosum.",
   },
 ];
 
@@ -108,6 +126,7 @@ const emptyForm: FormState = {
   extent: "",
   redFlags: [],
   risks: [],
+  severeSymptoms: [],
 };
 
 type Flag = { title: string; detail: string };
@@ -162,10 +181,18 @@ function derive(form: FormState): Outcome {
   const age = readNumber(form.age);
   const redFlags = clinicalSelections(form.redFlags);
   const gpItems = clinicalSelections(form.risks);
+  const severeItems = clinicalSelections(form.severeSymptoms);
+  const uncertainDiagnosis = form.severeSymptoms.includes(uncertainDiagnosisLabel);
   const ageOut = age != null && age < 2;
   const extentMultiple = form.extent === "multiple";
   const notImpetigo = form.initialSymptoms === "no";
-  const hardGp = ageOut || form.consent === "no" || form.presentation === "no" || extentMultiple || gpItems.length > 0;
+  const hardGp =
+    ageOut ||
+    form.consent === "no" ||
+    form.presentation === "no" ||
+    extentMultiple ||
+    gpItems.length > 0 ||
+    severeItems.length > 0;
   const ready =
     age != null &&
     age >= 2 &&
@@ -183,6 +210,7 @@ function derive(form: FormState): Outcome {
     flags.push({ title: "Symptoms", detail: "Signs, symptoms, or history are not consistent with impetigo." });
   }
   if (gpItems.length > 0) flags.push({ title: "Risks", detail: gpItems.join(", ") });
+  if (severeItems.length > 0) flags.push({ title: "GP referral triggers", detail: severeItems.join(", ") });
   if (form.presentation === "no") {
     flags.push({ title: "Presentation", detail: "The presentation is not clear non-bullous impetigo." });
   }
@@ -236,6 +264,7 @@ function derive(form: FormState): Outcome {
 
   const showUsualCare =
     form.initialSymptoms !== "no" &&
+    !uncertainDiagnosis &&
     (recommendation.kind === "ed" ||
       recommendation.kind === "gp" ||
       recommendation.kind === "concurrent" ||
@@ -588,7 +617,11 @@ function activeClinicalTriggers(form: FormState) {
   if (form.initialSymptoms === "no") triggers.push("Signs, symptoms, or history not consistent with impetigo");
   if (form.presentation === "no") triggers.push("Presentation not clear non-bullous impetigo");
   if (form.extent) triggers.push(extentLabel(form.extent));
-  triggers.push(...clinicalSelections(form.redFlags), ...clinicalSelections(form.risks));
+  triggers.push(
+    ...clinicalSelections(form.redFlags),
+    ...clinicalSelections(form.risks),
+    ...clinicalSelections(form.severeSymptoms),
+  );
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
 
@@ -605,7 +638,7 @@ function primaryAction(outcome: Outcome) {
 
 function treatmentPathway(outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
-  if (outcome.showOral) return oralTreatmentPdf;
+  if (outcome.showOral) return outcome.showUsualCare ? oralTreatmentPdf : oralTreatmentPdf.replace(`\n\n${usualCarePdf}`, "");
   if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "differential") {
     const blocked = "Not indicated. Do not supply antibiotics under this protocol.";
     return outcome.showUsualCare ? `${blocked}\n\n${usualCarePdf}` : blocked;
@@ -621,6 +654,7 @@ function consultationRows(form: FormState): string[][] {
     [symptomsQuestion, yesNoText(form.initialSymptoms)],
     ["Risks", listText(form.risks)],
     ["Red flag symptoms", listText(form.redFlags)],
+    ["GP referral triggers (severe symptoms and differential diagnosis)", listText(form.severeSymptoms)],
     ["Clear non-bullous impetigo", yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
   ];
@@ -763,7 +797,7 @@ export default function ImpetigoTriagePage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function toggle(key: "redFlags" | "risks", item: string) {
+  function toggle(key: "redFlags" | "risks" | "severeSymptoms", item: string) {
     setForm((current) => {
       const selected = current[key];
       if (item === noneLabel) {
@@ -872,6 +906,16 @@ export default function ImpetigoTriagePage() {
               items={redFlagItems}
               checked={form.redFlags}
               onToggle={(item) => toggle("redFlags", item)}
+            />
+          </Section>
+
+          <Section title="GP referral triggers (severe symptoms & differential dx)">
+            <CheckGroup
+              label="Does the patient report/present with any of the following?"
+              hint="Any one of these is a GP referral. Do not supply antibiotics."
+              items={severeSymptomItems}
+              checked={form.severeSymptoms}
+              onToggle={(item) => toggle("severeSymptoms", item)}
             />
           </Section>
 
