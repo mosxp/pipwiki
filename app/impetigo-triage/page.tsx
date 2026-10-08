@@ -29,11 +29,17 @@ const extentOptions: { value: Exclude<Extent, "">; label: string }[] = [
 ];
 
 const redFlagItems: CheckItem[] = [
-  { label: "Systemic illness (fever, lethargy, headache, nausea)" },
-  { label: "Widespread painful rash" },
+  { label: "Widespread, painful rash that may be erythematous" },
   { label: "Non-blanching purple rash" },
-  { label: "Blistering of mucous membranes" },
-  { label: "Generalised erythema >90% with systemic symptoms" },
+  { label: "Blistering of the skin and/or mucous membranes (that may include mouth and eyes)" },
+  {
+    label: "Signs and symptoms of serious and/or systemic illness",
+    info: "(e.g., complicated cellulitis, severe ecthyma, acute ARF) including fever, lethargy, headache, rash, nausea and vomiting, severe pain, sore and swollen joints, food/drinking aversion in a child",
+  },
+  {
+    label:
+      "Generalised erythema that covers 90% or more of the skin surface, especially when associated with systemic symptoms",
+  },
 ];
 
 const riskItems: CheckItem[] = [
@@ -614,9 +620,9 @@ function consultationRows(form: FormState): string[][] {
     ["Patient consents", yesNoText(form.consent)],
     [symptomsQuestion, yesNoText(form.initialSymptoms)],
     ["Risks", listText(form.risks)],
+    ["Red flag symptoms", listText(form.redFlags)],
     ["Clear non-bullous impetigo", yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
-    ["Red flag symptoms", listText(form.redFlags)],
   ];
 }
 
@@ -859,6 +865,16 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
+          <Section title="Red flag symptoms">
+            <CheckGroup
+              label="Does the patient report or present with any of the following?"
+              hint="Any one of these is an emergency department referral."
+              items={redFlagItems}
+              checked={form.redFlags}
+              onToggle={(item) => toggle("redFlags", item)}
+            />
+          </Section>
+
           <Section title="Clinical presentation">
             <RadioGroup
               label="Does the patient present with clear signs of non-bullous impetigo? (Honey-coloured crusts, vesicles that rupture easily, mild itch, no systemic symptoms)"
@@ -879,16 +895,6 @@ export default function ImpetigoTriagePage() {
               value={form.extent}
               onChange={(value) => set("extent", value)}
               options={extentOptions}
-            />
-          </Section>
-
-          <Section title="Red flag symptoms">
-            <CheckGroup
-              label="Does the patient report or present with any of the following?"
-              hint="Any one of these is an emergency department referral."
-              items={redFlagItems}
-              checked={form.redFlags}
-              onToggle={(item) => toggle("redFlags", item)}
             />
           </Section>
 
