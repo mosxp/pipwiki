@@ -40,6 +40,7 @@ const clinicalTools = [
   { href: "/ec-triage", title: "Emergency contraception" },
   { href: "/hc-triage", title: "Resupply of Hormonal Contraception" },
   { href: "/uti-triage", title: "UTI Management" },
+  { href: "/impetigo-triage", title: "Impetigo Management" },
 ];
 
 export function WikiShell({
