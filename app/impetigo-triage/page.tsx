@@ -880,12 +880,18 @@ export default function ImpetigoTriagePage() {
     recommendation.kind === "differential" ||
     recommendation.kind === "concurrent" ||
     recommendation.kind === "treat";
-  const isEligibilityFail = (form.age !== "" && Number(form.age) < 2) || form.consent === "no";
-  const isSymptomsFail = isEligibilityFail || form.initialSymptoms === "no";
-  const isRisksFail = isSymptomsFail || (form.risks.length > 0 && !form.risks.includes(noneLabel));
-  const isRedFlagsFail = isRisksFail || (form.redFlags.length > 0 && !form.redFlags.includes(noneLabel));
-  const isSevereFail = isRedFlagsFail || (form.severeSymptoms.length > 0 && !form.severeSymptoms.includes(noneLabel));
-  const isNonBullousFail = isSevereFail || form.presentation === "no";
+  const isEligibilityPassed = form.age !== "" && Number(form.age) >= 2 && form.consent === "yes";
+  const isSymptomsLocked = !isEligibilityPassed;
+  const isSymptomsPassed = form.initialSymptoms === "yes";
+  const isRisksLocked = isSymptomsLocked || !isSymptomsPassed;
+  const isRisksPassed = form.risks.length > 0 && form.risks.includes(noneLabel);
+  const isRedFlagsLocked = isRisksLocked || !isRisksPassed;
+  const isRedFlagsPassed = form.redFlags.length > 0 && form.redFlags.includes(noneLabel);
+  const isSevereLocked = isRedFlagsLocked || !isRedFlagsPassed;
+  const isSeverePassed = form.severeSymptoms.length > 0 && form.severeSymptoms.includes(noneLabel);
+  const isNonBullousLocked = isSevereLocked || !isSeverePassed;
+  const isNonBullousPassed = form.presentation === "yes";
+  const isExtentLocked = isNonBullousLocked || !isNonBullousPassed;
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -960,12 +966,12 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Symptoms" locked={isEligibilityFail}>
+          <Section title="Symptoms" locked={isSymptomsLocked}>
             <RadioGroup
               label={symptomsQuestion}
               name="initialSymptoms"
               value={form.initialSymptoms}
-              disabled={isEligibilityFail}
+              disabled={isSymptomsLocked}
               onChange={(value) => set("initialSymptoms", value)}
               options={[
                 { value: "yes", label: "Yes" },
@@ -984,45 +990,45 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Risks" locked={isSymptomsFail}>
+          <Section title="Risks" locked={isRisksLocked}>
             <CheckGroup
               label="Does the patient report or present with any of the following?"
               hint="Any one of these is a GP referral. Do not supply antibiotics."
               items={riskItems}
               checked={form.risks}
-              disabled={isSymptomsFail}
+              disabled={isRisksLocked}
               onToggle={(item) => toggle("risks", item)}
             />
           </Section>
 
-          <Section title="Red flag symptoms" locked={isRisksFail}>
+          <Section title="Red flag symptoms" locked={isRedFlagsLocked}>
             <CheckGroup
               label="Does the patient report or present with any of the following?"
               hint="Any one of these is an emergency department referral."
               items={redFlagItems}
               checked={form.redFlags}
-              disabled={isRisksFail}
+              disabled={isRedFlagsLocked}
               onToggle={(item) => toggle("redFlags", item)}
             />
           </Section>
 
-          <Section title="GP referral triggers (severe symptoms & differential dx)" locked={isRedFlagsFail}>
+          <Section title="GP referral triggers (severe symptoms & differential dx)" locked={isSevereLocked}>
             <CheckGroup
               label="Does the patient report/present with any of the following?"
               hint="Any one of these is a GP referral. Do not supply antibiotics."
               items={severeSymptomItems}
               checked={form.severeSymptoms}
-              disabled={isRedFlagsFail}
+              disabled={isSevereLocked}
               onToggle={(item) => toggle("severeSymptoms", item)}
             />
           </Section>
 
-          <Section title="Non-bullous impetigo presentation" locked={isSevereFail}>
+          <Section title="Non-bullous impetigo presentation" locked={isNonBullousLocked}>
             <RadioGroup
               label={presentationQuestion}
               name="presentation"
               value={form.presentation}
-              disabled={isSevereFail}
+              disabled={isNonBullousLocked}
               onChange={(value) => set("presentation", value)}
               options={[
                 { value: "yes", label: "Yes" },
@@ -1045,12 +1051,12 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Extent of infection" locked={isNonBullousFail}>
+          <Section title="Extent of infection" locked={isExtentLocked}>
             <RadioGroup
               label="How extensive is the infection?"
               name="extent"
               value={form.extent}
-              disabled={isNonBullousFail}
+              disabled={isExtentLocked}
               onChange={(value) => set("extent", value)}
               options={extentOptions}
               stacked
