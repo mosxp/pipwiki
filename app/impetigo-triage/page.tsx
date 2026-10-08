@@ -538,6 +538,17 @@ function UsualCare() {
         <li>Remove crusts gently using paw paw or white soft paraffin before applying topicals.</li>
         <li>Bleach baths: 10 mins daily (12 mL of 4% bleach in 10 L water).</li>
         <li>School exclusion: Stay home until 24 hours after antibiotics commence.</li>
+        <li>
+          For detailed hygiene and household prevention tips, refer to the{" "}
+          <a
+            href="https://www.rch.org.au/kidsinfo/fact_sheets/Impetigo_school_sores/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-moss underline decoration-moss/40 underline-offset-4 hover:decoration-moss"
+          >
+            Royal Children’s Hospital Impetigo Fact Sheet
+          </a>.
+        </li>
       </ul>
     </div>
   );
@@ -549,10 +560,10 @@ function LocalisedTreatment() {
       <h3 className="text-[11px] font-medium tracking-[0.14em] text-moss uppercase">Localised treatment</h3>
       <ul className="mt-3 list-disc space-y-1.5 pl-4 text-sm leading-6 text-ink">
         <li>
-          <span className="font-medium">1st line:</span> Topical mupirocin 2% (Apply every 8 hours for 5 days).
+          <span className="font-medium">1st line:</span> Topical ointment or cream, mupirocin 2% (Apply to lesions, every 8 hours for 5 days).
         </li>
         <li>
-          <span className="font-medium">2nd line:</span> Topical hydrogen peroxide 1% (Apply every 8 hours for 5 days).
+          <span className="font-medium">2nd line:</span> Topical cream, hydrogen peroxide 1% (Apply to lesions, every 8 hours for 5 days).
         </li>
       </ul>
     </article>
@@ -641,11 +652,12 @@ const usualCarePdf = `Usual care:
 - Good hand hygiene, keep nails short, cover with watertight dressing.
 - Remove crusts gently using paw paw or white soft paraffin before applying topicals.
 - Bleach baths: 10 mins daily (12 mL of 4% bleach in 10 L water).
-- School exclusion: Stay home until 24 hours after antibiotics commence.`;
+- School exclusion: Stay home until 24 hours after antibiotics commence.
+- For detailed hygiene and household prevention tips, refer to the Royal Children’s Hospital Impetigo Fact Sheet: https://www.rch.org.au/kidsinfo/fact_sheets/Impetigo_school_sores/`;
 
 const localTreatmentPdf = `Localised treatment:
-- 1st line. Topical mupirocin 2% (apply every 8 hours for 5 days).
-- 2nd line. Topical hydrogen peroxide 1% (apply every 8 hours for 5 days).
+- 1st line. Topical ointment or cream, mupirocin 2% (Apply to lesions, every 8 hours for 5 days).
+- 2nd line. Topical cream, hydrogen peroxide 1% (Apply to lesions, every 8 hours for 5 days).
 
 ${usualCarePdf}`;
 
