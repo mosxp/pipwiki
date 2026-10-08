@@ -559,19 +559,55 @@ function LocalisedTreatment() {
   );
 }
 
-function OralReference() {
+type OralDose = { dose: string; note: string };
+
+const adultOralDoses: OralDose[] = [
+  {
+    dose: "Dicloxacillin or flucloxacillin: 500 mg, every 6 hours for 5 days.",
+    note: "Recommended first-line oral therapy. Stop therapy after 3 days if infection has resolved.",
+  },
+  {
+    dose: "Cefalexin: 1,000 mg every 12 hours for 5 days.",
+    note: "First-line therapy – can be used if non-severe (immediate/delayed) penicillin hypersensitivity. Less frequent dosing; may be preferred by patients. Stop therapy after 3 days if infection has resolved.",
+  },
+  {
+    dose: "Trimethoprim + sulfamethoxazole: 160 + 800 mg every 12 hours for 3 days, OR 320 + 1,600 mg daily for 5 days.",
+    note: "Second-line therapy – use if severe (immediate/delayed) penicillin hypersensitivity. Once-daily regimen may be preferred for administration in school settings.",
+  },
+];
+
+const childOralDoses: OralDose[] = [
+  {
+    dose: "Cefalexin: 25 mg/kg up to 1,000 mg every 12 hours for 5 days.",
+    note: "Children tolerate cefalexin liquid better than dicloxacillin/flucloxacillin due to taste. Can be used if non-severe (immediate/delayed) penicillin hypersensitivity. Stop therapy after 3 days if infection has resolved.",
+  },
+  {
+    dose: "Dicloxacillin or flucloxacillin: 12.5 mg/kg up to 500 mg, every 6 hours for 5 days.",
+    note: "Stop therapy after 3 days if infection has resolved.",
+  },
+  {
+    dose: "Trimethoprim + sulfamethoxazole (≥ 1 month old): 4 + 20 mg/kg up to 160 + 800 mg every 12 hours for 3 days, OR 8 + 40 mg/kg up to 320 + 1,600 mg daily for 5 days.",
+    note: "Second-line therapy – use if severe (immediate/delayed) penicillin hypersensitivity. Once-daily regimen may be preferred for administration in school settings.",
+  },
+];
+
+function oralDosesForAge(age: number) {
+  return age >= 18 ? adultOralDoses : childOralDoses;
+}
+
+function OralReference({ age }: { age: number }) {
+  const doses = oralDosesForAge(age);
   return (
     <article className="rounded-lg border border-line bg-paper px-3.5 py-3">
       <h3 className="text-[11px] font-medium tracking-[0.14em] text-moss uppercase">Empirical treatment (extensive)</h3>
-      <p className="mt-3 text-sm font-medium text-ink">Adult oral</p>
-      <ul className="mt-1 list-disc space-y-1 pl-4 text-sm leading-6 text-ink">
-        <li>Dicloxacillin/flucloxacillin 500 mg QID for 5 days (1st line).</li>
-        <li>Cefalexin 1000 mg BD for 5 days.</li>
-      </ul>
-      <p className="mt-3 text-sm font-medium text-ink">Child oral</p>
-      <ul className="mt-1 list-disc space-y-1 pl-4 text-sm leading-6 text-ink">
-        <li>Cefalexin 25 mg/kg up to 1000 mg BD for 5 days.</li>
-        <li>Dicloxacillin 12.5 mg/kg up to 500 mg QID for 5 days.</li>
+      <p className="mt-3 text-sm font-medium text-ink">{age >= 18 ? "Adult oral" : "Child oral"}</p>
+      <ul className="mt-2 space-y-3">
+        {doses.map((item) => (
+          <li key={item.dose}>
+            <p className="text-sm leading-6 text-ink">{item.dose}</p>
+            <p className="text-xs leading-5 text-ink-soft italic">Note: {item.note}</p>
+          </li>
+        ))}
       </ul>
     </article>
   );
@@ -613,15 +649,16 @@ const localTreatmentPdf = `Localised treatment:
 
 ${usualCarePdf}`;
 
-const oralTreatmentPdf = `Empirical treatment (extensive):
-Adult oral:
-- 1st line. Dicloxacillin/flucloxacillin 500 mg QID for 5 days.
-- Cefalexin 1000 mg BD for 5 days.
-Child oral:
-- Cefalexin 25 mg/kg up to 1000 mg BD for 5 days.
-- Dicloxacillin 12.5 mg/kg up to 500 mg QID for 5 days.
+function oralTreatmentPdf(age: number | null) {
+  const adult = age != null && age >= 18;
+  const doses = adult ? adultOralDoses : childOralDoses;
+  const lines = doses.map((item) => `- ${item.dose}\n  Note: ${item.note}`).join("\n");
+  return `Empirical treatment (extensive):
+${adult ? "Adult oral" : "Child oral"}:
+${lines}
 
 ${usualCarePdf}`;
+}
 
 function activeClinicalTriggers(form: FormState) {
   const age = readNumber(form.age);
@@ -650,9 +687,9 @@ function primaryAction(outcome: Outcome) {
   return "No answers recorded yet.";
 }
 
-function treatmentPathway(outcome: Outcome) {
+function treatmentPathway(form: FormState, outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
-  if (outcome.showOral) return oralTreatmentPdf;
+  if (outcome.showOral) return oralTreatmentPdf(readNumber(form.age));
   if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "gp" || outcome.recommendation.kind === "differential") {
     return "Not indicated. Do not supply antibiotics under this protocol.";
   }
@@ -677,7 +714,7 @@ function outcomeRows(form: FormState, outcome: Outcome): string[][] {
   return [
     ["Action Required", primaryAction(outcome)],
     ["Active Clinical Triggers", activeClinicalTriggers(form)],
-    ["Treatment pathway", treatmentPathway(outcome)],
+    ["Treatment pathway", treatmentPathway(form, outcome)],
   ];
 }
 
@@ -1019,7 +1056,7 @@ export default function ImpetigoTriagePage() {
               </article>
             ) : null}
             {outcome.showLocal ? <LocalisedTreatment /> : null}
-            {outcome.showOral ? <OralReference /> : null}
+            {outcome.showOral ? <OralReference age={readNumber(form.age) ?? 0} /> : null}
           </div>
           {outcome.dirty ? (
             <button
