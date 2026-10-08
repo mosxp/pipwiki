@@ -13,6 +13,7 @@ type CheckItem = { label: string };
 type FormState = {
   age: string;
   consent: YesNo;
+  initialSymptoms: YesNo;
   presentation: YesNo;
   extent: Extent;
   redFlags: string[];
@@ -43,9 +44,25 @@ const gpTriggerItems: CheckItem[] = [
   { label: "Unclear diagnosis/co-occurring conditions (e.g., HSV, shingles, eczema)" },
 ];
 
+const symptomsQuestion =
+  "Does the patient present with signs, symptoms, or a history consistent with impetigo, based on initial presentation and information provided to the pharmacist?";
+
+const differentialTitle = "Provide Pharmacist Care and/or Refer to GP";
+const differentialDetail =
+  "Consider other skin conditions (e.g., shingles, psoriasis, acne, atopic dermatitis, HSV, scabies).";
+
+const impetigoExamples = [
+  "Golden or honey-coloured crusted lesions",
+  "Lesions commonly on the face, limbs, or around the mouth or nose",
+  "Vesicles or pustules that rupture easily",
+  "May be mildly itchy or red, but not deep, painful, or scaly",
+  "Erythema may be present where the lesions or sores are located",
+];
+
 const emptyForm: FormState = {
   age: "",
   consent: "",
+  initialSymptoms: "",
   presentation: "",
   extent: "",
   redFlags: [],
@@ -59,6 +76,7 @@ type Recommendation =
   | { kind: "pending"; detail: string }
   | { kind: "ed"; title: string; detail: string }
   | { kind: "gp"; title: string; detail: string }
+  | { kind: "differential"; title: string; detail: string }
   | { kind: "concurrent"; title: string; detail: string }
   | { kind: "treat"; title: string; detail: string };
 
@@ -104,11 +122,13 @@ function derive(form: FormState): Outcome {
   const gpItems = clinicalSelections(form.gpTriggers);
   const ageOut = age != null && age < 2;
   const extentMultiple = form.extent === "multiple";
+  const notImpetigo = form.initialSymptoms === "no";
   const hardGp = ageOut || form.consent === "no" || form.presentation === "no" || extentMultiple || gpItems.length > 0;
   const ready =
     age != null &&
     age >= 2 &&
     form.consent === "yes" &&
+    form.initialSymptoms === "yes" &&
     form.presentation === "yes" &&
     redFlags.length === 0 &&
     !hardGp;
@@ -117,6 +137,9 @@ function derive(form: FormState): Outcome {
   if (redFlags.length > 0) flags.push({ title: "Red flag symptoms", detail: redFlags.join(", ") });
   if (ageOut) flags.push({ title: "Age", detail: "Age is under 2 years." });
   if (form.consent === "no") flags.push({ title: "Consent", detail: "The patient does not consent." });
+  if (notImpetigo) {
+    flags.push({ title: "Symptoms", detail: "Signs, symptoms, or history are not consistent with impetigo." });
+  }
   if (form.presentation === "no") {
     flags.push({ title: "Presentation", detail: "The presentation is not clear non-bullous impetigo." });
   }
@@ -134,6 +157,12 @@ function derive(form: FormState): Outcome {
       kind: "ed",
       title: "Immediate referral to Emergency Department",
       detail: "A red flag symptom is present. Do not treat under this protocol.",
+    };
+  } else if (notImpetigo) {
+    recommendation = {
+      kind: "differential",
+      title: differentialTitle,
+      detail: differentialDetail,
     };
   } else if (hardGp) {
     showOral = true;
@@ -185,6 +214,7 @@ function RadioGroup<T extends string>({
   options,
   onChange,
   hint,
+  aside,
 }: {
   label: string;
   name: string;
@@ -192,11 +222,13 @@ function RadioGroup<T extends string>({
   options: { value: T; label: string }[];
   onChange: (value: T) => void;
   hint?: string;
+  aside?: React.ReactNode;
 }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
+      {aside}
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {options.map((option) => {
           const checked = value === option.value;
@@ -371,7 +403,7 @@ function OralReference() {
 
 function outcomeClass(kind: Recommendation["kind"]) {
   if (kind === "ed") return "border-red-200 bg-red-50";
-  if (kind === "gp") return "border-orange-200 bg-orange-50";
+  if (kind === "gp" || kind === "differential") return "border-orange-200 bg-orange-50";
   if (kind === "concurrent") return "border-yellow-300 bg-yellow-50";
   if (kind === "treat") return "border-moss/20 bg-[var(--step-bg)]";
   return "border-line bg-paper";
@@ -379,7 +411,7 @@ function outcomeClass(kind: Recommendation["kind"]) {
 
 function outcomeLabelClass(kind: Recommendation["kind"]) {
   if (kind === "ed") return "text-red-800";
-  if (kind === "gp") return "text-orange-800";
+  if (kind === "gp" || kind === "differential") return "text-orange-800";
   if (kind === "concurrent") return "text-yellow-800";
   if (kind === "treat") return "text-moss";
   return "text-ink-soft";
@@ -387,7 +419,7 @@ function outcomeLabelClass(kind: Recommendation["kind"]) {
 
 function alertName(kind: Recommendation["kind"]) {
   if (kind === "ed") return "Red alert";
-  if (kind === "gp") return "Orange alert";
+  if (kind === "gp" || kind === "differential") return "Orange alert";
   if (kind === "concurrent") return "Yellow alert";
   if (kind === "treat") return "Green alert";
   return "Outcome";
@@ -420,6 +452,7 @@ function activeClinicalTriggers(form: FormState) {
   const triggers: string[] = [];
   if (age != null && age < 2) triggers.push("Age under 2 years");
   if (form.consent === "no") triggers.push("Consent declined");
+  if (form.initialSymptoms === "no") triggers.push("Signs, symptoms, or history not consistent with impetigo");
   if (form.presentation === "no") triggers.push("Presentation not clear non-bullous impetigo");
   if (form.extent) triggers.push(extentLabel(form.extent));
   triggers.push(...clinicalSelections(form.redFlags), ...clinicalSelections(form.gpTriggers));
@@ -430,6 +463,7 @@ function primaryAction(outcome: Outcome) {
   const item = outcome.recommendation;
   if (item.kind === "ed") return "Immediate referral to Emergency Department";
   if (item.kind === "gp") return "Refer to GP. Do not supply antibiotics under this protocol.";
+  if (item.kind === "differential") return `${item.title}. ${item.detail}`;
   if (item.kind === "concurrent") return item.title;
   if (item.kind === "treat") return "Safe to treat";
   if (item.kind === "pending") return item.detail;
@@ -439,7 +473,9 @@ function primaryAction(outcome: Outcome) {
 function treatmentPathway(outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
   if (outcome.showOral) return oralTreatmentPdf;
-  if (outcome.recommendation.kind === "ed") return `Not indicated. Do not supply antibiotics under this protocol.\n\n${usualCarePdf}`;
+  if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "differential") {
+    return `Not indicated. Do not supply antibiotics under this protocol.\n\n${usualCarePdf}`;
+  }
   return "Not indicated";
 }
 
@@ -448,6 +484,7 @@ function consultationRows(form: FormState): string[][] {
   return [
     ["Age", age ? `${age} years` : "Not answered"],
     ["Patient consents", yesNoText(form.consent)],
+    [symptomsQuestion, yesNoText(form.initialSymptoms)],
     ["Clear non-bullous impetigo", yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
     ["Red flag symptoms", listText(form.redFlags)],
@@ -584,6 +621,7 @@ export default function ImpetigoTriagePage() {
   const decided =
     recommendation.kind === "ed" ||
     recommendation.kind === "gp" ||
+    recommendation.kind === "differential" ||
     recommendation.kind === "concurrent" ||
     recommendation.kind === "treat";
 
@@ -657,6 +695,29 @@ export default function ImpetigoTriagePage() {
                 { value: "no", label: "No" },
               ]}
               hint="The patient must be physically present in the pharmacy."
+            />
+          </Section>
+
+          <Section title="Symptoms">
+            <RadioGroup
+              label={symptomsQuestion}
+              name="initialSymptoms"
+              value={form.initialSymptoms}
+              onChange={(value) => set("initialSymptoms", value)}
+              options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+              ]}
+              aside={
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-ink">Examples of likely impetigo:</p>
+                  <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm leading-6 text-ink">
+                    {impetigoExamples.map((example) => (
+                      <li key={example}>{example}</li>
+                    ))}
+                  </ul>
+                </div>
+              }
             />
           </Section>
 
@@ -737,6 +798,8 @@ export default function ImpetigoTriagePage() {
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
                   {recommendation.kind === "ed" ? (
                     <span className="font-bold text-red-600">Immediate referral to Emergency Department</span>
+                  ) : recommendation.kind === "differential" ? (
+                    <span className="font-bold text-red-600">Provide Pharmacist Care and/or Refer to GP</span>
                   ) : recommendation.kind === "gp" ? (
                     <span className="font-bold text-red-600">Refer to GP</span>
                   ) : (
