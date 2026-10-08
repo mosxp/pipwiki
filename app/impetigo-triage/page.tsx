@@ -6,7 +6,7 @@ import type { jsPDF } from "jspdf";
 import type { UserOptions } from "jspdf-autotable";
 
 type YesNo = "" | "yes" | "no";
-type Extent = "" | "local" | "one" | "multiple";
+type Extent = "" | "limited" | "one" | "two" | "many";
 
 type CheckItem = { label: string; info?: React.ReactNode };
 
@@ -24,9 +24,10 @@ type FormState = {
 const noneLabel = "None of the above";
 
 const extentOptions: { value: Exclude<Extent, "">; label: string }[] = [
-  { value: "local", label: "≤ 2 sores in a single location" },
-  { value: "one", label: "> 2 sores in one location" },
-  { value: "multiple", label: "> 2 sores in multiple body regions" },
+  { value: "limited", label: "≤ 2 sores" },
+  { value: "one", label: "> 2 sores/lesions confined to 1 body region" },
+  { value: "two", label: "> 2 sores/lesions confined to 2 body regions (e.g., both legs or arm + torso)" },
+  { value: "many", label: "> 2 sores affecting > 2 body regions" },
 ];
 
 const redFlagItems: CheckItem[] = [
@@ -194,13 +195,13 @@ function derive(form: FormState): Outcome {
   const gpItems = clinicalSelections(form.risks);
   const severeItems = clinicalSelections(form.severeSymptoms);
   const ageOut = age != null && age < 2;
-  const extentMultiple = form.extent === "multiple";
+  const widespread = form.extent === "many";
   const notImpetigo = form.initialSymptoms === "no";
   const hardGp =
     ageOut ||
     form.consent === "no" ||
     form.presentation === "no" ||
-    extentMultiple ||
+    widespread ||
     gpItems.length > 0 ||
     severeItems.length > 0;
   const ready =
@@ -224,7 +225,7 @@ function derive(form: FormState): Outcome {
   if (form.presentation === "no") {
     flags.push({ title: "Presentation", detail: "The presentation is not clear non-bullous impetigo." });
   }
-  if (extentMultiple) flags.push({ title: "Extent", detail: extentLabel(form.extent) });
+  if (widespread) flags.push({ title: "Extent", detail: extentLabel(form.extent) });
 
   const dirty = Object.values(form).some((value) => (Array.isArray(value) ? value.length > 0 : value !== ""));
 
@@ -253,19 +254,26 @@ function derive(form: FormState): Outcome {
           ? `Do not supply antibiotics under this protocol. ${presentationNote}`
           : "Do not supply antibiotics under this protocol.",
     };
-  } else if (ready && form.extent === "one") {
-    showLocal = true;
+  } else if (ready && form.extent === "two") {
+    showOral = true;
     recommendation = {
       kind: "concurrent",
-      title: "Provide usual care and refer to GP for follow-up.",
-      detail: "Topical treatment may still be considered, together with GP follow-up.",
+      title: "Provide pharmacist care and refer to GP for follow up",
+      detail: "",
     };
-  } else if (ready && form.extent === "local") {
+  } else if (ready && form.extent === "one") {
+    showOral = true;
+    recommendation = {
+      kind: "treat",
+      title: "Safe to treat",
+      detail: "Extensive non-bullous impetigo. Proceed to pharmacist care.",
+    };
+  } else if (ready && form.extent === "limited") {
     showLocal = true;
     recommendation = {
       kind: "treat",
       title: "Safe to treat",
-      detail: "Limited non-bullous impetigo is present and no referral trigger is showing. Topical treatment can be considered.",
+      detail: "Limited non-bullous impetigo. Proceed to pharmacist care.",
     };
   } else if (dirty) {
     recommendation = {
@@ -550,11 +558,8 @@ function LocalisedTreatment() {
 
 function OralReference() {
   return (
-    <article className="rounded-lg border border-orange-200 bg-orange-50/40 px-3.5 py-3">
-      <h3 className="text-[11px] font-medium tracking-[0.14em] text-orange-800 uppercase">
-        Extended or high-risk treatment
-      </h3>
-      <p className="mt-2 text-sm leading-6 text-ink">For GP co-management. Do not supply under this protocol.</p>
+    <article className="rounded-lg border border-line bg-paper px-3.5 py-3">
+      <h3 className="text-[11px] font-medium tracking-[0.14em] text-moss uppercase">Empirical treatment (extensive)</h3>
       <p className="mt-3 text-sm font-medium text-ink">Adult oral</p>
       <ul className="mt-1 list-disc space-y-1 pl-4 text-sm leading-6 text-ink">
         <li>Dicloxacillin/flucloxacillin 500 mg QID for 5 days (1st line).</li>
@@ -605,7 +610,7 @@ const localTreatmentPdf = `Localised treatment:
 
 ${usualCarePdf}`;
 
-const oralTreatmentPdf = `Extended or high-risk treatment (for GP co-management; do not supply under this protocol):
+const oralTreatmentPdf = `Empirical treatment (extensive):
 Adult oral:
 - 1st line. Dicloxacillin/flucloxacillin 500 mg QID for 5 days.
 - Cefalexin 1000 mg BD for 5 days.
@@ -1003,7 +1008,9 @@ export default function ImpetigoTriagePage() {
                     recommendation.title
                   )}
                 </h3>
-                <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
+                {recommendation.detail ? (
+                  <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
+                ) : null}
                 {outcome.showUsualCare ? <UsualCare /> : null}
               </article>
             ) : null}
