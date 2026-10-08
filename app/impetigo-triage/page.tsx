@@ -103,6 +103,17 @@ const riskItems: CheckItem[] = [
   },
 ];
 
+const presentationQuestion = "Does the patient present with a clear presentation of non-bullous impetigo?";
+
+const presentationNote =
+  "Note: Pharmacists should treat only clearly eligible low-risk cases and refer to a GP for swabbing or further review if the diagnosis is uncertain, recurrent, or not improving.";
+
+const nonBullousFeatures = [
+  { lead: "Honey-coloured crusts", rest: ", typically on face/extremities" },
+  { lead: "Vesicles/pustules", rest: " that rupture easily" },
+  { lead: "Mild itch", rest: ", minimal pain" },
+  { lead: "No systemic symptoms", rest: "" },
+];
 const symptomsQuestion =
   "Does the patient present with signs, symptoms, or a history consistent with impetigo, based on initial presentation and information provided to the pharmacist?";
 
@@ -237,7 +248,10 @@ function derive(form: FormState): Outcome {
     recommendation = {
       kind: "gp",
       title: "Refer to GP",
-      detail: "Do not supply antibiotics under this protocol.",
+      detail:
+        form.presentation === "no"
+          ? `Do not supply antibiotics under this protocol. ${presentationNote}`
+          : "Do not supply antibiotics under this protocol.",
     };
   } else if (ready && form.extent === "one") {
     showLocal = true;
@@ -620,7 +634,7 @@ function activeClinicalTriggers(form: FormState) {
 function primaryAction(outcome: Outcome) {
   const item = outcome.recommendation;
   if (item.kind === "ed") return "Immediate referral to Emergency Department";
-  if (item.kind === "gp") return "Refer to GP. Do not supply antibiotics under this protocol.";
+  if (item.kind === "gp") return `Refer to GP. ${item.detail}`;
   if (item.kind === "differential") return `${item.title}. ${item.detail}`;
   if (item.kind === "concurrent") return item.title;
   if (item.kind === "treat") return "Safe to treat";
@@ -646,7 +660,7 @@ function consultationRows(form: FormState): string[][] {
     ["Risks", listText(form.risks)],
     ["Red flag symptoms", listText(form.redFlags)],
     ["GP referral triggers (severe symptoms and differential diagnosis)", listText(form.severeSymptoms)],
-    ["Clear non-bullous impetigo", yesNoText(form.presentation)],
+    [presentationQuestion, yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
   ];
 }
@@ -910,9 +924,9 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Clinical presentation">
+          <Section title="Non-bullous impetigo presentation">
             <RadioGroup
-              label="Does the patient present with clear signs of non-bullous impetigo? (Honey-coloured crusts, vesicles that rupture easily, mild itch, no systemic symptoms)"
+              label={presentationQuestion}
               name="presentation"
               value={form.presentation}
               onChange={(value) => set("presentation", value)}
@@ -920,6 +934,20 @@ export default function ImpetigoTriagePage() {
                 { value: "yes", label: "Yes" },
                 { value: "no", label: "No" },
               ]}
+              aside={
+                <div className="mt-3">
+                  <p className="text-sm font-medium text-ink">
+                    Key Features of non-bullous impetigo (eligible for pharmacist treatment)
+                  </p>
+                  <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm leading-6 text-ink">
+                    {nonBullousFeatures.map((feature) => (
+                      <li key={feature.lead}>
+                        <span className="font-semibold">{feature.lead}</span>{feature.rest}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              }
             />
           </Section>
 
