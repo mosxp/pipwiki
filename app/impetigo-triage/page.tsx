@@ -8,7 +8,7 @@ import type { UserOptions } from "jspdf-autotable";
 type YesNo = "" | "yes" | "no";
 type Extent = "" | "local" | "one" | "multiple";
 
-type CheckItem = { label: string; info?: string };
+type CheckItem = { label: string; info?: React.ReactNode };
 
 type FormState = {
   age: string;
@@ -44,7 +44,38 @@ const riskItems: CheckItem[] = [
   { label: "The patient is immunocompromised" },
   {
     label: "The patient is at high risk of complications of impetigo, including patients at high risk of ARF",
-    info: "Includes: Aboriginal and Torres Strait Islander/Māori/Pacific Islander in overcrowded/rural areas; personal/family history of ARF/RHD; overcrowded housing (>2 per bedroom); or residence/frequent travel to endemic areas (e.g., refugees/migrants from low-middle income countries, rural/remote communities).",
+    info: (
+      <div className="text-sm border border-slate-200 rounded-md overflow-hidden mt-2 bg-white text-slate-800 shadow-sm">
+        <div className="bg-blue-100 text-blue-900 font-semibold px-3 py-2 border-b border-blue-200">
+          Individuals at high risk of developing ARF
+        </div>
+        <ul className="list-disc list-outside ml-6 p-3 space-y-2 text-slate-700">
+          <li>
+            Aboriginal and Torres Strait Islander people residing in a rural or remote area, or living in a household
+            affected by household overcrowding (&gt; 2 people per bedroom) or experiencing socioeconomic disadvantage.
+          </li>
+          <li>
+            Māori and/or Pacific Islander person living in a household affected by overcrowding (&gt; 2 people per
+            bedroom) or experiencing socioeconomic disadvantage.
+          </li>
+          <li>A person with a personal history of ARF or RHD.</li>
+          <li>A person with a family or household member with a recent history of ARF or RHD.</li>
+        </ul>
+        <div className="bg-blue-100 text-blue-900 font-semibold px-3 py-2 border-y border-blue-200 mt-1">
+          Additional risk factors for individuals aged ≤ 40 years (particularly between 5-20 years)
+        </div>
+        <ul className="list-disc list-outside ml-6 p-3 space-y-2 text-slate-700">
+          <li>
+            People living in a household affected by household overcrowding (&gt; 2 people per bedroom) or experiencing
+            socioeconomic disadvantage.
+          </li>
+          <li>
+            People with current or prior residence in (or frequent or recent travel to) an area with a high rate of ARF
+            e.g., refugees and migrants from low-middle income countries, rural and remote communities.
+          </li>
+        </ul>
+      </div>
+    ),
   },
 ];
 
@@ -305,7 +336,7 @@ function NumberField({
   );
 }
 
-function InfoTip({ text }: { text: string }) {
+function InfoTip({ children }: { children: React.ReactNode }) {
   const tipId = useId();
   const hideTimer = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -358,16 +389,29 @@ function InfoTip({ text }: { text: string }) {
         </button>
       </span>
       {visible ? (
-        <span
-          id={tipId}
-          role="tooltip"
-          onMouseEnter={show}
-          onMouseLeave={scheduleHide}
-          onMouseDown={(event) => event.preventDefault()}
-          className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
-        >
-          {text}
-        </span>
+        typeof children === "string" ? (
+          <span
+            id={tipId}
+            role="tooltip"
+            onMouseEnter={show}
+            onMouseLeave={scheduleHide}
+            onMouseDown={(event) => event.preventDefault()}
+            className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
+          >
+            {children}
+          </span>
+        ) : (
+          <div
+            id={tipId}
+            role="tooltip"
+            onMouseEnter={show}
+            onMouseLeave={scheduleHide}
+            onMouseDown={(event) => event.preventDefault()}
+            className="print:hidden"
+          >
+            {children}
+          </div>
+        )
       ) : null}
     </>
   );
@@ -420,9 +464,9 @@ function CheckGroup({
                     />
                   </svg>
                 </span>
-                <span>
+                <span className="min-w-0 flex-1">
                   {item.label}
-                  {item.info ? <InfoTip text={item.info} /> : null}
+                  {item.info ? <InfoTip>{item.info}</InfoTip> : null}
                 </span>
               </label>
             </li>
