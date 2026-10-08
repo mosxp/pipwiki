@@ -176,15 +176,16 @@ function listText(items: string[]) {
 
 function derive(form: FormState): Outcome {
   const age = readNumber(form.age);
-  const symptomCount = form.symptoms.length;
+  const symptoms = clinicalSelections(form.symptoms);
+  const symptomCount = symptoms.length;
+  const symptomsDeclined = form.symptoms.includes(noneLabel);
   const redFlags = clinicalSelections(form.redFlags);
   const history = clinicalSelections(form.history);
   const risks = clinicalSelections(form.risks);
   const soft = clinicalSelections(form.soft);
-  const eligibilityAnswered = form.gender !== "" && age != null && form.consent !== "";
   const ageOut = age != null && (age < 18 || age > 65);
   const genderOut = form.gender === "male" || form.gender === "reassigned";
-  const fewSymptoms = symptomCount === 1 || (symptomCount === 0 && eligibilityAnswered);
+  const fewSymptoms = symptomCount === 1 || symptomsDeclined;
   const eligibleBase =
     form.gender === "female" &&
     age != null &&
@@ -578,20 +579,29 @@ const referralPhrases = [
   "Immediate referral to the emergency department",
   "Immediate referral to the GP",
 ];
+const s3Phrase = "Consider an S3 pharmacist-only thrush treatment if appropriate";
 
 function ReferralText({ text }: { text: string }) {
   const parts = text.split(
-    /(Immediate referral to Emergency Department|Immediate referral to the emergency department|Immediate referral to the GP)/g,
+    /(Immediate referral to Emergency Department|Immediate referral to the emergency department|Immediate referral to the GP|Consider an S3 pharmacist-only thrush treatment if appropriate)/g,
   );
-  return parts.map((part, index) =>
-    referralPhrases.includes(part) ? (
-      <span key={index} className="font-bold text-red-600">
-        {part}
-      </span>
-    ) : (
-      part
-    ),
-  );
+  return parts.map((part, index) => {
+    if (referralPhrases.includes(part)) {
+      return (
+        <span key={index} className="font-bold text-red-600">
+          {part}
+        </span>
+      );
+    }
+    if (part === s3Phrase) {
+      return (
+        <span key={index} className="font-semibold text-teal-700">
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
 }
 
 const referralActions = ["and/or refer to GP", "and refer to GP"];
@@ -744,9 +754,12 @@ function TreatmentPathway() {
 }
 
 function consultationRows(form: FormState): string[][] {
-  const count = form.symptoms.length;
-  const symptoms =
-    count > 0 ? `${form.symptoms.join("; ")} (${count} of 4)` : "None selected";
+  const selected = clinicalSelections(form.symptoms);
+  const symptoms = form.symptoms.includes(noneLabel)
+    ? noneLabel
+    : selected.length > 0
+      ? `${selected.join("; ")} (${selected.length} of 4)`
+      : "None selected";
   return [
     ["Gender", genderLabel(form.gender)],
     ["Age", form.age.trim() ? `${form.age.trim()} years` : "Not answered"],
@@ -1051,9 +1064,10 @@ export default function UtiTriagePage() {
               items={cystitisSymptoms}
               checked={form.symptoms}
               onToggle={(item) => toggle("symptoms", item)}
+              none
             />
             <p className="text-xs leading-5 text-ink-soft">
-              {form.symptoms.length} of 4 selected. At least 2 are needed to treat under this protocol.
+              {clinicalSelections(form.symptoms).length} of 4 selected. At least 2 are needed to treat under this protocol.
             </p>
           </Section>
 
