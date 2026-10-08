@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Disclaimer } from "@/components/disclaimer";
 import type { jsPDF } from "jspdf";
 import type { UserOptions } from "jspdf-autotable";
@@ -8,7 +8,7 @@ import type { UserOptions } from "jspdf-autotable";
 type YesNo = "" | "yes" | "no";
 type Extent = "" | "local" | "one" | "multiple";
 
-type CheckItem = { label: string };
+type CheckItem = { label: string; info?: string };
 
 type FormState = {
   age: string;
@@ -17,7 +17,7 @@ type FormState = {
   presentation: YesNo;
   extent: Extent;
   redFlags: string[];
-  gpTriggers: string[];
+  risks: string[];
 };
 
 const noneLabel = "None of the above";
@@ -36,12 +36,16 @@ const redFlagItems: CheckItem[] = [
   { label: "Generalised erythema >90% with systemic symptoms" },
 ];
 
-const gpTriggerItems: CheckItem[] = [
-  { label: "Immunocompromised" },
-  { label: "Recurrent impetigo (persists after 1st course or >2 in 12 months)" },
-  { label: "High risk of ARF (e.g., ATSI in remote/overcrowded areas, history of ARF/RHD)" },
-  { label: "Signs of bullous impetigo (large flaccid blisters) or deep ecthyma (ulcers)" },
-  { label: "Unclear diagnosis/co-occurring conditions (e.g., HSV, shingles, eczema)" },
+const riskItems: CheckItem[] = [
+  {
+    label: "The patient is identified with or at risk of recurrent impetigo",
+    info: "e.g., symptoms have not resolved after the first course of antibiotic treatment, symptoms significantly or rapidly worsen, if impetigo infection reoccurs frequently.",
+  },
+  { label: "The patient is immunocompromised" },
+  {
+    label: "The patient is at high risk of complications of impetigo, including patients at high risk of ARF",
+    info: "Includes: Aboriginal and Torres Strait Islander/Māori/Pacific Islander in overcrowded/rural areas; personal/family history of ARF/RHD; overcrowded housing (>2 per bedroom); or residence/frequent travel to endemic areas (e.g., refugees/migrants from low-middle income countries, rural/remote communities).",
+  },
 ];
 
 const symptomsQuestion =
@@ -66,7 +70,7 @@ const emptyForm: FormState = {
   presentation: "",
   extent: "",
   redFlags: [],
-  gpTriggers: [],
+  risks: [],
 };
 
 type Flag = { title: string; detail: string };
@@ -120,7 +124,7 @@ function extentLabel(extent: Extent) {
 function derive(form: FormState): Outcome {
   const age = readNumber(form.age);
   const redFlags = clinicalSelections(form.redFlags);
-  const gpItems = clinicalSelections(form.gpTriggers);
+  const gpItems = clinicalSelections(form.risks);
   const ageOut = age != null && age < 2;
   const extentMultiple = form.extent === "multiple";
   const notImpetigo = form.initialSymptoms === "no";
@@ -141,11 +145,11 @@ function derive(form: FormState): Outcome {
   if (notImpetigo) {
     flags.push({ title: "Symptoms", detail: "Signs, symptoms, or history are not consistent with impetigo." });
   }
+  if (gpItems.length > 0) flags.push({ title: "Risks", detail: gpItems.join(", ") });
   if (form.presentation === "no") {
     flags.push({ title: "Presentation", detail: "The presentation is not clear non-bullous impetigo." });
   }
   if (extentMultiple) flags.push({ title: "Extent", detail: extentLabel(form.extent) });
-  if (gpItems.length > 0) flags.push({ title: "GP referral triggers", detail: gpItems.join(", ") });
 
   const dirty = Object.values(form).some((value) => (Array.isArray(value) ? value.length > 0 : value !== ""));
 
@@ -301,6 +305,74 @@ function NumberField({
   );
 }
 
+function InfoTip({ text }: { text: string }) {
+  const tipId = useId();
+  const hideTimer = useRef<number | null>(null);
+  const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const visible = open || pinned;
+
+  function show() {
+    if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    setOpen(true);
+  }
+
+  function scheduleHide() {
+    if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    hideTimer.current = window.setTimeout(() => setOpen(false), 120);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
+    };
+  }, []);
+
+  return (
+    <>
+      <span className="print:hidden inline-block align-middle" onMouseEnter={show} onMouseLeave={scheduleHide}>
+        <button
+          type="button"
+          aria-label="Clinical criteria"
+          aria-expanded={visible}
+          aria-describedby={visible ? tipId : undefined}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setPinned((value) => !value);
+          }}
+          onFocus={show}
+          onBlur={() => {
+            setOpen(false);
+            setPinned(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            setOpen(false);
+            setPinned(false);
+          }}
+          className="ml-1.5 inline-flex size-4 items-center justify-center rounded-full border border-ink-soft/40 text-[10px] leading-none font-medium text-ink-soft hover:border-ink-soft hover:text-ink"
+        >
+          i
+        </button>
+      </span>
+      {visible ? (
+        <span
+          id={tipId}
+          role="tooltip"
+          onMouseEnter={show}
+          onMouseLeave={scheduleHide}
+          onMouseDown={(event) => event.preventDefault()}
+          className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
+        >
+          {text}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
 function CheckGroup({
   label,
   hint,
@@ -348,7 +420,10 @@ function CheckGroup({
                     />
                   </svg>
                 </span>
-                <span>{item.label}</span>
+                <span>
+                  {item.label}
+                  {item.info ? <InfoTip text={item.info} /> : null}
+                </span>
               </label>
             </li>
           );
@@ -463,7 +538,7 @@ function activeClinicalTriggers(form: FormState) {
   if (form.initialSymptoms === "no") triggers.push("Signs, symptoms, or history not consistent with impetigo");
   if (form.presentation === "no") triggers.push("Presentation not clear non-bullous impetigo");
   if (form.extent) triggers.push(extentLabel(form.extent));
-  triggers.push(...clinicalSelections(form.redFlags), ...clinicalSelections(form.gpTriggers));
+  triggers.push(...clinicalSelections(form.redFlags), ...clinicalSelections(form.risks));
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
 
@@ -494,10 +569,10 @@ function consultationRows(form: FormState): string[][] {
     ["Age", age ? `${age} years` : "Not answered"],
     ["Patient consents", yesNoText(form.consent)],
     [symptomsQuestion, yesNoText(form.initialSymptoms)],
+    ["Risks", listText(form.risks)],
     ["Clear non-bullous impetigo", yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
     ["Red flag symptoms", listText(form.redFlags)],
-    ["GP referral triggers", listText(form.gpTriggers)],
   ];
 }
 
@@ -638,7 +713,7 @@ export default function ImpetigoTriagePage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
-  function toggle(key: "redFlags" | "gpTriggers", item: string) {
+  function toggle(key: "redFlags" | "risks", item: string) {
     setForm((current) => {
       const selected = current[key];
       if (item === noneLabel) {
@@ -730,6 +805,16 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
+          <Section title="Risks">
+            <CheckGroup
+              label="Does the patient report or present with any of the following?"
+              hint="Any one of these is a GP referral. Do not supply antibiotics."
+              items={riskItems}
+              checked={form.risks}
+              onToggle={(item) => toggle("risks", item)}
+            />
+          </Section>
+
           <Section title="Clinical presentation">
             <RadioGroup
               label="Does the patient present with clear signs of non-bullous impetigo? (Honey-coloured crusts, vesicles that rupture easily, mild itch, no systemic symptoms)"
@@ -760,16 +845,6 @@ export default function ImpetigoTriagePage() {
               items={redFlagItems}
               checked={form.redFlags}
               onToggle={(item) => toggle("redFlags", item)}
-            />
-          </Section>
-
-          <Section title="GP referral triggers">
-            <CheckGroup
-              label="Does the patient report or present with any of the following?"
-              hint="Any one of these is a GP referral. Do not supply antibiotics."
-              items={gpTriggerItems}
-              checked={form.gpTriggers}
-              onToggle={(item) => toggle("gpTriggers", item)}
             />
           </Section>
 
