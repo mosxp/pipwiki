@@ -102,6 +102,7 @@ type Recommendation =
   | { kind: "pending"; detail: string }
   | { kind: "ed"; title: string; detail: string }
   | { kind: "gp"; triggers: ReferralTrigger[]; title: string; detail: string }
+  | { kind: "history"; findings: string; title: string; detail: string }
   | { kind: "concurrent"; title: string; detail: string }
   | { kind: "treat"; title: string; detail: string };
 
@@ -245,11 +246,11 @@ function derive(form: FormState): Outcome {
         "Symptoms or history suggest a cause other than acute cystitis. Consider an S3 pharmacist-only thrush treatment if appropriate, or refer to the GP.",
     });
   }
-  if (history.length > 0) {
+  if (history.length > 0 && redFlags.length > 0) {
     flags.push({
       tone: "alert",
       title: "Red flag history",
-      detail: `${history.join("; ")}. Immediate referral to the GP. Symptomatic non-prescription treatment and self-care advice may be given before that review.`,
+      detail: `${history.join("; ")}. Include this in the emergency department referral.`,
     });
   }
   if (risks.length > 0) {
@@ -292,6 +293,14 @@ function derive(form: FormState): Outcome {
       kind: "ed",
       title: "Immediate referral to Emergency Department",
       detail: "A red flag for pyelonephritis is present. Do not treat under this protocol.",
+    };
+  } else if (history.length > 0) {
+    recommendation = {
+      kind: "history",
+      findings: history.join("; "),
+      title: "Immediate referral to GP",
+      detail:
+        "Symptomatic non-prescription treatment and self-care advice may be provided prior to review by GP.",
     };
   } else if (gp) {
     const triggers: ReferralTrigger[] = [];
@@ -585,9 +594,29 @@ function ReferralText({ text }: { text: string }) {
   );
 }
 
-function UsualCare() {
+const referralActions = ["and/or refer to GP", "and refer to GP"];
+
+function ReferralAction({ text }: { text: string }) {
+  const parts = text.split(/(and\/or refer to GP|and refer to GP)/g);
+  return parts.map((part, index) =>
+    referralActions.includes(part) ? (
+      <span key={index} className="font-bold text-red-600">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
+function UsualCare({ tone = "orange" }: { tone?: "orange" | "red" }) {
   return (
-    <div className="mt-3 rounded-md border border-orange-200/80 bg-white/70 px-3 py-2.5">
+    <div
+      className={[
+        "mt-3 rounded-md border bg-white/70 px-3 py-2.5",
+        tone === "red" ? "border-red-200/80" : "border-orange-200/80",
+      ].join(" ")}
+    >
       <p className="text-sm font-medium text-ink">Usual care</p>
       <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-5 text-ink">
         <li>
@@ -607,6 +636,22 @@ function UsualCare() {
         </li>
       </ul>
     </div>
+  );
+}
+
+function HistoryReferral({ findings }: { findings: string }) {
+  return (
+    <article className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3">
+      <p className="text-[11px] font-medium tracking-[0.14em] text-red-800 uppercase">Red alert</p>
+      <h3 className="mt-1 text-sm font-medium text-red-800">
+        <span className="font-bold text-red-600">Immediate referral to GP</span>
+      </h3>
+      <p className="mt-1.5 text-sm leading-6 text-ink">{findings}</p>
+      <p className="mt-1.5 text-sm leading-6 text-ink">
+        Symptomatic non-prescription treatment and self-care advice may be provided prior to review by GP.
+      </p>
+      <UsualCare tone="red" />
+    </article>
   );
 }
 
@@ -719,6 +764,7 @@ function recommendationRecord(outcome: Outcome) {
   const item = outcome.recommendation;
   if (!outcome.dirty || item.kind === "idle") return "No answers recorded yet.";
   if (item.kind === "pending") return item.detail;
+  if (item.kind === "history") return `${item.findings}. ${item.title}. ${item.detail}`;
   return `${item.title}. ${item.detail}`;
 }
 
@@ -937,7 +983,7 @@ export default function UtiTriagePage() {
 
   const alerts = outcome.flags.filter((flag) => flag.tone === "alert");
   const cautions = outcome.flags.filter((flag) => flag.tone === "caution");
-  const decided = recommendation.kind === "ed" || recommendation.kind === "gp" || recommendation.kind === "concurrent" || recommendation.kind === "treat";
+  const decided = recommendation.kind === "ed" || recommendation.kind === "gp" || recommendation.kind === "history" || recommendation.kind === "concurrent" || recommendation.kind === "treat";
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
@@ -1092,13 +1138,18 @@ export default function UtiTriagePage() {
                 <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
               </article>
             ) : null}
-            {decided ? (
+            {recommendation.kind === "history" ? <HistoryReferral findings={recommendation.findings} /> : null}
+            {decided && recommendation.kind !== "history" ? (
               <article className={["rounded-lg border px-3.5 py-3", outcomeClass(recommendation.kind)].join(" ")}>
                 <p className={["text-[11px] font-medium tracking-[0.14em] uppercase", outcomeLabelClass(recommendation.kind)].join(" ")}>
                   {alertName(recommendation.kind)}
                 </p>
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
-                  <ReferralText text={outcomeTitle(recommendation)} />
+                  {recommendation.kind === "gp" || recommendation.kind === "concurrent" ? (
+                    <ReferralAction text={outcomeTitle(recommendation)} />
+                  ) : (
+                    <ReferralText text={outcomeTitle(recommendation)} />
+                  )}
                 </h3>
                 {recommendation.kind === "concurrent" ? (
                   <div className="mt-3 rounded-md border border-sky-200 bg-sky-50 px-3 py-2.5 text-sm leading-6 text-sky-950">
