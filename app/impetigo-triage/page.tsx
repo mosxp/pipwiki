@@ -85,6 +85,7 @@ type Outcome = {
   recommendation: Recommendation;
   showLocal: boolean;
   showOral: boolean;
+  showUsualCare: boolean;
   dirty: boolean;
 };
 
@@ -192,7 +193,14 @@ function derive(form: FormState): Outcome {
     };
   }
 
-  return { flags, recommendation, showLocal, showOral, dirty };
+  const showUsualCare =
+    form.initialSymptoms !== "no" &&
+    (recommendation.kind === "ed" ||
+      recommendation.kind === "gp" ||
+      recommendation.kind === "concurrent" ||
+      recommendation.kind === "treat");
+
+  return { flags, recommendation, showLocal, showOral, showUsualCare, dirty };
 }
 
 const inputClass =
@@ -474,7 +482,8 @@ function treatmentPathway(outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
   if (outcome.showOral) return oralTreatmentPdf;
   if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "differential") {
-    return `Not indicated. Do not supply antibiotics under this protocol.\n\n${usualCarePdf}`;
+    const blocked = "Not indicated. Do not supply antibiotics under this protocol.";
+    return outcome.showUsualCare ? `${blocked}\n\n${usualCarePdf}` : blocked;
   }
   return "Not indicated";
 }
@@ -807,7 +816,7 @@ export default function ImpetigoTriagePage() {
                   )}
                 </h3>
                 <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
-                <UsualCare />
+                {outcome.showUsualCare ? <UsualCare /> : null}
               </article>
             ) : null}
             {outcome.showLocal ? <LocalisedTreatment /> : null}
