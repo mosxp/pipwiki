@@ -307,6 +307,7 @@ function RadioGroup<T extends string>({
   onChange,
   hint,
   aside,
+  stacked = false,
 }: {
   label: string;
   name: string;
@@ -315,20 +316,22 @@ function RadioGroup<T extends string>({
   onChange: (value: T) => void;
   hint?: string;
   aside?: React.ReactNode;
+  stacked?: boolean;
 }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       {aside}
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className={stacked ? "mt-2 flex flex-col gap-3" : "mt-2 flex flex-wrap items-center gap-2"}>
         {options.map((option) => {
           const checked = value === option.value;
           return (
             <label
               key={option.value}
               className={[
-                "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                "cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                stacked ? "flex w-full" : "inline-flex",
                 checked ? "border-moss bg-[var(--step-bg)] text-ink" : "border-line bg-paper text-ink/80",
               ].join(" ")}
             >
@@ -963,6 +966,7 @@ export default function ImpetigoTriagePage() {
               value={form.extent}
               onChange={(value) => set("extent", value)}
               options={extentOptions}
+              stacked
             />
           </Section>
 
