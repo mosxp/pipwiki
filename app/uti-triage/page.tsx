@@ -95,13 +95,45 @@ type Flag = {
   detail: string;
 };
 
+type ReferralTrigger = "gender" | "age" | "consent" | "symptoms" | "differential" | "history" | "risks";
+
 type Recommendation =
   | { kind: "idle" }
   | { kind: "pending"; detail: string }
   | { kind: "ed"; title: string; detail: string }
-  | { kind: "gp"; title: string; detail: string }
+  | { kind: "gp"; triggers: ReferralTrigger[]; title: string; detail: string }
   | { kind: "concurrent"; title: string; detail: string }
   | { kind: "treat"; title: string; detail: string };
+
+const optionalReferralTitle = "Provide usual care and/or refer to GP";
+const mandatoryReferralTitle = "Provide usual care and refer to GP";
+const laboratoryNote = "The patient may benefit from laboratory investigations.";
+
+function gpAlert(triggers: readonly ReferralTrigger[]) {
+  if (triggers.includes("symptoms") || triggers.includes("risks")) {
+    return {
+      title: mandatoryReferralTitle,
+      detail: `${laboratoryNote} Do not supply antibiotics under this protocol.`,
+    };
+  }
+  return {
+    title: optionalReferralTitle,
+    detail: "A referral trigger applies. Do not supply antibiotics under this protocol.",
+  };
+}
+
+function outcomeTitle(item: Recommendation) {
+  if (item.kind === "gp") return gpAlert(item.triggers).title;
+  if (item.kind === "concurrent") return mandatoryReferralTitle;
+  if (item.kind === "idle" || item.kind === "pending") return "";
+  return item.title;
+}
+
+function outcomeDetail(item: Recommendation) {
+  if (item.kind === "gp") return gpAlert(item.triggers).detail;
+  if (item.kind === "idle") return "";
+  return item.detail;
+}
 
 type Outcome = {
   flags: Flag[];
@@ -202,7 +234,7 @@ function derive(form: FormState): Outcome {
       tone: "alert",
       title: "Cystitis symptoms",
       detail:
-        "Fewer than 2 symptoms of acute cystitis. Provide usual care and refer to GP as the patient may benefit from laboratory investigations.",
+        "Fewer than 2 symptoms of acute cystitis. Provide usual care and refer to GP. The patient may benefit from laboratory investigations.",
     });
   }
   if (form.differential === "yes") {
@@ -224,7 +256,7 @@ function derive(form: FormState): Outcome {
     flags.push({
       tone: "alert",
       title: "Risks",
-      detail: `${risks.join("; ")}. Provide usual care and refer to GP as the patient may benefit from laboratory investigations.`,
+      detail: `${risks.join("; ")}. Provide usual care and refer to GP. The patient may benefit from laboratory investigations.`,
     });
   }
   const gp =
@@ -240,7 +272,7 @@ function derive(form: FormState): Outcome {
     const advice =
       redFlags.length > 0 || gp
         ? `Include this in the referral.${sti}`
-        : `Provide usual care and refer to GP.${sti}`;
+        : `${mandatoryReferralTitle}.${sti}`;
     flags.push({
       tone: "caution",
       title: "Soft trigger",
@@ -262,24 +294,22 @@ function derive(form: FormState): Outcome {
       detail: "A red flag for pyelonephritis is present. Do not treat under this protocol.",
     };
   } else if (gp) {
-    const needsLaboratory = fewSymptoms || risks.length > 0;
-    recommendation = needsLaboratory
-      ? {
-          kind: "gp",
-          title: "Provide usual care and refer to GP as the patient may benefit from laboratory investigations.",
-          detail: "Do not supply antibiotics under this protocol.",
-        }
-      : {
-          kind: "gp",
-          title: "Provide usual care and/or refer to GP",
-          detail: "A referral trigger applies. Do not supply antibiotics under this protocol.",
-        };
+    const triggers: ReferralTrigger[] = [];
+    if (genderOut) triggers.push("gender");
+    if (ageOut) triggers.push("age");
+    if (form.consent === "no") triggers.push("consent");
+    if (fewSymptoms) triggers.push("symptoms");
+    if (form.differential === "yes") triggers.push("differential");
+    if (history.length > 0) triggers.push("history");
+    if (risks.length > 0) triggers.push("risks");
+    const alert = gpAlert(triggers);
+    recommendation = { kind: "gp", triggers, title: alert.title, detail: alert.detail };
   } else if (eligibleBase && soft.length > 0) {
     showPathway = true;
     const sti = soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
     recommendation = {
       kind: "concurrent",
-      title: "Provide usual care and refer to GP.",
+      title: mandatoryReferralTitle,
       detail: `Antibiotic treatment by the pharmacist may still be considered concurrent to a referral to the GP, if clinically appropriate (e.g., possible delay in access to GP and no contraindications to antibiotics).${sti}`,
     };
   } else if (eligibleBase) {
@@ -1068,15 +1098,15 @@ export default function UtiTriagePage() {
                   {alertName(recommendation.kind)}
                 </p>
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
-                  <ReferralText text={recommendation.title} />
+                  <ReferralText text={outcomeTitle(recommendation)} />
                 </h3>
                 {recommendation.kind === "concurrent" ? (
                   <div className="mt-3 rounded-md border border-sky-200 bg-sky-50 px-3 py-2.5 text-sm leading-6 text-sky-950">
-                    {recommendation.detail}
+                    {outcomeDetail(recommendation)}
                   </div>
                 ) : (
                   <p className="mt-1.5 text-sm leading-6 text-ink">
-                    <ReferralText text={recommendation.detail} />
+                    <ReferralText text={outcomeDetail(recommendation)} />
                   </p>
                 )}
                 {recommendation.kind === "gp" ? <UsualCare /> : null}
