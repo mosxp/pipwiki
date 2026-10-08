@@ -816,13 +816,30 @@ function primaryAction(form: FormState, outcome: Outcome) {
 
 function treatmentPathway(showPathway: boolean) {
   if (!showPathway) return "Not indicated";
-  return [
-    "Nitrofurantoin 100 mg orally every 6 hours for 5 days. Supply 20 capsules. Avoid in G6PD deficiency, severe renal impairment, and breastfeeding an infant under one month.",
-    "Fosfomycin 3 g orally as a single dose at night. Supply 1 sachet.",
-    "Trimethoprim 300 mg orally at night for 3 nights. Supply 3 tablets. Avoid if used in the past 3 months.",
-    "Conservative care: ibuprofen 400 mg every 8 hours, maximum 2.4 g in 24 hours. Water intake up to 1.5 L daily when usual intake is lower.",
-    "Avoid alkalinising agents with nitrofurantoin or fosfomycin.",
-  ].join(" ");
+  return `1st line. Nitrofurantoin 100 mg every 6 hours for 5 days (supply 20 capsules).
+Contraindications:
+- Previous serious adverse reaction to nitrofurantoin.
+- G6PD, enolase, or glutathione peroxidase deficiency.
+- Severe renal impairment.
+- Avoid in breastfeeding if the infant is under one month, or has G6PD deficiency.
+
+2nd line. Fosfomycin 3 g as a single dose at night (supply 1 sachet).
+Contraindications:
+- Previous serious adverse reaction or hypersensitivity to fosfomycin.
+- Severe renal impairment.
+- Not recommended with fructose intolerance, glucose-galactose malabsorption, or sucrase-isomaltase insufficiency.
+
+3rd line. Trimethoprim 300 mg daily at night for 3 nights (supply 3 tablets).
+Contraindications:
+- Avoid if trimethoprim was used in the past 3 months, or if a trimethoprim-resistant E. coli was isolated in that time.
+- Previous serious adverse reaction.
+- Megaloblastic anaemia, severe blood disorders, or porphyria.
+- Hyperkalaemia, or treatment with methotrexate, phenytoin, or lamivudine.
+
+Conservative care:
+- Ibuprofen 400 mg every 8 hours (max 2.4 g in 24 hours).
+- Water intake up to 1.5 L daily.
+- Avoid alkalinising agents with nitrofurantoin or fosfomycin.`;
 }
 
 function outcomeRows(form: FormState, outcome: Outcome): string[][] {
