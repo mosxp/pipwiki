@@ -773,45 +773,64 @@ function consultationRows(form: FormState): string[][] {
   ];
 }
 
-function recommendationRecord(outcome: Outcome) {
-  const item = outcome.recommendation;
-  if (!outcome.dirty || item.kind === "idle") return "No answers recorded yet.";
-  if (item.kind === "pending") return item.detail;
-  if (item.kind === "history") return `${item.findings}. ${item.title}. ${item.detail}`;
-  return `${item.title}. ${item.detail}`;
+function activeClinicalTriggers(form: FormState) {
+  const age = readNumber(form.age);
+  const triggers: string[] = [];
+  if (form.gender === "male") triggers.push("Male");
+  if (form.gender === "reassigned") triggers.push("Reassigned");
+  if (age != null && age < 18) triggers.push("Age under 18");
+  if (age != null && age > 65) triggers.push("Age over 65");
+  if (form.consent === "no") triggers.push("Consent declined");
+  if (clinicalSelections(form.symptoms).length === 1 || form.symptoms.includes(noneLabel)) {
+    triggers.push("Fewer than 2 cystitis symptoms");
+  }
+  if (form.differential === "yes") triggers.push("Cause other than acute cystitis");
+  triggers.push(
+    ...clinicalSelections(form.redFlags),
+    ...clinicalSelections(form.history),
+    ...clinicalSelections(form.risks),
+    ...clinicalSelections(form.soft),
+  );
+  return triggers.length > 0 ? triggers.join(", ") : "None";
 }
 
-function outcomeRows(outcome: Outcome): string[][] {
-  const alerts = outcome.flags.filter((flag) => flag.tone === "alert");
-  const cautions = outcome.flags.filter((flag) => flag.tone === "caution");
-  const rows: string[][] = [];
-  if (alerts.length === 0) rows.push(["Referral", "None"]);
-  else for (const flag of alerts) rows.push(["Referral", `${flag.title}. ${flag.detail}`]);
-  if (cautions.length === 0) rows.push(["Cautions", "None"]);
-  else for (const flag of cautions) rows.push(["Caution", `${flag.title}. ${flag.detail}`]);
-  rows.push(["Outcome", recommendationRecord(outcome)]);
-  if (outcome.showPathway) {
-    rows.push([
-      "1st line",
-      "Nitrofurantoin 100 mg orally every 6 hours for 5 days. Supply 20 capsules. Avoid in G6PD deficiency, severe renal impairment, and breastfeeding an infant under one month.",
-    ]);
-    rows.push(["2nd line", "Fosfomycin 3 g orally as a single dose at night. Supply 1 sachet."]);
-    rows.push([
-      "3rd line",
-      "Trimethoprim 300 mg orally at night for 3 nights. Supply 3 tablets. Avoid if used in the past 3 months.",
-    ]);
-    rows.push([
-      "Conservative care",
-      "Ibuprofen 400 mg every 8 hours, maximum 2.4 g in 24 hours. Water intake up to 1.5 L daily when usual intake is lower.",
-    ]);
-    rows.push([
-      "Antibiotic caution",
-      "Avoid alkalinising agents with nitrofurantoin or fosfomycin.",
-    ]);
-  } else {
-    rows.push(["Treatment pathway", "Not indicated"]);
-  }
-  return rows;
+function primaryAction(form: FormState, outcome: Outcome) {
+  const age = readNumber(form.age);
+  const redFlags = clinicalSelections(form.redFlags);
+  const history = clinicalSelections(form.history);
+  const risks = clinicalSelections(form.risks);
+  const genderOut = form.gender === "male" || form.gender === "reassigned";
+  const ageOut = age != null && (age < 18 || age > 65);
+  const fewSymptoms = clinicalSelections(form.symptoms).length === 1 || form.symptoms.includes(noneLabel);
+  const item = outcome.recommendation;
+
+  if (redFlags.length > 0) return "Immediate referral to Emergency Department";
+  if (history.length > 0) return "Immediate referral to GP";
+  if (genderOut || ageOut || form.consent === "no" || form.differential === "yes") return optionalReferralTitle;
+  if (fewSymptoms || risks.length > 0) return `${mandatoryReferralTitle}. ${laboratoryNote}`;
+  if (item.kind === "concurrent") return `${mandatoryReferralTitle}. ${item.detail}`;
+  if (item.kind === "treat") return "Safe to treat";
+  if (item.kind === "pending") return item.detail;
+  return "No answers recorded yet.";
+}
+
+function treatmentPathway(showPathway: boolean) {
+  if (!showPathway) return "Not indicated";
+  return [
+    "Nitrofurantoin 100 mg orally every 6 hours for 5 days. Supply 20 capsules. Avoid in G6PD deficiency, severe renal impairment, and breastfeeding an infant under one month.",
+    "Fosfomycin 3 g orally as a single dose at night. Supply 1 sachet.",
+    "Trimethoprim 300 mg orally at night for 3 nights. Supply 3 tablets. Avoid if used in the past 3 months.",
+    "Conservative care: ibuprofen 400 mg every 8 hours, maximum 2.4 g in 24 hours. Water intake up to 1.5 L daily when usual intake is lower.",
+    "Avoid alkalinising agents with nitrofurantoin or fosfomycin.",
+  ].join(" ");
+}
+
+function outcomeRows(form: FormState, outcome: Outcome): string[][] {
+  return [
+    ["Action Required", primaryAction(form, outcome)],
+    ["Active Clinical Triggers", activeClinicalTriggers(form)],
+    ["Treatment pathway", treatmentPathway(outcome.showPathway)],
+  ];
 }
 
 type TableDoc = jsPDF & { lastAutoTable?: { finalY: number } };
@@ -903,11 +922,11 @@ function buildConsultationReport(
   drawTable(doc, autoTable, {
     startY: headingY + 4,
     head: [["Item", "Detail"]],
-    body: outcomeRows(outcome),
-    columnStyles: { 0: { cellWidth: 42, fontStyle: "bold" } },
+    body: outcomeRows(form, outcome),
+    columnStyles: { 0: { cellWidth: 48, fontStyle: "bold" } },
     didParseCell: (data) => {
       if (data.section !== "body" || data.column.index !== 0) return;
-      if (data.cell.raw === "Referral") data.cell.styles.textColor = [140, 59, 50];
+      if (data.cell.raw === "Action Required") data.cell.styles.textColor = [140, 59, 50];
     },
   });
 
