@@ -130,6 +130,14 @@ const impetigoExamples = [
   "Erythema may be present where the lesions or sores are located",
 ];
 
+const subjectivePrompts = [
+  "Onset, duration, nature, location, severity and extent of lesions.",
+  "History of previous impetigo or skin infections.",
+  "Risk factors (recent skin or throat infections, trauma, immunosuppression).",
+  "Lifestyle factors, recent travel, or contact with similar symptoms.",
+  "Comorbidities, current medications, allergies/adverse effects, and pregnancy/lactation.",
+];
+
 const emptyForm: FormState = {
   age: "",
   consent: "",
@@ -794,6 +802,7 @@ function buildConsultationReport(
   autoTable: (doc: jsPDF, options: UserOptions) => void,
   form: FormState,
   outcome: Outcome,
+  notes: { subjective: string; objective: string },
 ) {
   const doc = new JsPDF({ unit: "mm", format: "a4" }) as TableDoc;
   const generatedAt = new Date().toLocaleString("en-AU", {
@@ -822,9 +831,28 @@ function buildConsultationReport(
   doc.setTextColor(28, 25, 21);
   doc.setFont("times", "bold");
   doc.setFontSize(13);
-  doc.text("Consultation answers", 16, 40);
-  const afterAnswers = drawTable(doc, autoTable, {
+  doc.text("Patient History", 16, 40);
+  const afterHistory = drawTable(doc, autoTable, {
     startY: 44,
+    head: [["Section", "Notes"]],
+    body: [
+      ["Subjective", notes.subjective.trim() || "Not recorded"],
+      ["Objective", notes.objective.trim() || "Not recorded"],
+    ],
+    columnStyles: { 0: { cellWidth: 32, fontStyle: "bold" } },
+  });
+
+  let answersHeadingY = afterHistory + 12;
+  if (answersHeadingY > doc.internal.pageSize.getHeight() - 48) {
+    doc.addPage();
+    answersHeadingY = 18;
+  }
+  doc.setFont("times", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(28, 25, 21);
+  doc.text("Consultation answers", 16, answersHeadingY);
+  const afterAnswers = drawTable(doc, autoTable, {
+    startY: answersHeadingY + 4,
     head: [["Question", "Answer"]],
     body: consultationRows(form),
     columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
@@ -871,6 +899,8 @@ function buildConsultationReport(
 
 export default function ImpetigoTriagePage() {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [subjectiveNotes, setSubjectiveNotes] = useState("");
+  const [objectiveNotes, setObjectiveNotes] = useState("");
   const [reportNote, setReportNote] = useState<string | null>(null);
   const outcome = derive(form);
   const recommendation = outcome.recommendation;
@@ -920,7 +950,10 @@ export default function ImpetigoTriagePage() {
     setReportNote(null);
     try {
       const [{ jsPDF }, { autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-      const doc = buildConsultationReport(jsPDF, autoTable, form, outcome);
+      const doc = buildConsultationReport(jsPDF, autoTable, form, outcome, {
+        subjective: subjectiveNotes,
+        objective: objectiveNotes,
+      });
       tab.location.href = doc.output("bloburl").toString();
     } catch {
       tab.close();
@@ -929,7 +962,7 @@ export default function ImpetigoTriagePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
+    <div className="mx-auto w-full max-w-[100rem] px-4 py-8 md:px-6 md:py-10">
       <header className="max-w-2xl">
         <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">Clinical tool</p>
         <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">Management of Impetigo</h1>
@@ -938,7 +971,37 @@ export default function ImpetigoTriagePage() {
         </p>
       </header>
 
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.8fr)]">
+      <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
+        <aside
+          aria-label="Clinical notes"
+          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)] xl:overflow-y-auto"
+        >
+          <p className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">Clinical notes (S&O)</p>
+          <label className="mt-4 block">
+            <span className="text-sm font-medium text-ink">Subjective</span>
+            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-5 text-ink-soft">
+              {subjectivePrompts.map((prompt) => (
+                <li key={prompt}>{prompt}</li>
+              ))}
+            </ul>
+            <textarea
+              value={subjectiveNotes}
+              onChange={(event) => setSubjectiveNotes(event.target.value)}
+              rows={8}
+              className={`${inputClass} min-h-40 resize-y leading-6`}
+            />
+          </label>
+          <label className="mt-5 block">
+            <span className="text-sm font-medium text-ink">Objective</span>
+            <textarea
+              value={objectiveNotes}
+              onChange={(event) => setObjectiveNotes(event.target.value)}
+              rows={8}
+              className={`${inputClass} min-h-40 resize-y leading-6`}
+            />
+          </label>
+        </aside>
+
         <form
           className="min-w-0 space-y-4"
           autoComplete="off"
@@ -1068,7 +1131,7 @@ export default function ImpetigoTriagePage() {
 
         <aside
           aria-label="Live clinical outcome"
-          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto"
+          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)] xl:overflow-y-auto"
         >
           <p className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">Live clinical outcome</p>
           <div aria-live="polite" className="mt-4 space-y-3">
