@@ -131,11 +131,11 @@ const impetigoExamples = [
 ];
 
 const subjectivePrompts = [
-  "Onset, duration, nature, location, severity and extent of lesions.",
-  "History of previous impetigo or skin infections.",
-  "Risk factors (recent skin or throat infections, trauma, immunosuppression).",
-  "Lifestyle factors, recent travel, or contact with similar symptoms.",
-  "Comorbidities, current medications, allergies/adverse effects, and pregnancy/lactation.",
+  "Onset, duration, nature, location, severity and extent of lesions",
+  "History of previous impetigo or skin infections",
+  "Risk factors (recent skin or throat infections, trauma, immunosuppression)",
+  "Lifestyle factors, recent travel, or contact with similar symptoms",
+  "Comorbidities, current medications, allergies/adverse effects, and pregnancy/lactation",
 ];
 
 const emptyForm: FormState = {
@@ -974,24 +974,29 @@ export default function ImpetigoTriagePage() {
       <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
         <aside
           aria-label="Clinical notes"
-          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)] xl:overflow-y-auto"
+          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100dvh-3rem)] xl:flex-col"
         >
-          <p className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">Clinical notes (S&O)</p>
-          <label className="mt-4 block">
+          <div className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
+            Clinical notes (S&O)
+            <span className="normal-case tracking-normal">
+              <InfoTip>
+                <ul className="mt-1.5 list-disc space-y-1 rounded bg-gray-800 py-2 pr-2 pl-5 text-left text-xs leading-5 font-normal tracking-normal text-white normal-case shadow-lg">
+                  {subjectivePrompts.map((prompt) => (
+                    <li key={prompt}>{prompt}</li>
+                  ))}
+                </ul>
+              </InfoTip>
+            </span>
+          </div>
+          <label className="mt-4 flex min-h-64 flex-1 flex-col">
             <span className="text-sm font-medium text-ink">Subjective</span>
-            <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-5 text-ink-soft">
-              {subjectivePrompts.map((prompt) => (
-                <li key={prompt}>{prompt}</li>
-              ))}
-            </ul>
             <textarea
               value={subjectiveNotes}
               onChange={(event) => setSubjectiveNotes(event.target.value)}
-              rows={8}
-              className={`${inputClass} min-h-40 resize-y leading-6`}
+              className={`${inputClass} min-h-48 flex-1 resize-y leading-6`}
             />
           </label>
-          <label className="mt-5 block">
+          <label className="mt-5 block shrink-0">
             <span className="text-sm font-medium text-ink">Objective</span>
             <textarea
               value={objectiveNotes}
