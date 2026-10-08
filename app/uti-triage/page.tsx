@@ -62,6 +62,7 @@ const riskItems: CheckItem[] = [
 ];
 
 const stiRiskLabel = "Risk factors for a sexually transmitted infection";
+const noneLabel = "None of the above";
 
 const softItems: CheckItem[] = [
   {
@@ -130,13 +131,23 @@ function yesNoText(value: YesNo) {
   return "Not answered";
 }
 
+function clinicalSelections(items: string[]) {
+  return items.filter((item) => item !== noneLabel);
+}
+
 function listText(items: string[]) {
-  return items.length > 0 ? items.join("; ") : "None selected";
+  if (items.length === 1 && items[0] === noneLabel) return noneLabel;
+  const clinical = clinicalSelections(items);
+  return clinical.length > 0 ? clinical.join("; ") : "None selected";
 }
 
 function derive(form: FormState): Outcome {
   const age = readNumber(form.age);
   const symptomCount = form.symptoms.length;
+  const redFlags = clinicalSelections(form.redFlags);
+  const history = clinicalSelections(form.history);
+  const risks = clinicalSelections(form.risks);
+  const soft = clinicalSelections(form.soft);
   const eligibilityAnswered = form.gender !== "" && age != null && form.consent !== "";
   const ageOut = age != null && (age < 18 || age > 65);
   const genderOut = form.gender === "male" || form.gender === "reassigned";
@@ -149,17 +160,17 @@ function derive(form: FormState): Outcome {
     form.consent === "yes" &&
     symptomCount >= 2 &&
     form.differential === "no" &&
-    form.redFlags.length === 0 &&
-    form.history.length === 0 &&
-    form.risks.length === 0;
+    redFlags.length === 0 &&
+    history.length === 0 &&
+    risks.length === 0;
 
   const flags: Flag[] = [];
 
-  if (form.redFlags.length > 0) {
+  if (redFlags.length > 0) {
     flags.push({
       tone: "alert",
       title: "Pyelonephritis",
-      detail: `${form.redFlags.join("; ")}. Immediate referral to the emergency department.`,
+      detail: `${redFlags.join("; ")}. Immediate referral to the emergency department.`,
     });
   }
   if (genderOut) {
@@ -202,18 +213,18 @@ function derive(form: FormState): Outcome {
         "Symptoms or history suggest a cause other than acute cystitis. Consider an S3 pharmacist-only thrush treatment if appropriate, or refer to the GP.",
     });
   }
-  if (form.history.length > 0) {
+  if (history.length > 0) {
     flags.push({
       tone: "alert",
       title: "Red flag history",
-      detail: `${form.history.join("; ")}. Immediate referral to the GP. Symptomatic non-prescription treatment and self-care advice may be given before that review.`,
+      detail: `${history.join("; ")}. Immediate referral to the GP. Symptomatic non-prescription treatment and self-care advice may be given before that review.`,
     });
   }
-  if (form.risks.length > 0) {
+  if (risks.length > 0) {
     flags.push({
       tone: "alert",
       title: "Risks",
-      detail: `${form.risks.join("; ")}. Provide usual care and/or refer to the GP. The patient may benefit from laboratory investigations.`,
+      detail: `${risks.join("; ")}. Provide usual care and/or refer to the GP. The patient may benefit from laboratory investigations.`,
     });
   }
   const gp =
@@ -222,18 +233,18 @@ function derive(form: FormState): Outcome {
     form.consent === "no" ||
     fewSymptoms ||
     form.differential === "yes" ||
-    form.history.length > 0 ||
-    form.risks.length > 0;
-  if (form.soft.length > 0) {
-    const sti = form.soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
+    history.length > 0 ||
+    risks.length > 0;
+  if (soft.length > 0) {
+    const sti = soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
     const advice =
-      form.redFlags.length > 0 || gp
+      redFlags.length > 0 || gp
         ? `Include this in the referral.${sti}`
         : `Antibiotic treatment may still be considered together with referral to the GP, if that is clinically appropriate.${sti}`;
     flags.push({
       tone: "caution",
       title: "Soft trigger",
-      detail: `${form.soft.join("; ")}. ${advice}`,
+      detail: `${soft.join("; ")}. ${advice}`,
     });
   }
   const dirty = Object.values(form).some((value) => {
@@ -244,7 +255,7 @@ function derive(form: FormState): Outcome {
   let recommendation: Recommendation = { kind: "idle" };
   let showPathway = false;
 
-  if (form.redFlags.length > 0) {
+  if (redFlags.length > 0) {
     recommendation = {
       kind: "ed",
       title: "Immediate referral to Emergency Department",
@@ -256,9 +267,9 @@ function derive(form: FormState): Outcome {
       title: "Provide usual care and/or refer to GP",
       detail: "A referral trigger applies. Do not supply antibiotics under this protocol.",
     };
-  } else if (eligibleBase && form.soft.length > 0) {
+  } else if (eligibleBase && soft.length > 0) {
     showPathway = true;
-    const sti = form.soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
+    const sti = soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
     recommendation = {
       kind: "concurrent",
       title: "Concurrent referral to GP indicated",
@@ -460,22 +471,26 @@ function CheckGroup({
   items,
   checked,
   onToggle,
+  none = false,
 }: {
   label: string;
   hint?: string;
   items: CheckItem[];
   checked: string[];
   onToggle: (item: string) => void;
+  none?: boolean;
 }) {
+  const rows = none ? [...items, { label: noneLabel }] : items;
   return (
     <fieldset>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       <ul className="mt-2 space-y-0.5">
-        {items.map((item) => {
+        {rows.map((item) => {
           const isChecked = checked.includes(item.label);
+          const isNone = item.label === noneLabel;
           return (
-            <li key={item.label}>
+            <li key={item.label} className={isNone ? "mt-1 border-t border-line pt-1" : undefined}>
               <label className="flex cursor-pointer items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink hover:bg-paper/70">
                 <span className="relative mt-0.5 inline-flex size-4 shrink-0">
                   <input
@@ -854,10 +869,15 @@ export default function UtiTriagePage() {
 
   function toggle(key: "symptoms" | "redFlags" | "history" | "risks" | "soft", item: string) {
     setForm((current) => {
-      const selected = current[key].includes(item)
-        ? current[key].filter((entry) => entry !== item)
-        : [...current[key], item];
-      return { ...current, [key]: selected };
+      const selected = current[key];
+      if (item === noneLabel) {
+        return { ...current, [key]: selected.includes(noneLabel) ? [] : [noneLabel] };
+      }
+      const withoutNone = selected.filter((entry) => entry !== noneLabel);
+      const next = withoutNone.includes(item)
+        ? withoutNone.filter((entry) => entry !== item)
+        : [...withoutNone, item];
+      return { ...current, [key]: next };
     });
   }
 
@@ -975,6 +995,7 @@ export default function UtiTriagePage() {
               items={redFlagSymptoms}
               checked={form.redFlags}
               onToggle={(item) => toggle("redFlags", item)}
+              none
             />
           </Section>
 
@@ -984,6 +1005,7 @@ export default function UtiTriagePage() {
               items={redFlagHistory}
               checked={form.history}
               onToggle={(item) => toggle("history", item)}
+              none
             />
           </Section>
 
@@ -993,6 +1015,7 @@ export default function UtiTriagePage() {
               items={riskItems}
               checked={form.risks}
               onToggle={(item) => toggle("risks", item)}
+              none
             />
           </Section>
 
@@ -1002,6 +1025,7 @@ export default function UtiTriagePage() {
               items={softItems}
               checked={form.soft}
               onToggle={(item) => toggle("soft", item)}
+              none
             />
           </Section>
 
