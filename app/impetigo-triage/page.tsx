@@ -290,9 +290,23 @@ function derive(form: FormState): Outcome {
 const inputClass =
   "mt-2 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-moss";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  locked = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  locked?: boolean;
+}) {
   return (
-    <section className="rounded-xl border border-line bg-paper-raised px-5 py-5">
+    <section
+      aria-disabled={locked || undefined}
+      className={[
+        "rounded-xl border border-line bg-paper-raised px-5 py-5 transition-opacity duration-200",
+        locked ? "pointer-events-none opacity-50" : "opacity-100",
+      ].join(" ")}
+    >
       <h2 className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">{title}</h2>
       <div className="mt-4 space-y-5">{children}</div>
     </section>
@@ -308,6 +322,7 @@ function RadioGroup<T extends string>({
   hint,
   aside,
   stacked = false,
+  disabled = false,
 }: {
   label: string;
   name: string;
@@ -317,9 +332,10 @@ function RadioGroup<T extends string>({
   hint?: string;
   aside?: React.ReactNode;
   stacked?: boolean;
+  disabled?: boolean;
 }) {
   return (
-    <fieldset>
+    <fieldset disabled={disabled}>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       {aside}
@@ -330,7 +346,8 @@ function RadioGroup<T extends string>({
             <label
               key={option.value}
               className={[
-                "cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                "items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                disabled ? "cursor-not-allowed" : "cursor-pointer",
                 stacked ? "flex w-full" : "inline-flex",
                 checked ? "border-moss bg-[var(--step-bg)] text-ink" : "border-line bg-paper text-ink/80",
               ].join(" ")}
@@ -340,6 +357,7 @@ function RadioGroup<T extends string>({
                 name={name}
                 value={option.value}
                 checked={checked}
+                disabled={disabled}
                 onChange={() => onChange(option.value)}
                 className="accent-moss"
               />
@@ -475,16 +493,18 @@ function CheckGroup({
   items,
   checked,
   onToggle,
+  disabled = false,
 }: {
   label: string;
   hint?: string;
   items: CheckItem[];
   checked: string[];
   onToggle: (item: string) => void;
+  disabled?: boolean;
 }) {
   const rows = [...items, { label: noneLabel }];
   return (
-    <fieldset>
+    <fieldset disabled={disabled}>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       <ul className="mt-2 space-y-0.5">
@@ -493,11 +513,17 @@ function CheckGroup({
           const isNone = item.label === noneLabel;
           return (
             <li key={item.label} className={isNone ? "mt-1 border-t border-line pt-1" : undefined}>
-              <label className="flex cursor-pointer items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink hover:bg-paper/70">
+              <label
+                className={[
+                  "flex items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink",
+                  disabled ? "cursor-not-allowed" : "cursor-pointer hover:bg-paper/70",
+                ].join(" ")}
+              >
                 <span className="relative mt-0.5 inline-flex size-4 shrink-0">
                   <input
                     type="checkbox"
                     checked={isChecked}
+                    disabled={disabled}
                     onChange={() => onToggle(item.label)}
                     className="peer size-4 appearance-none rounded-full border border-moss/50 bg-paper checked:border-moss checked:bg-moss focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
                   />
@@ -854,6 +880,12 @@ export default function ImpetigoTriagePage() {
     recommendation.kind === "differential" ||
     recommendation.kind === "concurrent" ||
     recommendation.kind === "treat";
+  const isEligibilityFail = (form.age !== "" && Number(form.age) < 2) || form.consent === "no";
+  const isSymptomsFail = isEligibilityFail || form.initialSymptoms === "no";
+  const isRisksFail = isSymptomsFail || (form.risks.length > 0 && !form.risks.includes(noneLabel));
+  const isRedFlagsFail = isRisksFail || (form.redFlags.length > 0 && !form.redFlags.includes(noneLabel));
+  const isSevereFail = isRedFlagsFail || (form.severeSymptoms.length > 0 && !form.severeSymptoms.includes(noneLabel));
+  const isNonBullousFail = isSevereFail || form.presentation === "no";
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -928,11 +960,12 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Symptoms">
+          <Section title="Symptoms" locked={isEligibilityFail}>
             <RadioGroup
               label={symptomsQuestion}
               name="initialSymptoms"
               value={form.initialSymptoms}
+              disabled={isEligibilityFail}
               onChange={(value) => set("initialSymptoms", value)}
               options={[
                 { value: "yes", label: "Yes" },
@@ -951,41 +984,45 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Risks">
+          <Section title="Risks" locked={isSymptomsFail}>
             <CheckGroup
               label="Does the patient report or present with any of the following?"
               hint="Any one of these is a GP referral. Do not supply antibiotics."
               items={riskItems}
               checked={form.risks}
+              disabled={isSymptomsFail}
               onToggle={(item) => toggle("risks", item)}
             />
           </Section>
 
-          <Section title="Red flag symptoms">
+          <Section title="Red flag symptoms" locked={isRisksFail}>
             <CheckGroup
               label="Does the patient report or present with any of the following?"
               hint="Any one of these is an emergency department referral."
               items={redFlagItems}
               checked={form.redFlags}
+              disabled={isRisksFail}
               onToggle={(item) => toggle("redFlags", item)}
             />
           </Section>
 
-          <Section title="GP referral triggers (severe symptoms & differential dx)">
+          <Section title="GP referral triggers (severe symptoms & differential dx)" locked={isRedFlagsFail}>
             <CheckGroup
               label="Does the patient report/present with any of the following?"
               hint="Any one of these is a GP referral. Do not supply antibiotics."
               items={severeSymptomItems}
               checked={form.severeSymptoms}
+              disabled={isRedFlagsFail}
               onToggle={(item) => toggle("severeSymptoms", item)}
             />
           </Section>
 
-          <Section title="Non-bullous impetigo presentation">
+          <Section title="Non-bullous impetigo presentation" locked={isSevereFail}>
             <RadioGroup
               label={presentationQuestion}
               name="presentation"
               value={form.presentation}
+              disabled={isSevereFail}
               onChange={(value) => set("presentation", value)}
               options={[
                 { value: "yes", label: "Yes" },
@@ -1008,11 +1045,12 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
-          <Section title="Extent of infection">
+          <Section title="Extent of infection" locked={isNonBullousFail}>
             <RadioGroup
               label="How extensive is the infection?"
               name="extent"
               value={form.extent}
+              disabled={isNonBullousFail}
               onChange={(value) => set("extent", value)}
               options={extentOptions}
               stacked
