@@ -1534,6 +1534,10 @@ export default function ImpetigoTriagePage() {
     });
   }
 
+  function handlePrintBlank() {
+    window.open("/Management of Impetigo Q.pdf", "_blank");
+  }
+
   async function printConsultationRecord() {
     const tab = window.open("about:blank", "_blank");
     if (!tab) {
@@ -1564,6 +1568,13 @@ export default function ImpetigoTriagePage() {
         <p className="mt-4 text-base leading-7 text-ink-soft">
           Work through management of impetigo. Referral flags update from the protocol as you answer. Nothing is saved.
         </p>
+        <button
+          type="button"
+          onClick={handlePrintBlank}
+          className="mt-5 inline-flex items-center rounded-md border border-moss/40 bg-transparent px-3.5 py-2 text-sm font-medium text-moss hover:border-moss hover:bg-[var(--step-bg)]"
+        >
+          Print Blank Questionnaire
+        </button>
       </header>
 
       <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
