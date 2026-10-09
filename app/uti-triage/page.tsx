@@ -242,12 +242,16 @@ function utiApprovedPlan(treatment: string): UtiApprovedPlan | null {
       name: "Fosfomycin",
       dose: "3 g as a single dose at night.",
       counselling: [
-        "Dissolve the sachet in water and drink it immediately.",
-        "Take the single dose at night on an empty stomach.",
-        "Avoid alkalinising agents. They may significantly reduce antibiotic efficacy.",
-        followUpCounselling,
+        "This medicine works best if you take it before bedtime, after emptying your bladder.",
+        "Mix the contents of the sachet in water and drink immediately.",
+        "Avoid urinary alkalisers (e.g., Ural) as they make fosfomycin less effective. Avoid taking them on the same day as, or within 2 days after taking fosfomycin.",
+        "Symptoms should respond within 48–72 hours. If symptoms persist after treatment, or if new/worsening symptoms develop, return for review.",
       ],
-      adverse: ["Common: diarrhoea, nausea, headache, and vaginitis."],
+      adverse: [
+        "Common (>1%): diarrhoea, nausea.",
+        "Infrequent (0.1–1%): paraesthesia (usually circumoral).",
+        "Rare (<0.1%): hypersensitivity reactions (e.g., anaphylaxis, angioedema, rash), taste disturbance.",
+      ],
     };
   }
   if (treatment === "trimethoprim") {
