@@ -890,6 +890,53 @@ function oralDosesForAge(age: number) {
   return age >= 18 ? adultOralDoses : childOralDoses;
 }
 
+function trimethoprimDose(age: number) {
+  return oralDosesForAge(age).find((item) => item.dose.startsWith("Trimethoprim"));
+}
+
+const trimethoprimCounselling = [
+  "Take this medicine with food to reduce stomach upset.",
+  "To reduce risk of rash from the sun avoid sun exposure, wear protective clothing and use sunscreen.",
+  "Drink a lot of fluid (at least 2–3 L daily) during prolonged or high-dose treatment.",
+];
+
+function TrimethoprimApproved({ age }: { age: number }) {
+  const dose = trimethoprimDose(age);
+  return (
+    <article className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-green-900">
+      <h3 className="text-sm font-bold">GREEN ALERT: Treatment Approved</h3>
+      <p className="mt-3 text-sm font-bold">Trimethoprim + sulfamethoxazole</p>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Dose</p>
+        <p className="mt-1.5 text-sm leading-6">{dose?.dose}</p>
+        {dose ? <p className="mt-1 text-xs leading-5 italic">Note: {dose.note}</p> : null}
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Counselling</p>
+        <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
+          {trimethoprimCounselling.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+          <li>
+            <strong>URGENT:</strong> Tell your doctor straight away if you get a sore throat, fever, troublesome rash,
+            cough, difficulty in breathing, joint pain, dark urine or pale stools.
+          </li>
+        </ul>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Adverse effects</p>
+        <p className="mt-1.5 text-sm leading-6">
+          Common (&gt;1%): fever, nausea, vomiting, diarrhoea, anorexia, rash, itch, sore mouth, hyperkalaemia,
+          thrombocytopenia (rarely significant).
+        </p>
+        <p className="mt-1.5 text-xs leading-5 italic">
+          Note: Most common adverse effects are GI and skin sensitivity reactions.
+        </p>
+      </div>
+    </article>
+  );
+}
+
 function OralReference({ age }: { age: number }) {
   const doses = oralDosesForAge(age);
   return (
@@ -1189,6 +1236,12 @@ export default function ImpetigoTriagePage() {
   const isTreatmentSelectionLocked = isExtentLocked || !isExtentPassed;
   const isTreatmentSelectionPassed = selectedTreatment !== "";
   const isDrugAssessmentLocked = isTreatmentSelectionLocked || !isTreatmentSelectionPassed;
+  const isTreatmentApproved = selectedTreatment !== "" && drugFlags.includes(noneLabel);
+  const showTrimethoprimApproved =
+    isTreatmentApproved &&
+    selectedTreatment === "trimethoprim" &&
+    (recommendation.kind === "treat" || recommendation.kind === "concurrent");
+  const replaceGreenAlert = showTrimethoprimApproved && recommendation.kind === "treat";
 
   useEffect(() => {
     fitClinicalNotes(noteStackRef.current);
@@ -1471,7 +1524,7 @@ export default function ImpetigoTriagePage() {
                 <p className="mt-1.5 text-sm leading-6 text-ink">{recommendation.detail}</p>
               </article>
             ) : null}
-            {decided ? (
+            {decided && !replaceGreenAlert ? (
               <article className={["rounded-lg border px-3.5 py-3", outcomeClass(recommendation.kind)].join(" ")}>
                 <p className={["text-[11px] font-medium tracking-[0.14em] uppercase", outcomeLabelClass(recommendation.kind)].join(" ")}>
                   {alertName(recommendation.kind)}
@@ -1495,6 +1548,8 @@ export default function ImpetigoTriagePage() {
                 {outcome.showUsualCare ? <UsualCare /> : null}
               </article>
             ) : null}
+            {showTrimethoprimApproved ? <TrimethoprimApproved age={readNumber(form.age) ?? 0} /> : null}
+            {replaceGreenAlert && outcome.showUsualCare ? <UsualCare /> : null}
             {outcome.showLocal ? <LocalisedTreatment /> : null}
             {outcome.showOral ? <OralReference age={readNumber(form.age) ?? 0} /> : null}
           </div>
