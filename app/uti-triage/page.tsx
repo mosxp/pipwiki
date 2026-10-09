@@ -77,6 +77,14 @@ const softItems: CheckItem[] = [
   { label: "IUD in situ for more than 3 months" },
 ];
 
+const subjectivePrompts = [
+  "Onset, duration, nature, and severity of urinary symptoms",
+  "History of previous urinary tract infections",
+  "Risk factors (recent antibiotics, catheter, immunosuppression, pregnancy)",
+  "Lifestyle factors, sexual history, or a new partner",
+  "Comorbidities, current medications, allergies/adverse effects, and pregnancy",
+];
+
 const emptyForm: FormState = {
   gender: "",
   age: "",
@@ -343,9 +351,35 @@ function derive(form: FormState): Outcome {
 const inputClass =
   "mt-2 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-moss";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function fitClinicalNotes(stack: HTMLElement | null) {
+  if (!stack) return;
+  for (const field of stack.querySelectorAll("textarea")) {
+    field.style.height = "auto";
+    const needed = field.scrollHeight;
+    field.style.height = `${needed}px`;
+    if (field.scrollHeight > field.clientHeight) {
+      field.style.height = `${needed + (field.scrollHeight - field.clientHeight)}px`;
+    }
+  }
+}
+
+function Section({
+  title,
+  children,
+  locked = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  locked?: boolean;
+}) {
   return (
-    <section className="rounded-xl border border-line bg-paper-raised px-5 py-5">
+    <section
+      aria-disabled={locked || undefined}
+      className={[
+        "rounded-xl border border-line bg-paper-raised px-5 py-5 transition-opacity duration-200",
+        locked ? "pointer-events-none opacity-50" : "opacity-100",
+      ].join(" ")}
+    >
       <h2 className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">{title}</h2>
       <div className="mt-4 space-y-5">{children}</div>
     </section>
@@ -356,12 +390,13 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <p className="text-sm font-medium leading-6 text-ink">{children}</p>;
 }
 
-function InfoTip({ text }: { text: string }) {
+function InfoTip({ text, children }: { text?: string; children?: React.ReactNode }) {
   const tipId = useId();
   const hideTimer = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
   const [pinned, setPinned] = useState(false);
-  const visible = open || pinned;
+  const content = children ?? text;
+  const visible = (open || pinned) && content != null;
 
   function show() {
     if (hideTimer.current != null) window.clearTimeout(hideTimer.current);
@@ -409,16 +444,29 @@ function InfoTip({ text }: { text: string }) {
         </button>
       </span>
       {visible ? (
-        <span
-          id={tipId}
-          role="tooltip"
-          onMouseEnter={show}
-          onMouseLeave={scheduleHide}
-          onMouseDown={(event) => event.preventDefault()}
-          className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
-        >
-          {text}
-        </span>
+        typeof content === "string" ? (
+          <span
+            id={tipId}
+            role="tooltip"
+            onMouseEnter={show}
+            onMouseLeave={scheduleHide}
+            onMouseDown={(event) => event.preventDefault()}
+            className="print:hidden mt-1.5 block max-w-xl rounded bg-gray-800 p-2 text-left text-xs leading-5 font-normal text-white shadow-lg"
+          >
+            {content}
+          </span>
+        ) : (
+          <div
+            id={tipId}
+            role="tooltip"
+            onMouseEnter={show}
+            onMouseLeave={scheduleHide}
+            onMouseDown={(event) => event.preventDefault()}
+            className="print:hidden"
+          >
+            {content}
+          </div>
+        )
       ) : null}
     </>
   );
@@ -432,6 +480,7 @@ function RadioGroup<T extends string>({
   onChange,
   hint,
   info,
+  disabled = false,
 }: {
   label: string;
   name: string;
@@ -440,9 +489,10 @@ function RadioGroup<T extends string>({
   onChange: (value: T) => void;
   hint?: string;
   info?: string;
+  disabled?: boolean;
 }) {
   return (
-    <fieldset>
+    <fieldset disabled={disabled}>
       <legend className="text-sm font-medium leading-6 text-ink">
         {label}
         {info ? <InfoTip text={info} /> : null}
@@ -455,7 +505,8 @@ function RadioGroup<T extends string>({
             <label
               key={option.value}
               className={[
-                "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                disabled ? "cursor-not-allowed" : "cursor-pointer",
                 checked ? "border-moss bg-[var(--step-bg)] text-ink" : "border-line bg-paper text-ink/80",
               ].join(" ")}
             >
@@ -464,6 +515,7 @@ function RadioGroup<T extends string>({
                 name={name}
                 value={option.value}
                 checked={checked}
+                disabled={disabled}
                 onChange={() => onChange(option.value)}
                 className="accent-moss"
               />
@@ -519,6 +571,7 @@ function CheckGroup({
   checked,
   onToggle,
   none = false,
+  disabled = false,
 }: {
   label: string;
   hint?: string;
@@ -526,10 +579,11 @@ function CheckGroup({
   checked: string[];
   onToggle: (item: string) => void;
   none?: boolean;
+  disabled?: boolean;
 }) {
   const rows = none ? [...items, { label: noneLabel }] : items;
   return (
-    <fieldset>
+    <fieldset disabled={disabled}>
       <legend className="text-sm font-medium leading-6 text-ink">{label}</legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
       <ul className="mt-2 space-y-0.5">
@@ -538,11 +592,17 @@ function CheckGroup({
           const isNone = item.label === noneLabel;
           return (
             <li key={item.label} className={isNone ? "mt-1 border-t border-line pt-1" : undefined}>
-              <label className="flex cursor-pointer items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink hover:bg-paper/70">
+              <label
+                className={[
+                  "flex items-start gap-2.5 rounded-md px-1 py-1 text-sm leading-5 text-ink",
+                  disabled ? "cursor-not-allowed" : "cursor-pointer hover:bg-paper/70",
+                ].join(" ")}
+              >
                 <span className="relative mt-0.5 inline-flex size-4 shrink-0">
                   <input
                     type="checkbox"
                     checked={isChecked}
+                    disabled={disabled}
                     onChange={() => onToggle(item.label)}
                     className="peer size-4 appearance-none rounded-full border border-moss/50 bg-paper checked:border-moss checked:bg-moss focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
                   />
@@ -888,6 +948,7 @@ function buildConsultationReport(
   autoTable: (doc: jsPDF, options: UserOptions) => void,
   form: FormState,
   outcome: Outcome,
+  notes: { subjective: string; objective: string },
 ) {
   const doc = new JsPDF({ unit: "mm", format: "a4" }) as TableDoc;
   const generatedAt = new Date().toLocaleString("en-AU", {
@@ -917,10 +978,29 @@ function buildConsultationReport(
   doc.setTextColor(28, 25, 21);
   doc.setFont("times", "bold");
   doc.setFontSize(13);
-  doc.text("Consultation answers", 16, 40);
+  doc.text("Patient History", 16, 40);
+  const afterHistory = drawTable(doc, autoTable, {
+    startY: 44,
+    head: [["Section", "Notes"]],
+    body: [
+      ["Subjective", notes.subjective.trim() || "Not recorded"],
+      ["Objective", notes.objective.trim() || "Not recorded"],
+    ],
+    columnStyles: { 0: { cellWidth: 32, fontStyle: "bold" } },
+  });
+
+  let answersHeadingY = afterHistory + 12;
+  if (answersHeadingY > doc.internal.pageSize.getHeight() - 48) {
+    doc.addPage();
+    answersHeadingY = 18;
+  }
+  doc.setFont("times", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(28, 25, 21);
+  doc.text("Consultation answers", 16, answersHeadingY);
 
   const afterAnswers = drawTable(doc, autoTable, {
-    startY: 44,
+    startY: answersHeadingY + 4,
     head: [["Question", "Answer"]],
     body: consultationRows(form),
     columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
@@ -991,9 +1071,29 @@ function alertName(kind: Recommendation["kind"]) {
 
 export default function UtiTriagePage() {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [subjectiveNotes, setSubjectiveNotes] = useState("");
+  const [objectiveNotes, setObjectiveNotes] = useState("");
   const [reportNote, setReportNote] = useState<string | null>(null);
+  const noteStackRef = useRef<HTMLDivElement>(null);
   const outcome = derive(form);
   const recommendation = outcome.recommendation;
+  const age = readNumber(form.age);
+  const isEligibilityPassed = form.gender === "female" && age != null && age >= 18 && age <= 65 && form.consent === "yes";
+  const isSymptomsLocked = !isEligibilityPassed;
+  const isSymptomsPassed = clinicalSelections(form.symptoms).length >= 2;
+  const isDifferentialLocked = isSymptomsLocked || !isSymptomsPassed;
+  const isDifferentialPassed = form.differential === "no";
+  const isRedFlagsLocked = isDifferentialLocked || !isDifferentialPassed;
+  const isRedFlagsPassed = form.redFlags.length > 0 && form.redFlags.includes(noneLabel);
+  const isHistoryLocked = isRedFlagsLocked || !isRedFlagsPassed;
+  const isHistoryPassed = form.history.length > 0 && form.history.includes(noneLabel);
+  const isRisksLocked = isHistoryLocked || !isHistoryPassed;
+  const isRisksPassed = form.risks.length > 0 && form.risks.includes(noneLabel);
+  const isSoftLocked = isRisksLocked || !isRisksPassed;
+
+  useEffect(() => {
+    fitClinicalNotes(noteStackRef.current);
+  }, [subjectiveNotes, objectiveNotes]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -1022,7 +1122,10 @@ export default function UtiTriagePage() {
     setReportNote(null);
     try {
       const [{ jsPDF }, { autoTable }] = await Promise.all([import("jspdf"), import("jspdf-autotable")]);
-      const doc = buildConsultationReport(jsPDF, autoTable, form, outcome);
+      const doc = buildConsultationReport(jsPDF, autoTable, form, outcome, {
+        subjective: subjectiveNotes,
+        objective: objectiveNotes,
+      });
       tab.location.href = doc.output("bloburl").toString();
     } catch {
       tab.close();
@@ -1035,7 +1138,7 @@ export default function UtiTriagePage() {
   const decided = recommendation.kind === "ed" || recommendation.kind === "gp" || recommendation.kind === "history" || recommendation.kind === "concurrent" || recommendation.kind === "treat";
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8 md:py-10">
+    <div className="mx-auto w-full max-w-[100rem] px-4 py-8 md:px-6 md:py-10">
       <header className="max-w-2xl">
         <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">Clinical tool</p>
         <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">
@@ -1054,7 +1157,45 @@ export default function UtiTriagePage() {
         </p>
       </header>
 
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1.45fr)_minmax(18rem,0.8fr)]">
+      <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
+        <aside
+          aria-label="Clinical notes"
+          className="min-w-0 self-start h-fit rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6"
+        >
+          <div className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
+            Clinical notes (S&O)
+            <span className="normal-case tracking-normal">
+              <InfoTip>
+                <ul className="mt-1.5 list-disc space-y-1 rounded bg-gray-800 py-2 pr-2 pl-5 text-left text-xs leading-5 font-normal tracking-normal text-white normal-case shadow-lg">
+                  {subjectivePrompts.map((prompt) => (
+                    <li key={prompt}>{prompt}</li>
+                  ))}
+                </ul>
+              </InfoTip>
+            </span>
+          </div>
+          <div ref={noteStackRef} className="mt-4 grid gap-5">
+            <label className="block">
+              <span className="text-sm font-medium text-ink">Subjective</span>
+              <textarea
+                value={subjectiveNotes}
+                rows={3}
+                onChange={(event) => setSubjectiveNotes(event.target.value)}
+                className={`${inputClass} min-h-[100px] resize-none overflow-hidden leading-6`}
+              />
+            </label>
+            <label className="block">
+              <span className="text-sm font-medium text-ink">Objective</span>
+              <textarea
+                value={objectiveNotes}
+                rows={3}
+                onChange={(event) => setObjectiveNotes(event.target.value)}
+                className={`${inputClass} min-h-[100px] resize-none overflow-hidden leading-6`}
+              />
+            </label>
+          </div>
+        </aside>
+
         <form
           className="min-w-0 space-y-4"
           autoComplete="off"
@@ -1093,7 +1234,7 @@ export default function UtiTriagePage() {
             />
           </Section>
 
-          <Section title="Symptoms">
+          <Section title="Symptoms" locked={isSymptomsLocked}>
             <CheckGroup
               label="Acute cystitis symptoms"
               hint="If vaginal discharge is absent and at least two of dysuria, frequency, or urgency are present, the probability of cystitis is greater than 90%."
@@ -1101,13 +1242,14 @@ export default function UtiTriagePage() {
               checked={form.symptoms}
               onToggle={(item) => toggle("symptoms", item)}
               none
+              disabled={isSymptomsLocked}
             />
             <p className="text-xs leading-5 text-ink-soft">
               {clinicalSelections(form.symptoms).length} of 4 selected. At least 2 are needed to treat under this protocol.
             </p>
           </Section>
 
-          <Section title="Differential diagnosis">
+          <Section title="Differential diagnosis" locked={isDifferentialLocked}>
             <RadioGroup
               label="Do the symptoms or history suggest a cause other than acute cystitis?"
               name="differential"
@@ -1118,10 +1260,11 @@ export default function UtiTriagePage() {
                 { value: "no", label: "No" },
               ]}
               info="Vaginal thrush, bacterial vaginosis, chlamydia, gonorrhoea, trichomoniasis."
+              disabled={isDifferentialLocked}
             />
           </Section>
 
-          <Section title="Red flag symptoms">
+          <Section title="Red flag symptoms" locked={isRedFlagsLocked}>
             <CheckGroup
               label="Signs of pyelonephritis"
               hint="Any one of these is an emergency department referral."
@@ -1129,36 +1272,40 @@ export default function UtiTriagePage() {
               checked={form.redFlags}
               onToggle={(item) => toggle("redFlags", item)}
               none
+              disabled={isRedFlagsLocked}
             />
           </Section>
 
-          <Section title="Red flag medical history">
+          <Section title="Red flag medical history" locked={isHistoryLocked}>
             <CheckGroup
               label="Does the patient have any of the following?"
               items={redFlagHistory}
               checked={form.history}
               onToggle={(item) => toggle("history", item)}
               none
+              disabled={isHistoryLocked}
             />
           </Section>
 
-          <Section title="Risks">
+          <Section title="Risks" locked={isRisksLocked}>
             <CheckGroup
               label="Does the patient report any of the following?"
               items={riskItems}
               checked={form.risks}
               onToggle={(item) => toggle("risks", item)}
               none
+              disabled={isRisksLocked}
             />
           </Section>
 
-          <Section title="Soft triggers">
+          <Section title="Soft triggers" locked={isSoftLocked}>
             <CheckGroup
               label="Does the patient report or present with any of the following?"
               items={softItems}
               checked={form.soft}
               onToggle={(item) => toggle("soft", item)}
               none
+              disabled={isSoftLocked}
             />
           </Section>
 
@@ -1167,7 +1314,7 @@ export default function UtiTriagePage() {
 
         <aside
           aria-label="Live clinical outcome"
-          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto"
+          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)] xl:overflow-y-auto"
         >
           <p className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">Live clinical outcome</p>
           <div aria-live="polite" className="mt-4 space-y-3">
@@ -1215,10 +1362,14 @@ export default function UtiTriagePage() {
             ) : null}
             {outcome.showPathway ? <TreatmentPathway /> : null}
           </div>
-          {outcome.dirty ? (
+          {outcome.dirty || subjectiveNotes.trim() !== "" || objectiveNotes.trim() !== "" ? (
             <button
               type="button"
-              onClick={() => setForm(emptyForm)}
+              onClick={() => {
+                setForm(emptyForm);
+                setSubjectiveNotes("");
+                setObjectiveNotes("");
+              }}
               className="mt-4 text-sm text-ink-soft underline decoration-line underline-offset-4 hover:text-ink"
             >
               Clear answers
