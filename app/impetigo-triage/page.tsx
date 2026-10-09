@@ -1019,6 +1019,55 @@ function DicloxacillinApproved({ age }: { age: number }) {
   );
 }
 
+function MupirocinApproved() {
+  return (
+    <article className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-green-900">
+      <h3 className="text-sm font-bold">GREEN ALERT: Treatment Approved</h3>
+      <p className="mt-3 text-sm font-bold">Mupirocin 2% ointment/cream</p>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Dose</p>
+        <p className="mt-1.5 text-sm leading-6">Adult, child, apply 2 or 3 times a day for 5 days.</p>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Counselling</p>
+        <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
+          <li>Avoid contact with eyes and mouth.</li>
+          <li>
+            Before applying to impetigo, soak affected area and remove crusts (e.g., using a wet disposable cloth).
+          </li>
+          <li>
+            Children with impetigo should be kept home until appropriate treatment is started. Sores on exposed surfaces
+            must be covered with a watertight dressing when the child returns to school or child care.
+          </li>
+        </ul>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Adverse effects</p>
+        <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
+          <li>
+            Common (&gt;1%): localised skin reactions, including itch, burning, erythema, stinging, dryness, pain and
+            swelling.
+          </li>
+          <li>Rare (&lt;0.1%): allergy (e.g., urticaria, anaphylaxis, angioedema).</li>
+        </ul>
+      </div>
+    </article>
+  );
+}
+
+function PeroxideApproved() {
+  return (
+    <article className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-green-900">
+      <h3 className="text-sm font-bold">GREEN ALERT: Treatment Approved</h3>
+      <p className="mt-3 text-sm font-bold">Hydrogen peroxide 1% cream</p>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Dose</p>
+        <p className="mt-1.5 text-sm leading-6">Apply to lesions, every 8 hours for 5 days.</p>
+      </div>
+    </article>
+  );
+}
+
 function OralReference({ age }: { age: number }) {
   const doses = oralDosesForAge(age);
   return (
@@ -1331,8 +1380,21 @@ export default function ImpetigoTriagePage() {
     isTreatmentApproved &&
     selectedTreatment === "dicloxacillin" &&
     (recommendation.kind === "treat" || recommendation.kind === "concurrent");
+  const showMupirocinApproved =
+    isTreatmentApproved &&
+    selectedTreatment === "mupirocin" &&
+    (recommendation.kind === "treat" || recommendation.kind === "concurrent");
+  const showPeroxideApproved =
+    isTreatmentApproved &&
+    selectedTreatment === "peroxide" &&
+    (recommendation.kind === "treat" || recommendation.kind === "concurrent");
   const replaceGreenAlert =
-    (showTrimethoprimApproved || showCefalexinApproved || showDicloxacillinApproved) && recommendation.kind === "treat";
+    (showTrimethoprimApproved ||
+      showCefalexinApproved ||
+      showDicloxacillinApproved ||
+      showMupirocinApproved ||
+      showPeroxideApproved) &&
+    recommendation.kind === "treat";
 
   useEffect(() => {
     fitClinicalNotes(noteStackRef.current);
@@ -1642,6 +1704,8 @@ export default function ImpetigoTriagePage() {
             {showTrimethoprimApproved ? <TrimethoprimApproved age={readNumber(form.age) ?? 0} /> : null}
             {showCefalexinApproved ? <CefalexinApproved age={readNumber(form.age) ?? 0} /> : null}
             {showDicloxacillinApproved ? <DicloxacillinApproved age={readNumber(form.age) ?? 0} /> : null}
+            {showMupirocinApproved ? <MupirocinApproved /> : null}
+            {showPeroxideApproved ? <PeroxideApproved /> : null}
             {replaceGreenAlert && outcome.showUsualCare ? <UsualCare /> : null}
             {outcome.showLocal ? <LocalisedTreatment /> : null}
             {outcome.showOral ? <OralReference age={readNumber(form.age) ?? 0} /> : null}
