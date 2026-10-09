@@ -73,7 +73,42 @@ function drugFlagItems(treatment: string): CheckItem[] {
   if (treatment === "cefalexin") {
     return [
       {
-        label: "History of allergy to cephalosporins OR immediate/severe hypersensitivity to a penicillin",
+        label: "History of allergy to cephalosporins or severe hypersensitivity to penicillins",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Contraindicated:</strong> History of allergy to cephalosporins
+              </li>
+              <li>
+                <strong>Contraindicated:</strong> Immediate (e.g., urticaria, bronchospasm, anaphylaxis) or severe
+                (e.g., interstitial nephritis) hypersensitivity to a penicillin
+              </li>
+              <li>
+                <strong>Precaution:</strong> Cross-reactivity can occur with other penicillins or carbapenems
+              </li>
+            </ul>
+          </div>
+        ),
+      },
+      {
+        label: "Renal impairment (especially CrCl < 10 mL/minute)",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Precaution:</strong> Consider reducing dose if CrCl &lt; 10 mL/minute
+              </li>
+              <li>
+                <strong>Precaution:</strong> Renal impairment increases the risk of neurotoxicity (seizures, coma) with
+                high doses
+              </li>
+              <li>
+                <strong>Precaution:</strong> Risk of neutropenia may be increased
+              </li>
+            </ul>
+          </div>
+        ),
       },
     ];
   }
