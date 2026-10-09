@@ -30,13 +30,24 @@ const extentOptions: { value: Exclude<Extent, "">; label: string }[] = [
   { value: "many", label: "> 2 sores affecting > 2 body regions" },
 ];
 
-const treatmentOptions = [
+const topicalTreatmentOptions = [
   { value: "mupirocin", label: "Mupirocin 2% ointment/cream" },
   { value: "peroxide", label: "Hydrogen peroxide 1% cream" },
+];
+
+const oralTreatmentOptions = [
   { value: "dicloxacillin", label: "Dicloxacillin / Flucloxacillin" },
   { value: "cefalexin", label: "Cefalexin" },
   { value: "trimethoprim", label: "Trimethoprim + sulfamethoxazole" },
 ];
+
+const treatmentOptions = [...topicalTreatmentOptions, ...oralTreatmentOptions];
+
+function proposedTreatmentOptions(extent: Extent): { value: string; label: string }[] {
+  if (extent === "limited") return topicalTreatmentOptions;
+  if (extent === "one" || extent === "two") return oralTreatmentOptions;
+  return [];
+}
 
 const contraindicationDetail =
   "Do not supply the selected medicine. Select an alternative therapy or refer to the GP.";
@@ -1237,7 +1248,11 @@ export default function ImpetigoTriagePage() {
               name="extent"
               value={form.extent}
               disabled={isExtentLocked}
-              onChange={(value) => set("extent", value)}
+              onChange={(value) => {
+                set("extent", value);
+                setSelectedTreatment("");
+                setDrugFlags([]);
+              }}
               options={extentOptions}
               stacked
             />
@@ -1253,7 +1268,7 @@ export default function ImpetigoTriagePage() {
                 setSelectedTreatment(value);
                 setDrugFlags([]);
               }}
-              options={treatmentOptions}
+              options={proposedTreatmentOptions(form.extent)}
               stacked
             />
           </Section>
