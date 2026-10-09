@@ -10,7 +10,7 @@ type Gender = "" | "male" | "female" | "reassigned";
 
 type CheckItem = {
   label: string;
-  info?: string;
+  info?: React.ReactNode;
 };
 
 type FormState = {
@@ -112,7 +112,149 @@ type Recommendation =
   | { kind: "gp"; triggers: ReferralTrigger[]; title: string; detail: string }
   | { kind: "history"; findings: string; title: string; detail: string }
   | { kind: "concurrent"; title: string; detail: string }
+  | { kind: "contraindicated"; title: string; detail: string }
   | { kind: "treat"; title: string; detail: string };
+
+const contraindicationDetail =
+  "Do not supply the selected medicine. Select an alternative therapy or refer to the GP.";
+
+const utiTreatmentOptions = [
+  { value: "nitrofurantoin", label: "Nitrofurantoin (100 mg every 6 hours for 5 days)" },
+  { value: "fosfomycin", label: "Fosfomycin (3 g as a single dose at night)" },
+  { value: "trimethoprim", label: "Trimethoprim (300 mg daily at night for 3 days)" },
+];
+
+function contraTip(bullets: string[]) {
+  return (
+    <div className="w-[350px] rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-900 shadow-sm">
+      <ul className="ml-4 list-disc list-outside space-y-1.5">
+        {bullets.map((bullet) => (
+          <li key={bullet}>
+            <strong>Contraindicated:</strong> {bullet}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function drugFlagItems(treatment: string): CheckItem[] {
+  if (treatment === "nitrofurantoin") {
+    return [
+      {
+        label: "Previous serious adverse reaction to nitrofurantoin",
+        info: contraTip(["Previous serious adverse reaction to nitrofurantoin."]),
+      },
+      {
+        label: "G6PD, enolase, or glutathione peroxidase deficiency",
+        info: contraTip(["G6PD, enolase, or glutathione peroxidase deficiency."]),
+      },
+      {
+        label: "Severe renal impairment",
+        info: contraTip(["Severe renal impairment."]),
+      },
+      {
+        label: "Breastfeeding an infant under one month, or an infant with G6PD deficiency",
+        info: contraTip(["Avoid in breastfeeding if the infant is under one month, or has G6PD deficiency."]),
+      },
+    ];
+  }
+  if (treatment === "fosfomycin") {
+    return [
+      {
+        label: "Previous serious adverse reaction or hypersensitivity to fosfomycin",
+        info: contraTip(["Previous serious adverse reaction or hypersensitivity to fosfomycin."]),
+      },
+      {
+        label: "Severe renal impairment",
+        info: contraTip(["Severe renal impairment."]),
+      },
+      {
+        label: "Fructose intolerance, glucose-galactose malabsorption, or sucrase-isomaltase insufficiency",
+        info: contraTip([
+          "Not recommended with fructose intolerance, glucose-galactose malabsorption, or sucrase-isomaltase insufficiency.",
+        ]),
+      },
+    ];
+  }
+  if (treatment === "trimethoprim") {
+    return [
+      {
+        label: "Trimethoprim used in the past 3 months, or resistant E. coli in that time",
+        info: contraTip([
+          "Avoid if trimethoprim was used in the past 3 months, or if a trimethoprim-resistant E. coli was isolated in that time.",
+        ]),
+      },
+      {
+        label: "Previous serious adverse reaction to a trimethoprim-containing medicine",
+        info: contraTip(["Previous serious adverse reaction to a trimethoprim-containing medicine."]),
+      },
+      {
+        label: "Folate deficiency, severe blood disorder, or porphyria",
+        info: contraTip([
+          "Megaloblastic anaemia or another cause of folate deficiency, another severe blood disorder, or porphyria.",
+        ]),
+      },
+      {
+        label: "Hyperkalaemia, or treatment with methotrexate, phenytoin, or lamivudine",
+        info: contraTip(["Hyperkalaemia, or treatment with methotrexate, phenytoin, or lamivudine."]),
+      },
+    ];
+  }
+  return [];
+}
+
+function treatmentLabel(treatment: string) {
+  return utiTreatmentOptions.find((option) => option.value === treatment)?.label ?? "Not answered";
+}
+
+type UtiApprovedPlan = {
+  name: string;
+  dose: string;
+  counselling: string[];
+  adverse: string[];
+};
+
+const followUpCounselling =
+  "Symptoms should respond within 48 hours. If they persist 48–72 hours after the antibiotic course, or symptoms that are not acute cystitis develop, return for review.";
+
+function utiApprovedPlan(treatment: string): UtiApprovedPlan | null {
+  if (treatment === "nitrofurantoin") {
+    return {
+      name: "Nitrofurantoin",
+      dose: "100 mg every 6 hours for 5 days.",
+      counselling: [
+        "Take each dose with food or milk.",
+        "Urine may turn dark yellow or brown.",
+        "Avoid alkalinising agents. They may significantly reduce antibiotic efficacy.",
+        followUpCounselling,
+      ],
+      adverse: ["Common: nausea, vomiting, anorexia, diarrhoea, and headache."],
+    };
+  }
+  if (treatment === "fosfomycin") {
+    return {
+      name: "Fosfomycin",
+      dose: "3 g as a single dose at night.",
+      counselling: [
+        "Dissolve the sachet in water and drink it immediately.",
+        "Take the single dose at night on an empty stomach.",
+        "Avoid alkalinising agents. They may significantly reduce antibiotic efficacy.",
+        followUpCounselling,
+      ],
+      adverse: ["Common: diarrhoea, nausea, headache, and vaginitis."],
+    };
+  }
+  if (treatment === "trimethoprim") {
+    return {
+      name: "Trimethoprim",
+      dose: "300 mg daily at night for 3 days.",
+      counselling: ["Take the dose at night.", "Finish the 3-day course.", followUpCounselling],
+      adverse: ["Common: nausea, vomiting, rash, itch, and hyperkalaemia."],
+    };
+  }
+  return null;
+}
 
 const optionalReferralTitle = "Provide usual care and/or refer to GP";
 const mandatoryReferralTitle = "Provide usual care and refer to GP";
@@ -182,7 +324,7 @@ function listText(items: string[]) {
   return clinical.length > 0 ? clinical.join("; ") : "None selected";
 }
 
-function derive(form: FormState): Outcome {
+function derive(form: FormState, drugFlags: string[]): Outcome {
   const age = readNumber(form.age);
   const symptoms = clinicalSelections(form.symptoms);
   const symptomCount = symptoms.length;
@@ -191,6 +333,7 @@ function derive(form: FormState): Outcome {
   const history = clinicalSelections(form.history);
   const risks = clinicalSelections(form.risks);
   const soft = clinicalSelections(form.soft);
+  const drugContra = clinicalSelections(drugFlags);
   const ageOut = age != null && (age < 18 || age > 65);
   const genderOut = form.gender === "male" || form.gender === "reassigned";
   const fewSymptoms = symptomCount === 1 || symptomsDeclined;
@@ -269,6 +412,13 @@ function derive(form: FormState): Outcome {
       detail: `${risks.join("; ")}. Provide usual care and refer to GP. The patient may benefit from laboratory investigations.`,
     });
   }
+  if (eligibleBase && soft.length === 0 && drugContra.length > 0) {
+    flags.push({
+      tone: "alert",
+      title: "Appropriateness assessment",
+      detail: `${drugContra.join("; ")}. ${contraindicationDetail}`,
+    });
+  }
   const gp =
     genderOut ||
     ageOut ||
@@ -289,10 +439,12 @@ function derive(form: FormState): Outcome {
       detail: `${soft.join("; ")}. ${advice}`,
     });
   }
-  const dirty = Object.values(form).some((value) => {
-    if (Array.isArray(value)) return value.length > 0;
-    return value !== "";
-  });
+  const dirty =
+    drugFlags.length > 0 ||
+    Object.values(form).some((value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      return value !== "";
+    });
 
   let recommendation: Recommendation = { kind: "idle" };
   let showPathway = false;
@@ -329,6 +481,12 @@ function derive(form: FormState): Outcome {
       kind: "concurrent",
       title: mandatoryReferralTitle,
       detail: `Antibiotic treatment by the pharmacist may still be considered concurrent to a referral to the GP, if clinically appropriate (e.g., possible delay in access to GP and no contraindications to antibiotics).${sti}`,
+    };
+  } else if (eligibleBase && drugContra.length > 0) {
+    recommendation = {
+      kind: "contraindicated",
+      title: "Treatment Contraindicated",
+      detail: contraindicationDetail,
     };
   } else if (eligibleBase) {
     showPathway = true;
@@ -481,6 +639,7 @@ function RadioGroup<T extends string>({
   hint,
   info,
   disabled = false,
+  stacked = false,
 }: {
   label: string;
   name: string;
@@ -490,6 +649,7 @@ function RadioGroup<T extends string>({
   hint?: string;
   info?: string;
   disabled?: boolean;
+  stacked?: boolean;
 }) {
   return (
     <fieldset disabled={disabled}>
@@ -498,15 +658,16 @@ function RadioGroup<T extends string>({
         {info ? <InfoTip text={info} /> : null}
       </legend>
       {hint ? <p className="mt-1 text-xs leading-5 text-ink-soft">{hint}</p> : null}
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className={stacked ? "mt-2 flex flex-col gap-3" : "mt-2 flex flex-wrap items-center gap-2"}>
         {options.map((option) => {
           const checked = value === option.value;
           return (
             <label
               key={option.value}
               className={[
-                "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm",
+                "items-center gap-2 rounded-md border px-3 py-2 text-sm",
                 disabled ? "cursor-not-allowed" : "cursor-pointer",
+                stacked ? "flex w-full" : "inline-flex",
                 checked ? "border-moss bg-[var(--step-bg)] text-ink" : "border-line bg-paper text-ink/80",
               ].join(" ")}
             >
@@ -623,7 +784,13 @@ function CheckGroup({
                 </span>
                 <span>
                   {item.label}
-                  {item.info ? <InfoTip text={item.info} /> : null}
+                  {item.info ? (
+                    typeof item.info === "string" ? (
+                      <InfoTip text={item.info} />
+                    ) : (
+                      <InfoTip>{item.info}</InfoTip>
+                    )
+                  ) : null}
                 </span>
               </label>
             </li>
@@ -813,7 +980,36 @@ function TreatmentPathway() {
   );
 }
 
-function consultationRows(form: FormState): string[][] {
+function UtiApproved({ plan }: { plan: UtiApprovedPlan }) {
+  return (
+    <article className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-green-900">
+      <h3 className="text-sm font-bold">GREEN ALERT: Treatment Approved</h3>
+      <p className="mt-3 text-sm font-bold">{plan.name}</p>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Dose</p>
+        <p className="mt-1.5 text-sm leading-6">{plan.dose}</p>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Counselling</p>
+        <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
+          {plan.counselling.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Adverse effects</p>
+        {plan.adverse.map((point) => (
+          <p key={point} className="mt-1.5 text-sm leading-6">
+            {point}
+          </p>
+        ))}
+      </div>
+    </article>
+  );
+}
+
+function consultationRows(form: FormState, treatment: string, drugFlags: string[]): string[][] {
   const selected = clinicalSelections(form.symptoms);
   const symptoms = form.symptoms.includes(noneLabel)
     ? noneLabel
@@ -830,10 +1026,12 @@ function consultationRows(form: FormState): string[][] {
     ["Red flag medical history", listText(form.history)],
     ["Risks", listText(form.risks)],
     ["Soft triggers", listText(form.soft)],
+    ["Proposed treatment", treatment ? treatmentLabel(treatment) : "Not answered"],
+    ["Appropriateness assessment", listText(drugFlags)],
   ];
 }
 
-function activeClinicalTriggers(form: FormState) {
+function activeClinicalTriggers(form: FormState, drugFlags: string[]) {
   const age = readNumber(form.age);
   const triggers: string[] = [];
   if (form.gender === "male") triggers.push("Male");
@@ -850,6 +1048,7 @@ function activeClinicalTriggers(form: FormState) {
     ...clinicalSelections(form.history),
     ...clinicalSelections(form.risks),
     ...clinicalSelections(form.soft),
+    ...clinicalSelections(drugFlags),
   );
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
@@ -869,13 +1068,17 @@ function primaryAction(form: FormState, outcome: Outcome) {
   if (genderOut || ageOut || form.consent === "no" || form.differential === "yes") return optionalReferralTitle;
   if (fewSymptoms || risks.length > 0) return `${mandatoryReferralTitle}. ${laboratoryNote}`;
   if (item.kind === "concurrent") return `${mandatoryReferralTitle}. ${item.detail}`;
+  if (item.kind === "contraindicated") return `RED ALERT: Treatment Contraindicated. ${item.detail}`;
   if (item.kind === "treat") return "Safe to treat";
   if (item.kind === "pending") return item.detail;
   return "No answers recorded yet.";
 }
 
-function treatmentPathway(showPathway: boolean) {
-  if (!showPathway) return "Not indicated";
+function treatmentPathway(outcome: Outcome) {
+  if (outcome.recommendation.kind === "contraindicated") {
+    return "Not indicated. Do not supply the selected medicine.";
+  }
+  if (!outcome.showPathway) return "Not indicated";
   return `1st line. Nitrofurantoin 100 mg every 6 hours for 5 days (supply 20 capsules).
 Contraindications:
 - Previous serious adverse reaction to nitrofurantoin.
@@ -902,12 +1105,28 @@ Conservative care:
 - Avoid alkalinising agents with nitrofurantoin or fosfomycin.`;
 }
 
-function outcomeRows(form: FormState, outcome: Outcome): string[][] {
-  return [
+function outcomeRows(form: FormState, outcome: Outcome, treatment: string, drugFlags: string[]): string[][] {
+  const rows = [
     ["Action Required", primaryAction(form, outcome)],
-    ["Active Clinical Triggers", activeClinicalTriggers(form)],
-    ["Treatment pathway", treatmentPathway(outcome.showPathway)],
+    ["Active Clinical Triggers", activeClinicalTriggers(form, drugFlags)],
+    ["Treatment pathway", treatmentPathway(outcome)],
   ];
+  const plan =
+    outcome.recommendation.kind === "treat" && drugFlags.includes(noneLabel) ? utiApprovedPlan(treatment) : null;
+  if (plan) {
+    rows.splice(1, 0, [
+      plan.name,
+      [
+        "GREEN ALERT: Treatment Approved",
+        `Dose: ${plan.dose}`,
+        "Counselling:",
+        ...plan.counselling.map((point) => `- ${point}`),
+        "Adverse effects:",
+        ...plan.adverse.map((point) => `- ${point}`),
+      ].join("\n"),
+    ]);
+  }
+  return rows;
 }
 
 type TableDoc = jsPDF & { lastAutoTable?: { finalY: number } };
@@ -948,7 +1167,7 @@ function buildConsultationReport(
   autoTable: (doc: jsPDF, options: UserOptions) => void,
   form: FormState,
   outcome: Outcome,
-  notes: { subjective: string; objective: string },
+  notes: { subjective: string; objective: string; treatment: string; drugFlags: string[] },
 ) {
   const doc = new JsPDF({ unit: "mm", format: "a4" }) as TableDoc;
   const generatedAt = new Date().toLocaleString("en-AU", {
@@ -1002,7 +1221,7 @@ function buildConsultationReport(
   const afterAnswers = drawTable(doc, autoTable, {
     startY: answersHeadingY + 4,
     head: [["Question", "Answer"]],
-    body: consultationRows(form),
+    body: consultationRows(form, notes.treatment, notes.drugFlags),
     columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
   });
 
@@ -1019,7 +1238,7 @@ function buildConsultationReport(
   drawTable(doc, autoTable, {
     startY: headingY + 4,
     head: [["Item", "Detail"]],
-    body: outcomeRows(form, outcome),
+    body: outcomeRows(form, outcome, notes.treatment, notes.drugFlags),
     columnStyles: { 0: { cellWidth: 48, fontStyle: "bold" } },
     didParseCell: (data) => {
       if (data.section !== "body" || data.column.index !== 0) return;
@@ -1047,7 +1266,7 @@ function buildConsultationReport(
 }
 
 function outcomeClass(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "border-red-200 bg-red-50";
+  if (kind === "ed" || kind === "contraindicated") return "border-red-200 bg-red-50";
   if (kind === "gp") return "border-orange-200 bg-orange-50";
   if (kind === "concurrent") return "border-yellow-300 bg-yellow-50";
   if (kind === "treat") return "border-moss/20 bg-[var(--step-bg)]";
@@ -1055,7 +1274,7 @@ function outcomeClass(kind: Recommendation["kind"]) {
 }
 
 function outcomeLabelClass(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "text-red-800";
+  if (kind === "ed" || kind === "contraindicated") return "text-red-800";
   if (kind === "gp") return "text-orange-800";
   if (kind === "concurrent") return "text-yellow-800";
   if (kind === "treat") return "text-moss";
@@ -1063,7 +1282,7 @@ function outcomeLabelClass(kind: Recommendation["kind"]) {
 }
 
 function alertName(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "Red alert";
+  if (kind === "ed" || kind === "contraindicated") return "Red alert";
   if (kind === "gp") return "Orange alert";
   if (kind === "concurrent") return "Yellow alert";
   return "Outcome";
@@ -1073,9 +1292,11 @@ export default function UtiTriagePage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [subjectiveNotes, setSubjectiveNotes] = useState("");
   const [objectiveNotes, setObjectiveNotes] = useState("");
+  const [selectedTreatment, setSelectedTreatment] = useState("");
+  const [drugFlags, setDrugFlags] = useState<string[]>([]);
   const [reportNote, setReportNote] = useState<string | null>(null);
   const noteStackRef = useRef<HTMLDivElement>(null);
-  const outcome = derive(form);
+  const outcome = derive(form, drugFlags);
   const recommendation = outcome.recommendation;
   const age = readNumber(form.age);
   const isEligibilityPassed = form.gender === "female" && age != null && age >= 18 && age <= 65 && form.consent === "yes";
@@ -1090,6 +1311,13 @@ export default function UtiTriagePage() {
   const isRisksLocked = isHistoryLocked || !isHistoryPassed;
   const isRisksPassed = form.risks.length > 0 && form.risks.includes(noneLabel);
   const isSoftLocked = isRisksLocked || !isRisksPassed;
+  const isTreatmentSelectionLocked = isRisksLocked || !isRisksPassed || clinicalSelections(form.soft).length > 0;
+  const isTreatmentSelectionPassed = selectedTreatment !== "";
+  const isDrugAssessmentLocked = isTreatmentSelectionLocked || !isTreatmentSelectionPassed;
+  const approvedPlan =
+    !isDrugAssessmentLocked && drugFlags.includes(noneLabel) && recommendation.kind === "treat"
+      ? utiApprovedPlan(selectedTreatment)
+      : null;
 
   useEffect(() => {
     fitClinicalNotes(noteStackRef.current);
@@ -1113,6 +1341,14 @@ export default function UtiTriagePage() {
     });
   }
 
+  function toggleDrug(item: string) {
+    setDrugFlags((selected) => {
+      if (item === noneLabel) return selected.includes(noneLabel) ? [] : [noneLabel];
+      const withoutNone = selected.filter((entry) => entry !== noneLabel);
+      return withoutNone.includes(item) ? withoutNone.filter((entry) => entry !== item) : [...withoutNone, item];
+    });
+  }
+
   async function printConsultationRecord() {
     const tab = window.open("about:blank", "_blank");
     if (!tab) {
@@ -1125,6 +1361,8 @@ export default function UtiTriagePage() {
       const doc = buildConsultationReport(jsPDF, autoTable, form, outcome, {
         subjective: subjectiveNotes,
         objective: objectiveNotes,
+        treatment: selectedTreatment,
+        drugFlags,
       });
       tab.location.href = doc.output("bloburl").toString();
     } catch {
@@ -1135,7 +1373,13 @@ export default function UtiTriagePage() {
 
   const alerts = outcome.flags.filter((flag) => flag.tone === "alert");
   const cautions = outcome.flags.filter((flag) => flag.tone === "caution");
-  const decided = recommendation.kind === "ed" || recommendation.kind === "gp" || recommendation.kind === "history" || recommendation.kind === "concurrent" || recommendation.kind === "treat";
+  const decided =
+    recommendation.kind === "ed" ||
+    recommendation.kind === "gp" ||
+    recommendation.kind === "history" ||
+    recommendation.kind === "concurrent" ||
+    recommendation.kind === "contraindicated" ||
+    recommendation.kind === "treat";
 
   return (
     <div className="mx-auto w-full max-w-[100rem] px-4 py-8 md:px-6 md:py-10">
@@ -1309,6 +1553,33 @@ export default function UtiTriagePage() {
             />
           </Section>
 
+          <Section title="Proposed treatment" locked={isTreatmentSelectionLocked}>
+            <RadioGroup
+              label="Which management option are you proposing to supply?"
+              name="proposedTreatment"
+              value={selectedTreatment}
+              stacked
+              disabled={isTreatmentSelectionLocked}
+              onChange={(value) => {
+                setSelectedTreatment(value);
+                setDrugFlags([]);
+              }}
+              options={utiTreatmentOptions}
+            />
+          </Section>
+
+          <Section title="Appropriateness assessment" locked={isDrugAssessmentLocked}>
+            <CheckGroup
+              label="Does the patient have allergies, medicine interactions or any other contraindications to management options?"
+              hint="If any apply, do not supply the selected medicine. Refer to GP or select an alternative."
+              items={drugFlagItems(selectedTreatment)}
+              checked={drugFlags}
+              onToggle={toggleDrug}
+              none
+              disabled={isDrugAssessmentLocked}
+            />
+          </Section>
+
           <Disclaimer />
         </form>
 
@@ -1336,13 +1607,15 @@ export default function UtiTriagePage() {
               </article>
             ) : null}
             {recommendation.kind === "history" ? <HistoryReferral findings={recommendation.findings} /> : null}
-            {decided && recommendation.kind !== "history" ? (
+            {decided && recommendation.kind !== "history" && !approvedPlan ? (
               <article className={["rounded-lg border px-3.5 py-3", outcomeClass(recommendation.kind)].join(" ")}>
                 <p className={["text-[11px] font-medium tracking-[0.14em] uppercase", outcomeLabelClass(recommendation.kind)].join(" ")}>
                   {alertName(recommendation.kind)}
                 </p>
                 <h3 className={["mt-1 text-sm font-medium", outcomeLabelClass(recommendation.kind)].join(" ")}>
-                  {recommendation.kind === "gp" || recommendation.kind === "concurrent" ? (
+                  {recommendation.kind === "contraindicated" ? (
+                    <span className="font-bold text-red-600">Treatment Contraindicated</span>
+                  ) : recommendation.kind === "gp" || recommendation.kind === "concurrent" ? (
                     <ReferralAction text={outcomeTitle(recommendation)} />
                   ) : (
                     <ReferralText text={outcomeTitle(recommendation)} />
@@ -1360,6 +1633,7 @@ export default function UtiTriagePage() {
                 {recommendation.kind === "gp" ? <UsualCare /> : null}
               </article>
             ) : null}
+            {approvedPlan ? <UtiApproved plan={approvedPlan} /> : null}
             {outcome.showPathway ? <TreatmentPathway /> : null}
           </div>
           {outcome.dirty || subjectiveNotes.trim() !== "" || objectiveNotes.trim() !== "" ? (
@@ -1369,6 +1643,8 @@ export default function UtiTriagePage() {
                 setForm(emptyForm);
                 setSubjectiveNotes("");
                 setObjectiveNotes("");
+                setSelectedTreatment("");
+                setDrugFlags([]);
               }}
               className="mt-4 text-sm text-ink-soft underline decoration-line underline-offset-4 hover:text-ink"
             >
