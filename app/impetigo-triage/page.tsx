@@ -64,10 +64,60 @@ function drugFlagItems(treatment: string): CheckItem[] {
   if (treatment === "dicloxacillin") {
     return [
       {
-        label:
-          "History of immediate or severe hypersensitivity to a penicillin (e.g., urticaria, bronchospasm, anaphylaxis, interstitial nephritis)",
+        label: "History of immediate or severe hypersensitivity to a penicillin",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Contraindicated:</strong> Immediate (e.g., urticaria, bronchospasm, anaphylaxis) or severe
+                (e.g., interstitial nephritis) hypersensitivity to a penicillin
+              </li>
+              <li>
+                <strong>Precaution:</strong> Cross-reactivity can occur with cephalosporins and carbapenems
+              </li>
+            </ul>
+          </div>
+        ),
       },
-      { label: "History of cholestatic hepatitis with dicloxacillin or flucloxacillin" },
+      {
+        label: "History of cholestatic hepatitis with dicloxacillin or flucloxacillin",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Contraindicated:</strong> History of cholestatic hepatitis associated with dicloxacillin or
+                flucloxacillin
+              </li>
+              <li>
+                <strong>Precaution:</strong> Risk of hepatitis increases in people &gt;55 years, females
+                (flucloxacillin), and with courses &gt;2 weeks
+              </li>
+              <li>
+                <strong>Note:</strong> Pre-existing hepatic impairment is NOT a risk factor
+              </li>
+            </ul>
+          </div>
+        ),
+      },
+      {
+        label: "Severe renal impairment (CrCl < 10 mL/minute)",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Precaution:</strong> Reduce dose if CrCl &lt; 10 mL/minute
+              </li>
+              <li>
+                <strong>Precaution:</strong> Renal impairment increases the risk of neurotoxicity (seizures, coma) with
+                high doses
+              </li>
+              <li>
+                <strong>Precaution:</strong> Risk of neutropenia may be increased
+              </li>
+            </ul>
+          </div>
+        ),
+      },
     ];
   }
   if (treatment === "cefalexin") {
