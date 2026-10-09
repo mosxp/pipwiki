@@ -898,6 +898,10 @@ function cefalexinDose(age: number) {
   return oralDosesForAge(age).find((item) => item.dose.startsWith("Cefalexin"));
 }
 
+function dicloxacillinDose(age: number) {
+  return oralDosesForAge(age).find((item) => item.dose.startsWith("Dicloxacillin"));
+}
+
 const trimethoprimCounselling = [
   "Take this medicine with food to reduce stomach upset.",
   "To reduce risk of rash from the sun avoid sun exposure, wear protective clothing and use sunscreen.",
@@ -969,6 +973,46 @@ function CefalexinApproved({ age }: { age: number }) {
         </p>
         <p className="mt-1.5 text-sm leading-6">
           Rare: cholestatic hepatitis, Clostridioides difficile-associated disease.
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function DicloxacillinApproved({ age }: { age: number }) {
+  const dose = dicloxacillinDose(age);
+  return (
+    <article className="rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-green-900">
+      <h3 className="text-sm font-bold">GREEN ALERT: Treatment Approved</h3>
+      <p className="mt-3 text-sm font-bold">Dicloxacillin / Flucloxacillin</p>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Dose</p>
+        <p className="mt-1.5 text-sm leading-6">{dose?.dose}</p>
+        {dose ? <p className="mt-1 text-xs leading-5 italic">Note: {dose.note}</p> : null}
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Counselling</p>
+        <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
+          <li>
+            Take this medicine on an empty stomach, at least half an hour before food or 2 hours after food, for best
+            absorption.
+          </li>
+          <li>
+            If this is your first time taking this antibiotic, watch closely for any signs of an allergic reaction, such
+            as rash, itching, or swelling. Seek immediate medical attention if you experience difficulty breathing or
+            facial swelling.
+          </li>
+        </ul>
+      </div>
+      <div className="mt-3">
+        <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Adverse effects</p>
+        <p className="mt-1.5 text-sm leading-6">
+          Common (&gt;1%): diarrhoea, nausea, transient increases in liver enzymes and bilirubin, superinfection (e.g.,
+          thrush), and allergy.
+        </p>
+        <p className="mt-1.5 text-sm leading-6">
+          Rare (&lt;0.1%): cholestatic hepatitis (can be severe, delayed, and take weeks to resolve; higher risk if
+          &gt;55 years, female, or treatment &gt;2 weeks), Clostridioides difficile-associated disease.
         </p>
       </div>
     </article>
@@ -1283,7 +1327,12 @@ export default function ImpetigoTriagePage() {
     isTreatmentApproved &&
     selectedTreatment === "cefalexin" &&
     (recommendation.kind === "treat" || recommendation.kind === "concurrent");
-  const replaceGreenAlert = (showTrimethoprimApproved || showCefalexinApproved) && recommendation.kind === "treat";
+  const showDicloxacillinApproved =
+    isTreatmentApproved &&
+    selectedTreatment === "dicloxacillin" &&
+    (recommendation.kind === "treat" || recommendation.kind === "concurrent");
+  const replaceGreenAlert =
+    (showTrimethoprimApproved || showCefalexinApproved || showDicloxacillinApproved) && recommendation.kind === "treat";
 
   useEffect(() => {
     fitClinicalNotes(noteStackRef.current);
@@ -1592,6 +1641,7 @@ export default function ImpetigoTriagePage() {
             ) : null}
             {showTrimethoprimApproved ? <TrimethoprimApproved age={readNumber(form.age) ?? 0} /> : null}
             {showCefalexinApproved ? <CefalexinApproved age={readNumber(form.age) ?? 0} /> : null}
+            {showDicloxacillinApproved ? <DicloxacillinApproved age={readNumber(form.age) ?? 0} /> : null}
             {replaceGreenAlert && outcome.showUsualCare ? <UsualCare /> : null}
             {outcome.showLocal ? <LocalisedTreatment /> : null}
             {outcome.showOral ? <OralReference age={readNumber(form.age) ?? 0} /> : null}
