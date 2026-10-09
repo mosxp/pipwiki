@@ -337,17 +337,23 @@ function derive(form: FormState, drugFlags: string[]): Outcome {
   const ageOut = age != null && (age < 18 || age > 65);
   const genderOut = form.gender === "male" || form.gender === "reassigned";
   const fewSymptoms = symptomCount === 1 || symptomsDeclined;
-  const eligibleBase =
+  const screeningAnswered =
+    form.redFlags.length > 0 && form.history.length > 0 && form.risks.length > 0 && form.soft.length > 0;
+  const passedDifferential =
     form.gender === "female" &&
     age != null &&
     age >= 18 &&
     age <= 65 &&
     form.consent === "yes" &&
     symptomCount >= 2 &&
-    form.differential === "no" &&
+    form.differential === "no";
+  const screeningClear =
+    passedDifferential &&
+    screeningAnswered &&
     redFlags.length === 0 &&
     history.length === 0 &&
-    risks.length === 0;
+    risks.length === 0 &&
+    soft.length === 0;
 
   const flags: Flag[] = [];
 
@@ -412,7 +418,7 @@ function derive(form: FormState, drugFlags: string[]): Outcome {
       detail: `${risks.join("; ")}. Provide usual care and refer to GP. The patient may benefit from laboratory investigations.`,
     });
   }
-  if (eligibleBase && soft.length === 0 && drugContra.length > 0) {
+  if (screeningClear && drugContra.length > 0) {
     flags.push({
       tone: "alert",
       title: "Appropriateness assessment",
@@ -474,21 +480,26 @@ function derive(form: FormState, drugFlags: string[]): Outcome {
     if (risks.length > 0) triggers.push("risks");
     const alert = gpAlert(triggers);
     recommendation = { kind: "gp", triggers, title: alert.title, detail: alert.detail };
-  } else if (eligibleBase && soft.length > 0) {
-    showPathway = true;
+  } else if (passedDifferential && !screeningAnswered && soft.length === 0) {
+    recommendation = {
+      kind: "pending",
+      detail:
+        "Pending Assessment: Please complete all Red Flag, History, Risk, and Soft Trigger evaluations before treatment selection.",
+    };
+  } else if (passedDifferential && screeningAnswered && soft.length > 0) {
     const sti = soft.includes(stiRiskLabel) ? " Refer the patient for STI testing." : "";
     recommendation = {
       kind: "concurrent",
       title: mandatoryReferralTitle,
       detail: `Antibiotic treatment by the pharmacist may still be considered concurrent to a referral to the GP, if clinically appropriate (e.g., possible delay in access to GP and no contraindications to antibiotics).${sti}`,
     };
-  } else if (eligibleBase && drugContra.length > 0) {
+  } else if (screeningClear && drugContra.length > 0) {
     recommendation = {
       kind: "contraindicated",
       title: "Treatment Contraindicated",
       detail: contraindicationDetail,
     };
-  } else if (eligibleBase) {
+  } else if (screeningClear) {
     showPathway = true;
     recommendation = {
       kind: "treat",
@@ -1311,7 +1322,8 @@ export default function UtiTriagePage() {
   const isRisksLocked = isHistoryLocked || !isHistoryPassed;
   const isRisksPassed = form.risks.length > 0 && form.risks.includes(noneLabel);
   const isSoftLocked = isRisksLocked || !isRisksPassed;
-  const isTreatmentSelectionLocked = isRisksLocked || !isRisksPassed || clinicalSelections(form.soft).length > 0;
+  const isSoftClear = form.soft.includes(noneLabel);
+  const isTreatmentSelectionLocked = isSoftLocked || !isSoftClear;
   const isTreatmentSelectionPassed = selectedTreatment !== "";
   const isDrugAssessmentLocked = isTreatmentSelectionLocked || !isTreatmentSelectionPassed;
   const approvedPlan =
