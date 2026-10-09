@@ -1151,13 +1151,119 @@ function activeClinicalTriggers(form: FormState, drugFlags: string[]) {
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
 
-function primaryAction(outcome: Outcome) {
+type ApprovedPlan = {
+  name: string;
+  dose: string;
+  note: string | null;
+  counselling: string[];
+  adverse: string[];
+  adverseNote: string | null;
+};
+
+function approvedPlanFor(treatment: string, age: number): ApprovedPlan | null {
+  if (treatment === "trimethoprim") {
+    const dose = trimethoprimDose(age);
+    if (!dose) return null;
+    return {
+      name: "Trimethoprim + sulfamethoxazole",
+      dose: dose.dose,
+      note: dose.note,
+      counselling: [
+        ...trimethoprimCounselling,
+        "URGENT: Tell your doctor straight away if you get a sore throat, fever, troublesome rash, cough, difficulty in breathing, joint pain, dark urine or pale stools.",
+      ],
+      adverse: [
+        "Common (>1%): fever, nausea, vomiting, diarrhoea, anorexia, rash, itch, sore mouth, hyperkalaemia, thrombocytopenia (rarely significant).",
+      ],
+      adverseNote: "Most common adverse effects are GI and skin sensitivity reactions.",
+    };
+  }
+  if (treatment === "cefalexin") {
+    const dose = cefalexinDose(age);
+    if (!dose) return null;
+    return {
+      name: "Cefalexin",
+      dose: dose.dose,
+      note: dose.note,
+      counselling: [
+        "If this is your first time taking this antibiotic, watch closely for any signs of an allergic reaction, such as rash, itching, or swelling. Seek immediate medical attention if you experience difficulty breathing or facial swelling.",
+      ],
+      adverse: [
+        "Common or infrequent: diarrhoea, nausea, vomiting, rash, headache, dizziness, and allergy.",
+        "Rare: cholestatic hepatitis, Clostridioides difficile-associated disease.",
+      ],
+      adverseNote: null,
+    };
+  }
+  if (treatment === "dicloxacillin") {
+    const dose = dicloxacillinDose(age);
+    if (!dose) return null;
+    return {
+      name: "Dicloxacillin / Flucloxacillin",
+      dose: dose.dose,
+      note: dose.note,
+      counselling: [
+        "Take this medicine on an empty stomach, at least half an hour before food or 2 hours after food, for best absorption.",
+        "If this is your first time taking this antibiotic, watch closely for any signs of an allergic reaction, such as rash, itching, or swelling. Seek immediate medical attention if you experience difficulty breathing or facial swelling.",
+      ],
+      adverse: [
+        "Common (>1%): diarrhoea, nausea, transient increases in liver enzymes and bilirubin, superinfection (e.g., thrush), and allergy.",
+        "Rare (<0.1%): cholestatic hepatitis (can be severe, delayed, and take weeks to resolve; higher risk if >55 years, female, or treatment >2 weeks), Clostridioides difficile-associated disease.",
+      ],
+      adverseNote: null,
+    };
+  }
+  if (treatment === "mupirocin") {
+    return {
+      name: "Mupirocin 2% ointment/cream",
+      dose: "Adult, child, apply 2 or 3 times a day for 5 days.",
+      note: null,
+      counselling: [
+        "Avoid contact with eyes and mouth.",
+        "Before applying to impetigo, soak affected area and remove crusts (e.g., using a wet disposable cloth).",
+        "Children with impetigo should be kept home until appropriate treatment is started. Sores on exposed surfaces must be covered with a watertight dressing when the child returns to school or child care.",
+      ],
+      adverse: [
+        "Common (>1%): localised skin reactions, including itch, burning, erythema, stinging, dryness, pain and swelling.",
+        "Rare (<0.1%): allergy (e.g., urticaria, anaphylaxis, angioedema).",
+      ],
+      adverseNote: null,
+    };
+  }
+  if (treatment === "peroxide") {
+    return {
+      name: "Hydrogen peroxide 1% cream",
+      dose: "Apply to lesions, every 8 hours for 5 days.",
+      note: null,
+      counselling: [],
+      adverse: [],
+      adverseNote: null,
+    };
+  }
+  return null;
+}
+
+function formatApprovedPlan(plan: ApprovedPlan) {
+  const lines = ["GREEN ALERT: Treatment Approved", `Dose: ${plan.dose}`];
+  if (plan.note) lines.push(`Note: ${plan.note}`);
+  if (plan.counselling.length > 0) {
+    lines.push("Counselling:", ...plan.counselling.map((point) => `- ${point}`));
+  }
+  if (plan.adverse.length > 0 || plan.adverseNote) {
+    lines.push("Adverse effects:", ...plan.adverse.map((point) => `- ${point}`));
+    if (plan.adverseNote) lines.push(`Note: ${plan.adverseNote}`);
+  }
+  return lines.join("\n");
+}
+
+function primaryAction(outcome: Outcome, approved: boolean) {
   const item = outcome.recommendation;
   if (item.kind === "ed") return "Immediate referral to Emergency Department";
-  if (item.kind === "contraindicated") return `Treatment Contraindicated. ${item.detail}`;
+  if (item.kind === "contraindicated") return `RED ALERT: Treatment Contraindicated. ${item.detail}`;
   if (item.kind === "gp") return `Refer to GP. ${item.detail}`;
   if (item.kind === "differential") return `${item.title}. ${item.detail}`;
   if (item.kind === "concurrent") return item.title;
+  if (item.kind === "treat" && approved) return "GREEN ALERT: Treatment Approved";
   if (item.kind === "treat") return "Safe to treat";
   if (item.kind === "pending") return item.detail;
   return "No answers recorded yet.";
@@ -1193,12 +1299,18 @@ function consultationRows(form: FormState, treatment: string, drugFlags: string[
   ];
 }
 
-function outcomeRows(form: FormState, outcome: Outcome, drugFlags: string[]): string[][] {
-  return [
-    ["Action Required", primaryAction(outcome)],
+function outcomeRows(form: FormState, outcome: Outcome, treatment: string, drugFlags: string[]): string[][] {
+  const kind = outcome.recommendation.kind;
+  const approved =
+    treatment !== "" && drugFlags.includes(noneLabel) && (kind === "treat" || kind === "concurrent");
+  const plan = approved ? approvedPlanFor(treatment, readNumber(form.age) ?? 0) : null;
+  const rows: string[][] = [["Action Required", primaryAction(outcome, plan != null)]];
+  if (plan) rows.push([plan.name, formatApprovedPlan(plan)]);
+  rows.push(
     ["Active Clinical Triggers", activeClinicalTriggers(form, drugFlags)],
     ["Treatment pathway", treatmentPathway(form, outcome)],
-  ];
+  );
+  return rows;
 }
 
 type TableDoc = jsPDF & { lastAutoTable?: { finalY: number } };
@@ -1307,11 +1419,15 @@ function buildConsultationReport(
   drawTable(doc, autoTable, {
     startY: headingY + 4,
     head: [["Item", "Detail"]],
-    body: outcomeRows(form, outcome, notes.drugFlags),
-    columnStyles: { 0: { cellWidth: 48, fontStyle: "bold" } },
+    body: outcomeRows(form, outcome, notes.treatment, notes.drugFlags),
+    columnStyles: { 0: { cellWidth: 52, fontStyle: "bold" } },
     didParseCell: (data) => {
       if (data.section !== "body" || data.column.index !== 0) return;
-      if (data.cell.raw === "Action Required") data.cell.styles.textColor = [140, 59, 50];
+      const detail = Array.isArray(data.row.raw) ? String(data.row.raw[1] ?? "") : "";
+      if (data.cell.raw === "Action Required") {
+        data.cell.styles.textColor = detail.startsWith("GREEN ALERT") ? [22, 101, 52] : [140, 59, 50];
+      }
+      if (detail.startsWith("GREEN ALERT")) data.cell.styles.textColor = [22, 101, 52];
     },
   });
 
