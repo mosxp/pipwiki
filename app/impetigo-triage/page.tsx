@@ -300,24 +300,14 @@ const inputClass =
 
 function fitClinicalNotes(stack: HTMLElement | null) {
   if (!stack) return;
-  const fields = [...stack.querySelectorAll("textarea")];
-  for (const field of fields) {
-    if (!field.dataset.baseHeight && field.clientHeight > 0) {
-      field.dataset.baseHeight = String(field.clientHeight);
-    }
-  }
-  let grow = false;
-  for (const field of fields) {
-    const base = Math.max(Number(field.dataset.baseHeight) || 150, 150);
+  for (const field of stack.querySelectorAll("textarea")) {
     field.style.height = "auto";
-    const needed = Math.max(field.scrollHeight, base);
+    const needed = field.scrollHeight;
     field.style.height = `${needed}px`;
     if (field.scrollHeight > field.clientHeight) {
       field.style.height = `${needed + (field.scrollHeight - field.clientHeight)}px`;
     }
-    if (needed > base + 1) grow = true;
   }
-  stack.style.gridTemplateRows = grow ? "auto auto" : "";
 }
 
 function Section({
@@ -1015,21 +1005,23 @@ export default function ImpetigoTriagePage() {
               </InfoTip>
             </span>
           </div>
-          <div ref={noteStackRef} className="mt-4 grid flex-1 grid-rows-2 gap-5">
-            <label className="flex h-full min-h-[150px] flex-col">
+          <div ref={noteStackRef} className="mt-4 grid gap-5">
+            <label className="block">
               <span className="text-sm font-medium text-ink">Subjective</span>
               <textarea
                 value={subjectiveNotes}
+                rows={3}
                 onChange={(event) => setSubjectiveNotes(event.target.value)}
-                className={`${inputClass} h-full min-h-[150px] resize-none overflow-hidden leading-6`}
+                className={`${inputClass} min-h-[100px] resize-none overflow-hidden leading-6`}
               />
             </label>
-            <label className="flex h-full min-h-[150px] flex-col">
+            <label className="block">
               <span className="text-sm font-medium text-ink">Objective</span>
               <textarea
                 value={objectiveNotes}
+                rows={3}
                 onChange={(event) => setObjectiveNotes(event.target.value)}
-                className={`${inputClass} h-full min-h-[150px] resize-none overflow-hidden leading-6`}
+                className={`${inputClass} min-h-[100px] resize-none overflow-hidden leading-6`}
               />
             </label>
           </div>
