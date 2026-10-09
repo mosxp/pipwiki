@@ -332,10 +332,19 @@ function clinicalSelections(items: string[]) {
   return items.filter((item) => item !== noneLabel);
 }
 
-function listText(items: string[]) {
+function checklistText(items: string[]) {
+  if (items.length === 0) return "Not answered";
   if (items.length === 1 && items[0] === noneLabel) return noneLabel;
   const clinical = clinicalSelections(items);
-  return clinical.length > 0 ? clinical.join("; ") : "None selected";
+  return clinical.length > 0 ? clinical.map((item) => `- ${item}`).join("\n") : "Not answered";
+}
+
+function symptomChecklist(items: string[]) {
+  if (items.length === 0) return "Not answered";
+  if (items.includes(noneLabel)) return noneLabel;
+  const selected = clinicalSelections(items);
+  if (selected.length === 0) return "Not answered";
+  return [`${selected.length} of 4`, ...selected.map((item) => `- ${item}`)].join("\n");
 }
 
 function derive(form: FormState, drugFlags: string[]): Outcome {
@@ -1043,25 +1052,29 @@ function UtiApproved({ plan }: { plan: UtiApprovedPlan }) {
   );
 }
 
-function consultationRows(form: FormState, treatment: string, drugFlags: string[]): string[][] {
-  const selected = clinicalSelections(form.symptoms);
-  const symptoms = form.symptoms.includes(noneLabel)
-    ? noneLabel
-    : selected.length > 0
-      ? `${selected.join("; ")} (${selected.length} of 4)`
-      : "None selected";
+function demographicsRows(form: FormState): string[][] {
   return [
-    ["Gender", genderLabel(form.gender)],
+    ["Sex", genderLabel(form.gender)],
     ["Age", form.age.trim() ? `${form.age.trim()} years` : "Not answered"],
-    ["Patient consents", yesNoText(form.consent)],
-    ["Cystitis symptoms", symptoms],
-    ["Cause other than acute cystitis", yesNoText(form.differential)],
-    ["Red flag symptoms", listText(form.redFlags)],
-    ["Red flag medical history", listText(form.history)],
-    ["Risks", listText(form.risks)],
-    ["Soft triggers", listText(form.soft)],
+    ["Consent", yesNoText(form.consent)],
+  ];
+}
+
+function screeningRows(form: FormState): string[][] {
+  return [
+    ["Acute cystitis symptoms", symptomChecklist(form.symptoms)],
+    ["Differential diagnosis", yesNoText(form.differential)],
+    ["Red flag symptoms", checklistText(form.redFlags)],
+    ["Red flag medical history", checklistText(form.history)],
+    ["Risks", checklistText(form.risks)],
+    ["Soft triggers", checklistText(form.soft)],
+  ];
+}
+
+function treatmentRows(treatment: string, drugFlags: string[]): string[][] {
+  return [
     ["Proposed treatment", treatment ? treatmentLabel(treatment) : "Not answered"],
-    ["Appropriateness assessment", listText(drugFlags)],
+    ["Appropriateness assessment", checklistText(drugFlags)],
   ];
 }
 
@@ -1087,26 +1100,42 @@ function activeClinicalTriggers(form: FormState, drugFlags: string[]) {
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
 
-function primaryAction(form: FormState, outcome: Outcome) {
-  const age = readNumber(form.age);
-  const redFlags = clinicalSelections(form.redFlags);
-  const history = clinicalSelections(form.history);
-  const risks = clinicalSelections(form.risks);
-  const genderOut = form.gender === "male" || form.gender === "reassigned";
-  const ageOut = age != null && (age < 18 || age > 65);
-  const fewSymptoms = clinicalSelections(form.symptoms).length === 1 || form.symptoms.includes(noneLabel);
+function primaryAction(outcome: Outcome, approved: boolean) {
   const item = outcome.recommendation;
-
-  if (redFlags.length > 0) return "Immediate referral to Emergency Department";
-  if (history.length > 0) return "Immediate referral to GP";
-  if (genderOut || ageOut || form.consent === "no" || form.differential === "yes") return optionalReferralTitle;
-  if (fewSymptoms || risks.length > 0) return `${mandatoryReferralTitle}. ${laboratoryNote}`;
-  if (item.kind === "concurrent") return `${mandatoryReferralTitle}. ${item.detail}`;
+  if (item.kind === "ed" || item.kind === "history") return item.title;
+  if (item.kind === "gp" || item.kind === "concurrent") return outcomeTitle(item);
   if (item.kind === "contraindicated") return `RED ALERT: Treatment Contraindicated. ${item.detail}`;
-  if (item.kind === "treat") return "Safe to treat";
+  if (item.kind === "treat" && approved) return "GREEN ALERT: Treatment Approved";
+  if (item.kind === "treat") return item.title;
   if (item.kind === "pending") return item.detail;
   return "No answers recorded yet.";
 }
+
+function outcomeDetailText(outcome: Outcome, approved: boolean) {
+  const item = outcome.recommendation;
+  if (item.kind === "history") return `${item.findings}\n${item.detail}`;
+  if (item.kind === "idle" || item.kind === "pending" || item.kind === "contraindicated") return "";
+  if (item.kind === "treat" && approved) return "";
+  return outcomeDetail(item);
+}
+
+function formatApprovedPlan(plan: UtiApprovedPlan) {
+  return [
+    "GREEN ALERT: Treatment Approved",
+    `Dose: ${plan.dose}`,
+    "Counselling:",
+    ...plan.counselling.map((point) => `- ${point}`),
+    "Adverse effects:",
+    ...plan.adverse.map((point) => `- ${point}`),
+  ].join("\n");
+}
+
+const usualCarePdf = [
+  "- Analgesia: Ibuprofen 400mg orally, every 8 hours for up to 3 days (max 2.4g in 24 hours). Caution / Avoid in: Pregnancy, trying to conceive, elderly, asthma, dehydration, heart failure, hypertension, cardiovascular disease, coagulation disorders, active/history of GI bleeding or ulcers, inflammatory bowel disease, renal or severe hepatic impairment, prior NSAID hypersensitivity, and upcoming surgery.",
+  "- Hydration: Increase water intake up to 1.5 L daily.",
+  "- Advice: Provide CMI and/or Self-Care Fact Card, and advise on recognising worsening signs (e.g., fever >38°C, rigors, back pain, vomiting).",
+  "- Follow-up: If symptoms persist after 48 hours of conservative management, return to pharmacy to reconsider antibiotic therapy.",
+].join("\n");
 
 function treatmentPathway(outcome: Outcome) {
   if (outcome.recommendation.kind === "contraindicated") {
@@ -1140,25 +1169,21 @@ Conservative care:
 }
 
 function outcomeRows(form: FormState, outcome: Outcome, treatment: string, drugFlags: string[]): string[][] {
-  const rows = [
-    ["Action Required", primaryAction(form, outcome)],
-    ["Active Clinical Triggers", activeClinicalTriggers(form, drugFlags)],
-    ["Treatment pathway", treatmentPathway(outcome)],
-  ];
   const plan =
     outcome.recommendation.kind === "treat" && drugFlags.includes(noneLabel) ? utiApprovedPlan(treatment) : null;
-  if (plan) {
-    rows.splice(1, 0, [
-      plan.name,
-      [
-        "GREEN ALERT: Treatment Approved",
-        `Dose: ${plan.dose}`,
-        "Counselling:",
-        ...plan.counselling.map((point) => `- ${point}`),
-        "Adverse effects:",
-        ...plan.adverse.map((point) => `- ${point}`),
-      ].join("\n"),
-    ]);
+  const rows: string[][] = [["Action Required", primaryAction(outcome, plan != null)]];
+  const detail = outcomeDetailText(outcome, plan != null);
+  if (detail) rows.push(["Clinical detail", detail]);
+  if (plan) rows.push([plan.name, formatApprovedPlan(plan)]);
+  if (outcome.flags.length > 0) {
+    rows.push(["Referral flags", outcome.flags.map((flag) => `${flag.title}: ${flag.detail}`).join("\n\n")]);
+  }
+  rows.push(
+    ["Active clinical triggers", activeClinicalTriggers(form, drugFlags)],
+    ["Treatment pathway", treatmentPathway(outcome)],
+  );
+  if (outcome.recommendation.kind === "history" || outcome.recommendation.kind === "gp") {
+    rows.push(["Usual care", usualCarePdf]);
   }
   return rows;
 }
@@ -1228,11 +1253,24 @@ function buildConsultationReport(
   doc.setFontSize(10);
   doc.text(generatedAt, 16, 21);
 
+  const placeSection = (title: string, afterY: number, options: UserOptions) => {
+    let headingY = afterY;
+    if (headingY > doc.internal.pageSize.getHeight() - 48) {
+      doc.addPage();
+      headingY = 18;
+    }
+    doc.setFont("times", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(28, 25, 21);
+    doc.text(title, 16, headingY);
+    return drawTable(doc, autoTable, { ...options, startY: headingY + 4 });
+  };
+
   doc.setTextColor(28, 25, 21);
   doc.setFont("times", "bold");
   doc.setFontSize(13);
-  doc.text("Patient History", 16, 40);
-  const afterHistory = drawTable(doc, autoTable, {
+  doc.text("Clinical Notes (S&O)", 16, 40);
+  const afterNotes = drawTable(doc, autoTable, {
     startY: 44,
     head: [["Section", "Notes"]],
     body: [
@@ -1242,41 +1280,35 @@ function buildConsultationReport(
     columnStyles: { 0: { cellWidth: 32, fontStyle: "bold" } },
   });
 
-  let answersHeadingY = afterHistory + 12;
-  if (answersHeadingY > doc.internal.pageSize.getHeight() - 48) {
-    doc.addPage();
-    answersHeadingY = 18;
-  }
-  doc.setFont("times", "bold");
-  doc.setFontSize(13);
-  doc.setTextColor(28, 25, 21);
-  doc.text("Consultation answers", 16, answersHeadingY);
-
-  const afterAnswers = drawTable(doc, autoTable, {
-    startY: answersHeadingY + 4,
-    head: [["Question", "Answer"]],
-    body: consultationRows(form, notes.treatment, notes.drugFlags),
+  const afterDemographics = placeSection("Patient demographics and eligibility", afterNotes + 12, {
+    head: [["Item", "Record"]],
+    body: demographicsRows(form),
     columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
   });
 
-  let headingY = afterAnswers + 12;
-  if (headingY > doc.internal.pageSize.getHeight() - 48) {
-    doc.addPage();
-    headingY = 18;
-  }
-  doc.setFont("times", "bold");
-  doc.setFontSize(13);
-  doc.setTextColor(28, 25, 21);
-  doc.text("Clinical outcomes", 16, headingY);
+  const afterScreening = placeSection("Screening checklist", afterDemographics + 12, {
+    head: [["Step", "Answer"]],
+    body: screeningRows(form),
+    columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
+  });
 
-  drawTable(doc, autoTable, {
-    startY: headingY + 4,
+  const afterTreatment = placeSection("Proposed treatment and appropriateness", afterScreening + 12, {
+    head: [["Item", "Record"]],
+    body: treatmentRows(notes.treatment, notes.drugFlags),
+    columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
+  });
+
+  placeSection("Live clinical outcome", afterTreatment + 12, {
     head: [["Item", "Detail"]],
     body: outcomeRows(form, outcome, notes.treatment, notes.drugFlags),
-    columnStyles: { 0: { cellWidth: 48, fontStyle: "bold" } },
+    columnStyles: { 0: { cellWidth: 52, fontStyle: "bold" } },
     didParseCell: (data) => {
       if (data.section !== "body" || data.column.index !== 0) return;
-      if (data.cell.raw === "Action Required") data.cell.styles.textColor = [140, 59, 50];
+      const detail = Array.isArray(data.row.raw) ? String(data.row.raw[1] ?? "") : "";
+      if (data.cell.raw === "Action Required") {
+        data.cell.styles.textColor = detail.startsWith("GREEN ALERT") ? [22, 101, 52] : [140, 59, 50];
+      }
+      if (detail.startsWith("GREEN ALERT")) data.cell.styles.textColor = [22, 101, 52];
     },
   });
 
