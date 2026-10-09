@@ -298,6 +298,28 @@ function derive(form: FormState): Outcome {
 const inputClass =
   "mt-2 w-full rounded-md border border-line bg-paper px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-soft/60 focus:border-moss";
 
+function fitClinicalNotes(stack: HTMLElement | null) {
+  if (!stack) return;
+  const fields = [...stack.querySelectorAll("textarea")];
+  for (const field of fields) {
+    if (!field.dataset.baseHeight && field.clientHeight > 0) {
+      field.dataset.baseHeight = String(field.clientHeight);
+    }
+  }
+  let grow = false;
+  for (const field of fields) {
+    const base = Math.max(Number(field.dataset.baseHeight) || 150, 150);
+    field.style.height = "auto";
+    const needed = Math.max(field.scrollHeight, base);
+    field.style.height = `${needed}px`;
+    if (field.scrollHeight > field.clientHeight) {
+      field.style.height = `${needed + (field.scrollHeight - field.clientHeight)}px`;
+    }
+    if (needed > base + 1) grow = true;
+  }
+  stack.style.gridTemplateRows = grow ? "auto auto" : "";
+}
+
 function Section({
   title,
   children,
@@ -902,6 +924,7 @@ export default function ImpetigoTriagePage() {
   const [subjectiveNotes, setSubjectiveNotes] = useState("");
   const [objectiveNotes, setObjectiveNotes] = useState("");
   const [reportNote, setReportNote] = useState<string | null>(null);
+  const noteStackRef = useRef<HTMLDivElement>(null);
   const outcome = derive(form);
   const recommendation = outcome.recommendation;
   const decided =
@@ -922,6 +945,10 @@ export default function ImpetigoTriagePage() {
   const isNonBullousLocked = isSevereLocked || !isSeverePassed;
   const isNonBullousPassed = form.presentation === "yes";
   const isExtentLocked = isNonBullousLocked || !isNonBullousPassed;
+
+  useEffect(() => {
+    fitClinicalNotes(noteStackRef.current);
+  }, [subjectiveNotes, objectiveNotes]);
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -974,7 +1001,7 @@ export default function ImpetigoTriagePage() {
       <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
         <aside
           aria-label="Clinical notes"
-          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100dvh-3rem)] xl:flex-col"
+          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100dvh-3rem)] xl:max-h-[calc(100dvh-3rem)] xl:flex-col xl:overflow-y-auto"
         >
           <div className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
             Clinical notes (S&O)
@@ -988,23 +1015,24 @@ export default function ImpetigoTriagePage() {
               </InfoTip>
             </span>
           </div>
-          <label className="mt-4 flex min-h-64 flex-1 flex-col">
-            <span className="text-sm font-medium text-ink">Subjective</span>
-            <textarea
-              value={subjectiveNotes}
-              onChange={(event) => setSubjectiveNotes(event.target.value)}
-              className={`${inputClass} min-h-48 flex-1 resize-y leading-6`}
-            />
-          </label>
-          <label className="mt-5 block shrink-0">
-            <span className="text-sm font-medium text-ink">Objective</span>
-            <textarea
-              value={objectiveNotes}
-              onChange={(event) => setObjectiveNotes(event.target.value)}
-              rows={8}
-              className={`${inputClass} min-h-40 resize-y leading-6`}
-            />
-          </label>
+          <div ref={noteStackRef} className="mt-4 grid flex-1 grid-rows-2 gap-5">
+            <label className="flex h-full min-h-[150px] flex-col">
+              <span className="text-sm font-medium text-ink">Subjective</span>
+              <textarea
+                value={subjectiveNotes}
+                onChange={(event) => setSubjectiveNotes(event.target.value)}
+                className={`${inputClass} h-full min-h-[150px] resize-none overflow-hidden leading-6`}
+              />
+            </label>
+            <label className="flex h-full min-h-[150px] flex-col">
+              <span className="text-sm font-medium text-ink">Objective</span>
+              <textarea
+                value={objectiveNotes}
+                onChange={(event) => setObjectiveNotes(event.target.value)}
+                className={`${inputClass} h-full min-h-[150px] resize-none overflow-hidden leading-6`}
+              />
+            </label>
+          </div>
         </aside>
 
         <form
