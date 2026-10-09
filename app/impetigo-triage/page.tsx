@@ -81,19 +81,75 @@ function drugFlagItems(treatment: string): CheckItem[] {
     return [
       {
         label: "History of severe allergy or immune reaction to sulfonamides/trimethoprim",
-        info: "Contraindicated: Serious allergic reaction to sulfonamides; Previous drug-induced immune thrombocytopenia from trimethoprim or sulfonamides.",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Contraindicated:</strong> Serious allergic reaction to sulfonamides
+              </li>
+              <li>
+                <strong>Contraindicated:</strong> Previous drug-induced immune thrombocytopenia from trimethoprim or
+                sulfonamides
+              </li>
+            </ul>
+          </div>
+        ),
       },
       {
         label: "Blood, renal, or hepatic contraindications",
-        info: "Contraindicated: Megaloblastic anaemia due to folate deficiency; Severe hepatic impairment; CrCl < 15 mL/minute. Precaution: G6PD deficiency (increases risk of haemolysis).",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Contraindicated:</strong> Megaloblastic anaemia (folate deficiency)
+              </li>
+              <li>
+                <strong>Contraindicated:</strong> Severe hepatic impairment
+              </li>
+              <li>
+                <strong>Contraindicated:</strong> CrCl &lt; 15 mL/minute
+              </li>
+              <li>
+                <strong>Precaution:</strong> G6PD deficiency (increases haemolysis risk)
+              </li>
+            </ul>
+          </div>
+        ),
       },
       {
         label: "Pregnancy, breastfeeding, or age-related precautions",
-        info: "Pregnancy: Avoid in 1st trimester; contraindicated in late pregnancy. Age: Contraindicated in infants < 6 weeks old; Avoid use in elderly. Breastfeeding: Avoid if neonate is ill, preterm, or has hyperbilirubinaemia/G6PD deficiency.",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Pregnancy:</strong> Avoid in 1st trimester; contraindicated in late pregnancy
+              </li>
+              <li>
+                <strong>Age:</strong> Contraindicated in infants &lt; 6 weeks old; Avoid use in elderly
+              </li>
+              <li>
+                <strong>Breastfeeding:</strong> Avoid if neonate is ill, preterm, or has hyperbilirubinaemia/G6PD
+                deficiency
+              </li>
+            </ul>
+          </div>
+        ),
       },
       {
         label: "High-risk comorbidities or drug interactions",
-        info: "Interactions: Drugs that cause potassium retention (e.g., ACE inhibitors), oral typhoid vaccine. Comorbidities: HIV infection, Systemic lupus erythematosus, slow acetylator phenotype.",
+        info: (
+          <div className="bg-red-50 text-red-900 border border-red-200 rounded-md p-3 text-sm shadow-sm w-[350px]">
+            <ul className="list-disc list-outside ml-4 space-y-1.5">
+              <li>
+                <strong>Interactions:</strong> Drugs that cause potassium retention (e.g., ACE inhibitors), oral typhoid
+                vaccine
+              </li>
+              <li>
+                <strong>Comorbidities:</strong> HIV infection, Systemic lupus erythematosus, slow acetylator phenotype
+              </li>
+            </ul>
+          </div>
+        ),
       },
     ];
   }
