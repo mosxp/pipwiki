@@ -224,12 +224,17 @@ function utiApprovedPlan(treatment: string): UtiApprovedPlan | null {
       name: "Nitrofurantoin",
       dose: "100 mg every 6 hours for 5 days.",
       counselling: [
-        "Take each dose with food or milk.",
-        "Urine may turn dark yellow or brown.",
-        "Avoid alkalinising agents. They may significantly reduce antibiotic efficacy.",
-        followUpCounselling,
+        "Take each dose with food or milk to reduce nausea and improve absorption.",
+        "Urine may turn a dark yellow or brown colour (this is temporary and harmless).",
+        "Avoid urinary alkalising agents (e.g., Ural) as they can significantly reduce nitrofurantoin's efficacy.",
+        "Symptoms should respond within 48–72 hours. If symptoms persist after the antibiotic course, or if new/worsening symptoms develop, return for review.",
+        "URGENT: Tell your doctor immediately if you experience difficulty breathing, a persistent cough, numbness or tingling in the hands or feet, or signs of liver problems (such as yellowing of the skin/eyes, dark urine, or pale stools).",
       ],
-      adverse: ["Common: nausea, vomiting, anorexia, diarrhoea, and headache."],
+      adverse: [
+        "Common (>1%): nausea, vomiting, anorexia, diarrhoea, abdominal pain, allergic skin reactions, and headache.",
+        "Infrequent (0.1–1%): drowsiness, vertigo, dizziness.",
+        "Rare (<0.1%): peripheral polyneuropathy (risk increased in renal impairment), hepatotoxicity, pulmonary toxicity (e.g., acute pneumonitis or hypersensitivity reactions), and severe skin reactions (e.g., Stevens-Johnson syndrome).",
+      ],
     };
   }
   if (treatment === "fosfomycin") {
@@ -1004,7 +1009,16 @@ function UtiApproved({ plan }: { plan: UtiApprovedPlan }) {
         <p className="text-[11px] font-medium tracking-[0.14em] uppercase">Counselling</p>
         <ul className="mt-1.5 list-disc space-y-1.5 pl-4 text-sm leading-6">
           {plan.counselling.map((point) => (
-            <li key={point}>{point}</li>
+            <li key={point}>
+              {point.startsWith("URGENT:") ? (
+                <>
+                  <strong>URGENT:</strong>
+                  {point.slice("URGENT:".length)}
+                </>
+              ) : (
+                point
+              )}
+            </li>
           ))}
         </ul>
       </div>
