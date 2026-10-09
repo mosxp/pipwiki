@@ -215,9 +215,6 @@ type UtiApprovedPlan = {
   adverse: string[];
 };
 
-const followUpCounselling =
-  "Symptoms should respond within 48 hours. If they persist 48–72 hours after the antibiotic course, or symptoms that are not acute cystitis develop, return for review.";
-
 function utiApprovedPlan(treatment: string): UtiApprovedPlan | null {
   if (treatment === "nitrofurantoin") {
     return {
@@ -258,8 +255,16 @@ function utiApprovedPlan(treatment: string): UtiApprovedPlan | null {
     return {
       name: "Trimethoprim",
       dose: "300 mg daily at night for 3 days.",
-      counselling: ["Take the dose at night.", "Finish the 3-day course.", followUpCounselling],
-      adverse: ["Common: nausea, vomiting, rash, itch, and hyperkalaemia."],
+      counselling: [
+        "Take at night to maximise urinary concentration for the treatment of UTI.",
+        "Be aware that trimethoprim can cause potassium retention (monitor serum potassium if treatment exceeds 3 days or in patients at risk of hyperkalaemia).",
+        "Symptoms should respond within 48–72 hours; return for review if symptoms persist or worsen.",
+      ],
+      adverse: [
+        "Common (>1%): fever, itch, rash, nausea, vomiting, and hyperkalaemia.",
+        "Infrequent (0.1–1%): sore mouth.",
+        "Rare (<0.1%): blood dyscrasias (e.g., leucopenia, thrombocytopenia, megaloblastic anaemia), hyponatraemia, and severe hypersensitivity reactions.",
+      ],
     };
   }
   return null;
