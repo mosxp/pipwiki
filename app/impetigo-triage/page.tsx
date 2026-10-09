@@ -30,6 +30,60 @@ const extentOptions: { value: Exclude<Extent, "">; label: string }[] = [
   { value: "many", label: "> 2 sores affecting > 2 body regions" },
 ];
 
+const treatmentOptions = [
+  { value: "mupirocin", label: "Mupirocin 2% ointment/cream" },
+  { value: "peroxide", label: "Hydrogen peroxide 1% cream" },
+  { value: "dicloxacillin", label: "Dicloxacillin / Flucloxacillin" },
+  { value: "cefalexin", label: "Cefalexin" },
+  { value: "trimethoprim", label: "Trimethoprim + sulfamethoxazole" },
+];
+
+const contraindicationDetail =
+  "Do not supply the selected medicine. Select an alternative therapy or refer to the GP.";
+
+function drugFlagItems(treatment: string): CheckItem[] {
+  if (treatment === "mupirocin") {
+    return [
+      {
+        label:
+          "Application to extensive burns and wounds (risk of macrogol toxicity, especially with pre-existing renal impairment)",
+      },
+    ];
+  }
+  if (treatment === "dicloxacillin") {
+    return [
+      {
+        label:
+          "History of immediate or severe hypersensitivity to a penicillin (e.g., urticaria, bronchospasm, anaphylaxis, interstitial nephritis)",
+      },
+      { label: "History of cholestatic hepatitis with dicloxacillin or flucloxacillin" },
+    ];
+  }
+  if (treatment === "cefalexin") {
+    return [
+      {
+        label: "History of allergy to cephalosporins OR immediate/severe hypersensitivity to a penicillin",
+      },
+    ];
+  }
+  if (treatment === "trimethoprim") {
+    return [
+      { label: "Serious allergic reaction to sulfonamides" },
+      { label: "Megaloblastic anaemia due to folate deficiency" },
+      { label: "Severe hepatic impairment or CrCl < 15 mL/minute" },
+      { label: "Late pregnancy or infant < 6 weeks old" },
+    ];
+  }
+  if (treatment === "peroxide") {
+    return [{ label: "Allergy or hypersensitivity to hydrogen peroxide" }];
+  }
+  return [];
+}
+
+function treatmentLabel(treatment: string) {
+  return treatmentOptions.find((option) => option.value === treatment)?.label ?? "Not answered";
+}
+
 const redFlagItems: CheckItem[] = [
   { label: "Widespread, painful rash that may be erythematous" },
   { label: "Non-blanching purple rash" },
@@ -155,6 +209,7 @@ type Recommendation =
   | { kind: "idle" }
   | { kind: "pending"; detail: string }
   | { kind: "ed"; title: string; detail: string }
+  | { kind: "contraindicated"; title: string; detail: string }
   | { kind: "gp"; title: string; detail: string }
   | { kind: "differential"; title: string; detail: string }
   | { kind: "concurrent"; title: string; detail: string }
@@ -197,11 +252,12 @@ function extentLabel(extent: Extent) {
   return extentOptions.find((option) => option.value === extent)?.label ?? "Not answered";
 }
 
-function derive(form: FormState): Outcome {
+function derive(form: FormState, drugFlags: string[]): Outcome {
   const age = readNumber(form.age);
   const redFlags = clinicalSelections(form.redFlags);
   const gpItems = clinicalSelections(form.risks);
   const severeItems = clinicalSelections(form.severeSymptoms);
+  const drugContra = clinicalSelections(drugFlags);
   const ageOut = age != null && age < 2;
   const widespread = form.extent === "many";
   const notImpetigo = form.initialSymptoms === "no";
@@ -234,18 +290,36 @@ function derive(form: FormState): Outcome {
     flags.push({ title: "Presentation", detail: "The presentation is not clear non-bullous impetigo." });
   }
   if (widespread) flags.push({ title: "Extent", detail: extentLabel(form.extent) });
+  if (drugContra.length > 0) flags.push({ title: "Appropriateness assessment", detail: drugContra.join(", ") });
 
-  const dirty = Object.values(form).some((value) => (Array.isArray(value) ? value.length > 0 : value !== ""));
+  const dirty =
+    Object.values(form).some((value) => (Array.isArray(value) ? value.length > 0 : value !== "")) ||
+    drugFlags.length > 0;
 
   let recommendation: Recommendation = { kind: "idle" };
   let showLocal = false;
   let showOral = false;
+
+  const earlierStop =
+    redFlags.length > 0 ||
+    notImpetigo ||
+    ageOut ||
+    form.consent === "no" ||
+    form.presentation === "no" ||
+    gpItems.length > 0 ||
+    severeItems.length > 0;
 
   if (redFlags.length > 0) {
     recommendation = {
       kind: "ed",
       title: "Immediate referral to Emergency Department",
       detail: "A red flag symptom is present. Do not treat under this protocol.",
+    };
+  } else if (drugContra.length > 0 && !earlierStop) {
+    recommendation = {
+      kind: "contraindicated",
+      title: "Treatment Contraindicated",
+      detail: contraindicationDetail,
     };
   } else if (notImpetigo) {
     recommendation = {
@@ -671,7 +745,7 @@ function OralReference({ age }: { age: number }) {
 }
 
 function outcomeClass(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "border-red-200 bg-red-50";
+  if (kind === "ed" || kind === "contraindicated") return "border-red-200 bg-red-50";
   if (kind === "gp" || kind === "differential") return "border-orange-200 bg-orange-50";
   if (kind === "concurrent") return "border-yellow-300 bg-yellow-50";
   if (kind === "treat") return "border-moss/20 bg-[var(--step-bg)]";
@@ -679,7 +753,7 @@ function outcomeClass(kind: Recommendation["kind"]) {
 }
 
 function outcomeLabelClass(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "text-red-800";
+  if (kind === "ed" || kind === "contraindicated") return "text-red-800";
   if (kind === "gp" || kind === "differential") return "text-orange-800";
   if (kind === "concurrent") return "text-yellow-800";
   if (kind === "treat") return "text-moss";
@@ -687,7 +761,7 @@ function outcomeLabelClass(kind: Recommendation["kind"]) {
 }
 
 function alertName(kind: Recommendation["kind"]) {
-  if (kind === "ed") return "Red alert";
+  if (kind === "ed" || kind === "contraindicated") return "Red alert";
   if (kind === "gp" || kind === "differential") return "Orange alert";
   if (kind === "concurrent") return "Yellow alert";
   if (kind === "treat") return "Green alert";
@@ -718,7 +792,7 @@ ${lines}
 ${usualCarePdf}`;
 }
 
-function activeClinicalTriggers(form: FormState) {
+function activeClinicalTriggers(form: FormState, drugFlags: string[]) {
   const age = readNumber(form.age);
   const triggers: string[] = [];
   if (age != null && age < 2) triggers.push("Age under 2 years");
@@ -730,6 +804,7 @@ function activeClinicalTriggers(form: FormState) {
     ...clinicalSelections(form.redFlags),
     ...clinicalSelections(form.risks),
     ...clinicalSelections(form.severeSymptoms),
+    ...clinicalSelections(drugFlags),
   );
   return triggers.length > 0 ? triggers.join(", ") : "None";
 }
@@ -737,6 +812,7 @@ function activeClinicalTriggers(form: FormState) {
 function primaryAction(outcome: Outcome) {
   const item = outcome.recommendation;
   if (item.kind === "ed") return "Immediate referral to Emergency Department";
+  if (item.kind === "contraindicated") return `Treatment Contraindicated. ${item.detail}`;
   if (item.kind === "gp") return `Refer to GP. ${item.detail}`;
   if (item.kind === "differential") return `${item.title}. ${item.detail}`;
   if (item.kind === "concurrent") return item.title;
@@ -748,13 +824,18 @@ function primaryAction(outcome: Outcome) {
 function treatmentPathway(form: FormState, outcome: Outcome) {
   if (outcome.showLocal) return localTreatmentPdf;
   if (outcome.showOral) return oralTreatmentPdf(readNumber(form.age));
-  if (outcome.recommendation.kind === "ed" || outcome.recommendation.kind === "gp" || outcome.recommendation.kind === "differential") {
+  if (
+    outcome.recommendation.kind === "ed" ||
+    outcome.recommendation.kind === "contraindicated" ||
+    outcome.recommendation.kind === "gp" ||
+    outcome.recommendation.kind === "differential"
+  ) {
     return "Not indicated. Do not supply antibiotics under this protocol.";
   }
   return "Not indicated";
 }
 
-function consultationRows(form: FormState): string[][] {
+function consultationRows(form: FormState, treatment: string, drugFlags: string[]): string[][] {
   const age = form.age.trim();
   return [
     ["Age", age ? `${age} years` : "Not answered"],
@@ -765,13 +846,15 @@ function consultationRows(form: FormState): string[][] {
     ["GP referral triggers (severe symptoms and differential diagnosis)", listText(form.severeSymptoms)],
     [presentationQuestion, yesNoText(form.presentation)],
     ["Extent of infection", form.extent ? extentLabel(form.extent) : "Not answered"],
+    ["Proposed treatment", treatment ? treatmentLabel(treatment) : "Not answered"],
+    ["Appropriateness assessment", listText(drugFlags)],
   ];
 }
 
-function outcomeRows(form: FormState, outcome: Outcome): string[][] {
+function outcomeRows(form: FormState, outcome: Outcome, drugFlags: string[]): string[][] {
   return [
     ["Action Required", primaryAction(outcome)],
-    ["Active Clinical Triggers", activeClinicalTriggers(form)],
+    ["Active Clinical Triggers", activeClinicalTriggers(form, drugFlags)],
     ["Treatment pathway", treatmentPathway(form, outcome)],
   ];
 }
@@ -814,7 +897,7 @@ function buildConsultationReport(
   autoTable: (doc: jsPDF, options: UserOptions) => void,
   form: FormState,
   outcome: Outcome,
-  notes: { subjective: string; objective: string },
+  notes: { subjective: string; objective: string; treatment: string; drugFlags: string[] },
 ) {
   const doc = new JsPDF({ unit: "mm", format: "a4" }) as TableDoc;
   const generatedAt = new Date().toLocaleString("en-AU", {
@@ -866,7 +949,7 @@ function buildConsultationReport(
   const afterAnswers = drawTable(doc, autoTable, {
     startY: answersHeadingY + 4,
     head: [["Question", "Answer"]],
-    body: consultationRows(form),
+    body: consultationRows(form, notes.treatment, notes.drugFlags),
     columnStyles: { 0: { cellWidth: 62, fontStyle: "bold" } },
   });
 
@@ -882,7 +965,7 @@ function buildConsultationReport(
   drawTable(doc, autoTable, {
     startY: headingY + 4,
     head: [["Item", "Detail"]],
-    body: outcomeRows(form, outcome),
+    body: outcomeRows(form, outcome, notes.drugFlags),
     columnStyles: { 0: { cellWidth: 48, fontStyle: "bold" } },
     didParseCell: (data) => {
       if (data.section !== "body" || data.column.index !== 0) return;
@@ -913,12 +996,15 @@ export default function ImpetigoTriagePage() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [subjectiveNotes, setSubjectiveNotes] = useState("");
   const [objectiveNotes, setObjectiveNotes] = useState("");
+  const [selectedTreatment, setSelectedTreatment] = useState<string>("");
+  const [drugFlags, setDrugFlags] = useState<string[]>([]);
   const [reportNote, setReportNote] = useState<string | null>(null);
   const noteStackRef = useRef<HTMLDivElement>(null);
-  const outcome = derive(form);
+  const outcome = derive(form, drugFlags);
   const recommendation = outcome.recommendation;
   const decided =
     recommendation.kind === "ed" ||
+    recommendation.kind === "contraindicated" ||
     recommendation.kind === "gp" ||
     recommendation.kind === "differential" ||
     recommendation.kind === "concurrent" ||
@@ -935,6 +1021,10 @@ export default function ImpetigoTriagePage() {
   const isNonBullousLocked = isSevereLocked || !isSeverePassed;
   const isNonBullousPassed = form.presentation === "yes";
   const isExtentLocked = isNonBullousLocked || !isNonBullousPassed;
+  const isExtentPassed = form.extent !== "";
+  const isTreatmentSelectionLocked = isExtentLocked || !isExtentPassed;
+  const isTreatmentSelectionPassed = selectedTreatment !== "";
+  const isDrugAssessmentLocked = isTreatmentSelectionLocked || !isTreatmentSelectionPassed;
 
   useEffect(() => {
     fitClinicalNotes(noteStackRef.current);
@@ -970,6 +1060,8 @@ export default function ImpetigoTriagePage() {
       const doc = buildConsultationReport(jsPDF, autoTable, form, outcome, {
         subjective: subjectiveNotes,
         objective: objectiveNotes,
+        treatment: selectedTreatment,
+        drugFlags,
       });
       tab.location.href = doc.output("bloburl").toString();
     } catch {
@@ -1151,6 +1243,40 @@ export default function ImpetigoTriagePage() {
             />
           </Section>
 
+          <Section title="Proposed treatment" locked={isTreatmentSelectionLocked}>
+            <RadioGroup
+              label="Which management option are you proposing to supply?"
+              name="proposedTreatment"
+              value={selectedTreatment}
+              disabled={isTreatmentSelectionLocked}
+              onChange={(value) => {
+                setSelectedTreatment(value);
+                setDrugFlags([]);
+              }}
+              options={treatmentOptions}
+              stacked
+            />
+          </Section>
+
+          <Section title="Appropriateness assessment" locked={isDrugAssessmentLocked}>
+            <CheckGroup
+              label="Does the patient have allergies, medicine interactions or any other contraindications to management options?"
+              hint="If any apply, do not supply the selected medicine. Refer to GP or select an alternative."
+              items={drugFlagItems(selectedTreatment)}
+              checked={drugFlags}
+              disabled={isDrugAssessmentLocked}
+              onToggle={(item) => {
+                setDrugFlags((selected) => {
+                  if (item === noneLabel) return selected.includes(noneLabel) ? [] : [noneLabel];
+                  const withoutNone = selected.filter((entry) => entry !== noneLabel);
+                  return withoutNone.includes(item)
+                    ? withoutNone.filter((entry) => entry !== item)
+                    : [...withoutNone, item];
+                });
+              }}
+            />
+          </Section>
+
           <Disclaimer />
         </form>
 
@@ -1189,6 +1315,8 @@ export default function ImpetigoTriagePage() {
                     <span className="font-bold text-red-600">Provide Pharmacist Care and/or Refer to GP</span>
                   ) : recommendation.kind === "gp" ? (
                     <span className="font-bold text-red-600">Refer to GP</span>
+                  ) : recommendation.kind === "contraindicated" ? (
+                    <span className="font-bold text-red-600">Treatment Contraindicated</span>
                   ) : (
                     recommendation.title
                   )}
@@ -1205,7 +1333,11 @@ export default function ImpetigoTriagePage() {
           {outcome.dirty ? (
             <button
               type="button"
-              onClick={() => setForm(emptyForm)}
+              onClick={() => {
+                setForm(emptyForm);
+                setSelectedTreatment("");
+                setDrugFlags([]);
+              }}
               className="mt-4 text-sm text-ink-soft underline decoration-line underline-offset-4 hover:text-ink"
             >
               Clear answers
