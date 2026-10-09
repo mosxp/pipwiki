@@ -79,10 +79,22 @@ function drugFlagItems(treatment: string): CheckItem[] {
   }
   if (treatment === "trimethoprim") {
     return [
-      { label: "Serious allergic reaction to sulfonamides" },
-      { label: "Megaloblastic anaemia due to folate deficiency" },
-      { label: "Severe hepatic impairment or CrCl < 15 mL/minute" },
-      { label: "Late pregnancy or infant < 6 weeks old" },
+      {
+        label: "History of severe allergy or immune reaction to sulfonamides/trimethoprim",
+        info: "Contraindicated: Serious allergic reaction to sulfonamides; Previous drug-induced immune thrombocytopenia from trimethoprim or sulfonamides.",
+      },
+      {
+        label: "Blood, renal, or hepatic contraindications",
+        info: "Contraindicated: Megaloblastic anaemia due to folate deficiency; Severe hepatic impairment; CrCl < 15 mL/minute. Precaution: G6PD deficiency (increases risk of haemolysis).",
+      },
+      {
+        label: "Pregnancy, breastfeeding, or age-related precautions",
+        info: "Pregnancy: Avoid in 1st trimester; contraindicated in late pregnancy. Age: Contraindicated in infants < 6 weeks old; Avoid use in elderly. Breastfeeding: Avoid if neonate is ill, preterm, or has hyperbilirubinaemia/G6PD deficiency.",
+      },
+      {
+        label: "High-risk comorbidities or drug interactions",
+        info: "Interactions: Drugs that cause potassium retention (e.g., ACE inhibitors), oral typhoid vaccine. Comorbidities: HIV infection, Systemic lupus erythematosus, slow acetylator phenotype.",
+      },
     ];
   }
   if (treatment === "peroxide") {
