@@ -991,7 +991,7 @@ export default function ImpetigoTriagePage() {
       <div className="mt-8 grid grid-cols-1 items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)_350px]">
         <aside
           aria-label="Clinical notes"
-          className="min-w-0 rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6 xl:flex xl:h-[calc(100dvh-3rem)] xl:max-h-[calc(100dvh-3rem)] xl:flex-col xl:overflow-y-auto"
+          className="min-w-0 self-start h-fit rounded-xl border border-line bg-paper-raised p-5 xl:sticky xl:top-6"
         >
           <div className="text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
             Clinical notes (S&O)
