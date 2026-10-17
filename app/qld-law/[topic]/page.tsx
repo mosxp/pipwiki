@@ -8,6 +8,7 @@ import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-pract
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
+import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
 
 const topicNotes: Record<string, { subtitle: string; factsheet: string; content: React.ReactNode }> = {
@@ -45,6 +46,11 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
     content: <ExtendedPracticeAuthorities />,
+  },
+  "substance-management-plans": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1108972/fs-substance-mgmt-plans.pdf",
+    content: <SubstanceManagementPlans />,
   },
 };
 
