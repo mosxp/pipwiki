@@ -6,6 +6,7 @@ import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
+import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
@@ -57,6 +58,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     subtitle: "QLD Pharmacy Law - Medicine - General",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108971/fs-dept-stds.pdf",
     content: <DepartmentalStandards />,
+  },
+  "categories-of-medicines-and-dealings": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108988/fs-dealings-medicine-categories.pdf",
+    content: <MedicineCategories />,
   },
 };
 
