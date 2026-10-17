@@ -38,7 +38,18 @@ export default async function QldLawTopicPage({ params }: TopicPageProps) {
       <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">{trail}</p>
       <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">{topic.title}</h1>
       {slug === "purposes-of-the-act" ? (
-        <p className="mt-3 text-lg leading-7 text-ink-soft">Queensland: Medicines and Poisons Act 2019</p>
+        <>
+          <p className="mt-3 text-lg leading-7 text-ink-soft">Queensland: Medicines and Poisons Act 2019</p>
+          <a
+            href="https://www.health.qld.gov.au/__data/assets/pdf_file/0030/1108974/fs-purposes-act.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
+          >
+            View Original Queensland Health Factsheet (PDF)
+            <ExternalLinkIcon />
+          </a>
+        </>
       ) : null}
       <div className="mt-6">
         <BackToHub />
@@ -53,6 +64,21 @@ export default async function QldLawTopicPage({ params }: TopicPageProps) {
       </div>
       <Disclaimer />
     </article>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-3.5 shrink-0" aria-hidden="true">
+      <path
+        d="M6 3.5H3.5v9h9V10M8.5 3.5H12.5V7.5M12.5 3.5 7 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
