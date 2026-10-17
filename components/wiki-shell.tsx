@@ -43,6 +43,8 @@ const clinicalTools = [
   { href: "/impetigo-triage", title: "Impetigo Management" },
 ];
 
+const lawLinks = [{ href: "/qld-law", title: "QLD Law" }];
+
 export function WikiShell({
   notes,
   children,
@@ -87,6 +89,12 @@ export function WikiShell({
         return haystack.includes(needle);
       })
     : clinicalTools;
+  const laws = needle
+    ? lawLinks.filter((item) => {
+        const haystack = `law ${item.title} qld pharmacy`.toLocaleLowerCase();
+        return haystack.includes(needle);
+      })
+    : lawLinks;
 
   return (
     <div className="flex h-full min-h-0">
@@ -177,7 +185,31 @@ export function WikiShell({
             </section>
           ) : null}
 
-          {groups.length === 0 && tools.length === 0 ? (
+          {laws.length > 0 ? (
+            <section className="mb-5">
+              <h2 className="px-2.5 pb-1 text-[11px] font-medium tracking-[0.16em] text-ink-soft uppercase">
+                LAW
+              </h2>
+              <ul>
+                {laws.map((item) => {
+                  const active = path === item.href || path.startsWith(`${item.href}/`);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={linkClass(active)}
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+
+          {groups.length === 0 && tools.length === 0 && laws.length === 0 ? (
             <p className="px-2.5 py-4 text-sm leading-6 text-ink-soft">
               {notes.length === 0
                 ? "No Markdown files in notes/ yet."
