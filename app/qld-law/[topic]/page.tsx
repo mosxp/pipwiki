@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
+import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
@@ -51,6 +52,11 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     subtitle: "QLD Pharmacy Law - Medicine - General",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1108972/fs-substance-mgmt-plans.pdf",
     content: <SubstanceManagementPlans />,
+  },
+  "departmental-standards-medicines": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108971/fs-dept-stds.pdf",
+    content: <DepartmentalStandards />,
   },
 };
 
