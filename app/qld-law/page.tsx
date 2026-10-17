@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { qldLawSections, type LawNode } from "@/lib/qld-law";
@@ -197,9 +200,33 @@ function GroupCard({ node }: { node: LawNode }) {
   );
 }
 
-export default function QldLawPage() {
+function FactsheetChevron({ open }: { open: boolean }) {
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 py-12 md:px-10 md:py-16">
+    <svg
+      viewBox="0 0 20 20"
+      aria-hidden="true"
+      className={[
+        "size-5 shrink-0 text-stone-500 transition-transform duration-300",
+        open ? "rotate-180" : "",
+      ].join(" ")}
+    >
+      <path
+        d="M5 7.5 10 12.5 15 7.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export default function QldLawPage() {
+  const [isFactsheetOpen, setIsFactsheetOpen] = useState(true);
+
+  return (
+    <div className="mx-auto w-full max-w-7xl px-6 py-12 md:px-10 md:py-16 xl:px-14">
       <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">Law</p>
       <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">
         QLD Pharmacy Law
@@ -210,7 +237,28 @@ export default function QldLawPage() {
 
       <div className="mt-10">
         <QuickLinks />
-        <div className="space-y-10">
+        <section className="rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+          <h2>
+            <button
+              type="button"
+              aria-expanded={isFactsheetOpen}
+              aria-controls="factsheet-notes"
+              onClick={() => setIsFactsheetOpen((open) => !open)}
+              className="flex w-full items-center justify-between gap-4 rounded-md text-left"
+            >
+              <span className="font-serif text-2xl tracking-tight text-stone-900">Factsheet notes</span>
+              <FactsheetChevron open={isFactsheetOpen} />
+            </button>
+          </h2>
+          <div
+            id="factsheet-notes"
+            className={[
+              "grid transition-[grid-template-rows] duration-300 ease-out",
+              isFactsheetOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+            ].join(" ")}
+          >
+            <div className="overflow-hidden">
+          <div className="mt-6 space-y-10">
         {qldLawSections.map((section) =>
           section.slug ? (
             <Link
@@ -237,7 +285,10 @@ export default function QldLawPage() {
             </section>
           ),
         )}
-        </div>
+          </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <Disclaimer />
