@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
+import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
@@ -31,6 +32,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0029/1108991/fs-substance-authorities-mpa.pdf",
     content: <SubstanceAuthorities />,
+  },
+  "emergency-orders-and-public-warnings": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0029/1108982/fs-emerg-order-risk-declarations-recall-pub-warn.pdf",
+    content: <EmergencyOrders />,
   },
 };
 
