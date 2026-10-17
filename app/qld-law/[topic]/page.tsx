@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
+import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
@@ -38,6 +39,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0029/1108982/fs-emerg-order-risk-declarations-recall-pub-warn.pdf",
     content: <EmergencyOrders />,
+  },
+  "general-extended-practice-authorities": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
+    content: <ExtendedPracticeAuthorities />,
   },
 };
 
