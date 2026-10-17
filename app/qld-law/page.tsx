@@ -25,6 +25,149 @@ function TopicList({ topics }: { topics: LawNode[] }) {
   );
 }
 
+type QuickLink = {
+  name: string;
+  href?: string;
+  nested?: boolean;
+};
+
+const quickLinkGroups: { category: string; links: QuickLink[] }[] = [
+  {
+    category: "State-based law",
+    links: [
+      {
+        name: "Medicines and Poisons Act (MPA) 2019",
+        href: "https://www.legislation.qld.gov.au/view/html/inforce/current/act-2019-026",
+      },
+      { name: "Medicines and Poisons Regulation (MPR) 2021" },
+      {
+        name: "MP(M)R - (Medicines)",
+        href: "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2021-0140",
+        nested: true,
+      },
+      {
+        name: "MP(PP)R - (Poisons & Prohibited Substances)",
+        href: "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2021-0141",
+        nested: true,
+      },
+      {
+        name: "MP(PM)R - (Pest Management Activities)",
+        href: "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2021-0142",
+        nested: true,
+      },
+      {
+        name: "Therapeutic Goods Act 2019",
+        href: "https://www.legislation.qld.gov.au/view/whole/html/asmade/act-2019-027",
+      },
+      {
+        name: "Therapeutic Goods Reg 2021",
+        href: "https://www.legislation.qld.gov.au/view/html/inforce/current/sl-2021-0143",
+      },
+      {
+        name: "Queensland Health",
+        href: "https://www.health.qld.gov.au/system-governance/licences/medicines-poisons/medicines-poisons-act/legislation-standards",
+      },
+    ],
+  },
+  {
+    category: "Pharmacy authority",
+    links: [
+      {
+        name: "QLD PBOC (Pharmacy Business Ownership Council)",
+        href: "https://www.pboc.qld.gov.au/",
+      },
+    ],
+  },
+  {
+    category: "Methadone",
+    links: [
+      {
+        name: "QOTP (Opioid Treatment Program)",
+        href: "https://www.health.qld.gov.au/public-health/topics/mhaod/for-healthcare-providers/programs-and-services/queensland-opioid-treatment-program",
+      },
+    ],
+  },
+  {
+    category: "Expanded scope",
+    links: [
+      {
+        name: "Pharmacists extended practice authority",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108944/epa-pharmacists.pdf",
+      },
+    ],
+  },
+  {
+    category: "Realtime monitoring",
+    links: [
+      {
+        name: "QScript",
+        href: "https://www.health.qld.gov.au/clinical-practice/guidelines-procedures/medicines/qscript",
+      },
+    ],
+  },
+];
+
+function QuickLinkName({ link }: { link: QuickLink }) {
+  if (!link.href) {
+    return <span className="font-medium text-stone-800">{link.name}</span>;
+  }
+
+  return (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={[
+        "text-moss underline decoration-moss/30 underline-offset-4 transition-colors hover:text-stone-950 hover:decoration-moss",
+        link.nested ? "block pl-4" : "",
+      ].join(" ")}
+    >
+      {link.name}
+    </a>
+  );
+}
+
+function QuickLinks() {
+  return (
+    <section className="mb-8 rounded-lg border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 className="font-serif text-2xl tracking-tight text-stone-900">Quick links</h2>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-stone-200 text-[11px] font-medium tracking-[0.14em] text-stone-500 uppercase">
+              <th className="w-40 py-2 pr-4 font-medium">Category</th>
+              <th className="py-2 font-medium">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {quickLinkGroups.map((group) =>
+              group.links.map((link, index) => (
+                <tr
+                  key={`${group.category}-${link.name}`}
+                  className="border-b border-stone-200 transition-colors last:border-b-0 hover:bg-stone-50"
+                >
+                  {index === 0 ? (
+                    <th
+                      scope="rowgroup"
+                      rowSpan={group.links.length}
+                      className="py-2.5 pr-4 align-top font-medium text-stone-800"
+                    >
+                      {group.category}
+                    </th>
+                  ) : null}
+                  <td className="py-2.5 align-top">
+                    <QuickLinkName link={link} />
+                  </td>
+                </tr>
+              )),
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 function GroupCard({ node }: { node: LawNode }) {
   const children = node.children ?? [];
   const nested = children.some((child) => child.children?.length);
@@ -65,7 +208,9 @@ export default function QldLawPage() {
         Queensland medicines legislation notes. Open a topic to write it up.
       </p>
 
-      <div className="mt-10 space-y-10">
+      <div className="mt-10">
+        <QuickLinks />
+        <div className="space-y-10">
         {qldLawSections.map((section) =>
           section.slug ? (
             <Link
@@ -92,6 +237,7 @@ export default function QldLawPage() {
             </section>
           ),
         )}
+        </div>
       </div>
 
       <Disclaimer />
