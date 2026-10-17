@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
+import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
 
 const topicNotes: Record<string, { subtitle: string; factsheet: string; content: React.ReactNode }> = {
@@ -24,6 +25,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0032/1108985/fs-authorisations-activities-mpa.pdf",
     content: <ApprovedPersons />,
+  },
+  "substance-authorities": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0029/1108991/fs-substance-authorities-mpa.pdf",
+    content: <SubstanceAuthorities />,
   },
 };
 
