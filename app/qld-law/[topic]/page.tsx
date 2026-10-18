@@ -6,6 +6,8 @@ import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { DepartmentalStandardMonitoredMedicines } from "@/components/qld-law/departmental-standard-monitored-medicines";
+import { DepartmentalStandardPseudoephedrine } from "@/components/qld-law/departmental-standard-pseudoephedrine";
+import { DepartmentalStandardSecureStorage } from "@/components/qld-law/departmental-standard-secure-storage";
 import { DiversionRiskDestruction } from "@/components/qld-law/diversion-risk-destruction";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
@@ -266,6 +268,28 @@ const topicNotes: Record<
       },
     ],
     content: <DepartmentalStandardMonitoredMedicines />,
+  },
+  "departmental-standard-secure-storage-of-s8-medicines": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Secure Storage of S8 Medicines",
+        text: "Departmental Standard – Secure Storage of S8 Medicines (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0031/1108939/ds-secure-storage-s8-medicines.pdf",
+      },
+    ],
+    content: <DepartmentalStandardSecureStorage />,
+  },
+  "departmental-standard-pseudoephedrine-recording": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Pseudoephedrine Recording",
+        text: "Departmental Standard – Pseudoephedrine Recording (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0030/1108938/ds-pseudoephedrine-recording.pdf",
+      },
+    ],
+    content: <DepartmentalStandardPseudoephedrine />,
   },
   "categories-of-medicines-and-dealings": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
