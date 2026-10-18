@@ -20,6 +20,7 @@ import { Psychostimulants } from "@/components/qld-law/psychostimulants";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
+import { Schedule8Storage } from "@/components/qld-law/schedule-8-storage";
 import { SelfPrescribeOffence } from "@/components/qld-law/self-prescribe-offence";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
 import { UnapprovedMedicinalCannabis } from "@/components/qld-law/unapproved-medicinal-cannabis";
@@ -189,6 +190,12 @@ const topicNotes: Record<
       "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Special & Restricted Medicines",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1364975/fs-therapeutic-vapes.pdf",
     content: <TherapeuticVapes />,
+  },
+  "schedule-8-storage-and-record-keeping": {
+    subtitle: "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - S8 Safe",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0024/1159071/storage-record-keeping-s8-medicines.pdf",
+    content: <Schedule8Storage />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
