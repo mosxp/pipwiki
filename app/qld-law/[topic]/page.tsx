@@ -11,6 +11,7 @@ import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
+import { PrescriberScopes } from "@/components/qld-law/prescriber-scopes";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
@@ -19,7 +20,15 @@ import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities
 import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
 
-const topicNotes: Record<string, { subtitle: string; factsheet: string; content: React.ReactNode }> = {
+const topicNotes: Record<
+  string,
+  {
+    subtitle: string;
+    factsheet?: string;
+    factsheets?: { label: string; href: string }[];
+    content: React.ReactNode;
+  }
+> = {
   "purposes-of-the-act": {
     subtitle: "Queensland: Medicines and Poisons Act 2019",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0030/1108974/fs-purposes-act.pdf",
@@ -96,6 +105,36 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0020/1023383/what-pharmacists-need-to-know.pdf",
     content: <PharmacistRequirements />,
   },
+  "prescribers-inter-professional-prescribing-scopes": {
+    subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
+    factsheets: [
+      {
+        label: "Medical Practitioners",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0014/1144310/fs-medical-practitioners.pdf",
+      },
+      {
+        label: "Dental Practitioners",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0015/1111506/info-sheet-dental-practitioners.pdf",
+      },
+      {
+        label: "Nurse Practitioners",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0015/1144311/fs-nurse-practitioners.pdf",
+      },
+      {
+        label: "Nurses",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0015/1111740/fs-nurses.pdf",
+      },
+      {
+        label: "Midwives",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0023/1111739/fs-midwives.pdf",
+      },
+      {
+        label: "Veterinary surgeons",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0026/1111499/fs-veterinary-surgeons.pdf",
+      },
+    ],
+    content: <PrescriberScopes />,
+  },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1108972/fs-substance-mgmt-plans.pdf",
@@ -150,15 +189,33 @@ export default async function QldLawTopicPage({ params }: TopicPageProps) {
       {note ? (
         <>
           <p className="mt-3 text-lg leading-7 text-ink-soft">{note.subtitle}</p>
-          <a
-            href={note.factsheet}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
-          >
-            View Original Queensland Health Factsheet (PDF)
-            <ExternalLinkIcon />
-          </a>
+          {note.factsheets ? (
+            <ul className="mt-3 flex flex-col gap-1.5">
+              {note.factsheets.map((sheet) => (
+                <li key={sheet.href}>
+                  <a
+                    href={sheet.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
+                  >
+                    {sheet.label} factsheet (PDF)
+                    <ExternalLinkIcon />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : note.factsheet ? (
+            <a
+              href={note.factsheet}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
+            >
+              View Original Queensland Health Factsheet (PDF)
+              <ExternalLinkIcon />
+            </a>
+          ) : null}
         </>
       ) : null}
       <div className="mt-6">
