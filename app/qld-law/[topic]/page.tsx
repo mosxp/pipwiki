@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
+import { DiversionRiskDestruction } from "@/components/qld-law/diversion-risk-destruction";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
 import { ImageBasedPrescriptions } from "@/components/qld-law/image-based-prescriptions";
@@ -196,6 +197,12 @@ const topicNotes: Record<
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0024/1159071/storage-record-keeping-s8-medicines.pdf",
     content: <Schedule8Storage />,
+  },
+  "destruction-of-diversion-risk-medicine-waste": {
+    subtitle: "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - S8 Safe",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0022/1113097/fs-disposal-destruction-medicine-waste.pdf",
+    content: <DiversionRiskDestruction />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
