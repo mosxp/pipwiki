@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
+import { DepartmentalStandardCompounding } from "@/components/qld-law/departmental-standard-compounding";
 import { DepartmentalStandardMonitoredMedicines } from "@/components/qld-law/departmental-standard-monitored-medicines";
 import { DepartmentalStandardPseudoephedrine } from "@/components/qld-law/departmental-standard-pseudoephedrine";
 import { DepartmentalStandardSecureStorage } from "@/components/qld-law/departmental-standard-secure-storage";
@@ -290,6 +291,17 @@ const topicNotes: Record<
       },
     ],
     content: <DepartmentalStandardPseudoephedrine />,
+  },
+  "departmental-standard-compounding": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Compounding",
+        text: "Departmental Standard – Compounding (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108935/ds-compounding.pdf",
+      },
+    ],
+    content: <DepartmentalStandardCompounding />,
   },
   "categories-of-medicines-and-dealings": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
