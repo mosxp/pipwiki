@@ -7,6 +7,7 @@ import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authori
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
+import { LawfulPrescriptions } from "@/components/qld-law/lawful-prescriptions";
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
@@ -134,6 +135,13 @@ const topicNotes: Record<
       },
     ],
     content: <PrescriberScopes />,
+  },
+  "writing-lawful-prescriptions": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Prescription",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0011/1115003/writing-lawful-prescriptions.pdf",
+    content: <LawfulPrescriptions />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
