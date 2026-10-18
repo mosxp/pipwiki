@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
+import { DepartmentalStandardMonitoredMedicines } from "@/components/qld-law/departmental-standard-monitored-medicines";
 import { DiversionRiskDestruction } from "@/components/qld-law/diversion-risk-destruction";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
@@ -14,11 +15,13 @@ import { LawfulPrescriptions } from "@/components/qld-law/lawful-prescriptions";
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MdmaPsilocybine } from "@/components/qld-law/mdma-psilocybine";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
+import { MonitoredMedicinesQscript } from "@/components/qld-law/monitored-medicines-qscript";
 import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
 import { PrescriberScopes } from "@/components/qld-law/prescriber-scopes";
 import { Psychostimulants } from "@/components/qld-law/psychostimulants";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
+import { QotpProgram } from "@/components/qld-law/qotp-program";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
 import { Schedule8Storage } from "@/components/qld-law/schedule-8-storage";
@@ -34,7 +37,7 @@ const topicNotes: Record<
   {
     subtitle: string;
     factsheet?: string;
-    factsheets?: { label: string; href: string }[];
+    factsheets?: { label: string; href: string; text?: string }[];
     content: React.ReactNode;
   }
 > = {
@@ -204,6 +207,45 @@ const topicNotes: Record<
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0022/1113097/fs-disposal-destruction-medicine-waste.pdf",
     content: <DiversionRiskDestruction />,
   },
+  "monitored-medicines-qscript": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Monitored Medicines",
+    factsheets: [
+      {
+        label: "Checking QScript",
+        text: "Checking QScript (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0025/1247470/guide-checking-QScript.pdf",
+      },
+      {
+        label: "Changes to QScript look-up and Monitored Medicines Standard requirements",
+        text: "Changes to QScript look-up and Monitored Medicines Standard requirements (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0023/1326254/fs-changes-qscript-lookup-mms-requirements.pdf",
+      },
+      {
+        label: "QScript look-up exemptions",
+        text: "QScript look-up exemptions (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1344285/Guide-QScript-look-up-exemptions-frequently-asked-questions.pdf",
+      },
+      {
+        label: "Changes to the Monitored Medicines Standard",
+        text: "Changes to the Monitored Medicines Standard (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0021/1336215/faq-changes-to-mms.pdf",
+      },
+    ],
+    content: <MonitoredMedicinesQscript />,
+  },
+  "qotp-queensland-opioid-treatment-program": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Monitored Medicines",
+    factsheets: [
+      {
+        label: "QOTP legislative requirements",
+        text: "Queensland Health QOTP legislative requirements guide (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0032/1276763/guide-qotp-legislative-require-mpa.pdf",
+      },
+    ],
+    content: <QotpProgram />,
+  },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1108972/fs-substance-mgmt-plans.pdf",
@@ -213,6 +255,17 @@ const topicNotes: Record<
     subtitle: "QLD Pharmacy Law - Medicine - General",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108971/fs-dept-stds.pdf",
     content: <DepartmentalStandards />,
+  },
+  "departmental-standard-monitored-medicines": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Monitored Medicines",
+        text: "Departmental Standard – Monitored Medicines (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0029/1108937/ds-monitored-medicines.pdf",
+      },
+    ],
+    content: <DepartmentalStandardMonitoredMedicines />,
   },
   "categories-of-medicines-and-dealings": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
@@ -268,7 +321,7 @@ export default async function QldLawTopicPage({ params }: TopicPageProps) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
                   >
-                    {sheet.label} factsheet (PDF)
+                    {sheet.text ?? `${sheet.label} factsheet (PDF)`}
                     <ExternalLinkIcon />
                   </a>
                 </li>
