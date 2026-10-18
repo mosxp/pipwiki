@@ -29,6 +29,16 @@ export default function ConditionsPage() {
       <p className="mt-8 text-base leading-7 text-ink-soft">
         Common conditions and clinical triage notes. This note has not been written yet.
       </p>
+      <div className="mt-8">
+        <Link
+          href="/otc-notes/conditions/breastfeeding-treatments"
+          className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-stone-900">
+            Common Treatments for Breastfeeding
+          </h2>
+        </Link>
+      </div>
       <div className="mt-10">
         <BackHome />
       </div>
