@@ -1,5 +1,15 @@
 export type S4Block = { text: string } | { image: string };
 
+export type S4Column =
+  | "className"
+  | "medicine"
+  | "labels"
+  | "indication"
+  | "instruction"
+  | "sideEffects"
+  | "referral"
+  | "lifestyle";
+
 export type S4Row = {
   className: S4Block[];
   medicine: S4Block[];
@@ -9,6 +19,7 @@ export type S4Row = {
   sideEffects: S4Block[];
   referral: S4Block[];
   lifestyle: S4Block[];
+  spans?: Partial<Record<S4Column, number>>;
 };
 
 export type S4Note = string | { image: string };
@@ -215,7 +226,11 @@ export const s4Sections: S4Section[] = [
             ]
           },
           {
-            "className": [],
+            "className": [
+              {
+                "text": "Immunomodulators"
+              }
+            ],
             "medicine": [
               {
                 "text": "Hydroxychloroquine"
@@ -370,7 +385,15 @@ export const s4Sections: S4Section[] = [
               {
                 "image": "rId8"
               }
-            ]
+            ],
+            "spans": {
+              "className": 2,
+              "medicine": 2,
+              "labels": 2,
+              "sideEffects": 2,
+              "referral": 2,
+              "lifestyle": 2
+            }
           },
           {
             "className": [],
@@ -610,7 +633,7 @@ export const s4Sections: S4Section[] = [
       {
         "heading": "Medicines for Parkinson’s disease",
         "notes": [
-          "Dopamine agonists: psychiatric adverse effects hallucinations and confusion, impulse control disorder (gambling, hypersexuality, overspending and binge eating)"
+          "Dopamine agonists: psychiatric adverse effects — hallucinations and confusion, impulse control disorder (gambling, hypersexuality, overspending and binge eating)"
         ],
         "rows": [
           {
@@ -670,20 +693,56 @@ export const s4Sections: S4Section[] = [
           {
             "className": [
               {
-                "text": "dopamine"
+                "text": "Levodopa / Decarboxylase inhibitor"
               }
             ],
             "medicine": [
               {
-                "text": "L-dopa"
+                "text": "L-dopa (Levodopa / Carbidopa)"
               }
             ],
-            "labels": [],
-            "indication": [],
-            "instruction": [],
-            "sideEffects": [],
-            "referral": [],
-            "lifestyle": []
+            "labels": [
+              {
+                "text": "12, 16"
+              },
+              {
+                "image": "rId11"
+              },
+              {
+                "image": "rId14"
+              }
+            ],
+            "indication": [
+              {
+                "text": "This medicine helps with your Parkinson’s disease."
+              }
+            ],
+            "instruction": [
+              {
+                "text": "• Take it …"
+              },
+              {
+                "text": "• Have this medicine with food because it can cause stomach upset. (N/V)"
+              }
+            ],
+            "sideEffects": [
+              {
+                "image": "rId11"
+              },
+              {
+                "image": "rId14"
+              }
+            ],
+            "referral": [
+              {
+                "text": "• Speak to your doctor if you notice any mood or behaviour changes."
+              }
+            ],
+            "lifestyle": [
+              {
+                "text": "—"
+              }
+            ]
           }
         ]
       }
@@ -1677,7 +1736,11 @@ export const s4Sections: S4Section[] = [
             ]
           },
           {
-            "className": [],
+            "className": [
+              {
+                "text": "Anti-thyroids"
+              }
+            ],
             "medicine": [
               {
                 "text": "Propylthiouracil (PTU)"
@@ -1688,7 +1751,11 @@ export const s4Sections: S4Section[] = [
                 "text": "21, A"
               }
             ],
-            "indication": [],
+            "indication": [
+              {
+                "text": "This medicine helps lower your thyroid levels. (for hyperthyroidism)"
+              }
+            ],
             "instruction": [
               {
                 "text": "Take it…"
@@ -1697,7 +1764,14 @@ export const s4Sections: S4Section[] = [
                 "image": "rId10"
               }
             ],
-            "sideEffects": [],
+            "sideEffects": [
+              {
+                "text": "• If you notice any of these symptoms, speak to your doctor. In the beginning, you may experience a mild rash of itchiness. This is usually nothing to e concerned about, but if IT SEVERE see your doctor."
+              },
+              {
+                "text": "• If you notice any of these symptoms, speak to your doctor. Since this medicine reduces your thyroid levels, monitor for sings your thyroid levels have GONE TOO LOW. These are generally, DECREASED STIMULATION EFFECTS, such as COLDNESS, LETHARGY, MUSCLE ACHES, SLEEPINESS, TIREDNESS, and unusual WEIGHT GAIN."
+              }
+            ],
             "referral": [
               {
                 "text": "• If you notice any of these symptoms, speak to your doctor."
@@ -1959,7 +2033,11 @@ export const s4Sections: S4Section[] = [
             ]
           },
           {
-            "className": [],
+            "className": [
+              {
+                "text": "Anticholinergics"
+              }
+            ],
             "medicine": [
               {
                 "text": "Solifenacin"
@@ -1968,12 +2046,43 @@ export const s4Sections: S4Section[] = [
             "labels": [
               {
                 "text": "12†, 18, A"
+              },
+              {
+                "image": "rId11"
+              },
+              {
+                "image": "rId12"
+              },
+              {
+                "image": "rId10"
               }
             ],
-            "indication": [],
-            "instruction": [],
-            "sideEffects": [],
-            "referral": [],
+            "indication": [
+              {
+                "text": "This medicine will help control (dry) your urine."
+              }
+            ],
+            "instruction": [
+              {
+                "text": "Take it … (as directed)"
+              },
+              {
+                "image": "rId10"
+              }
+            ],
+            "sideEffects": [
+              {
+                "text": "This medicine has a drying effect on the body, which is part of the reason it helps. Because of this, you may get dry eyes and mouth, and constipation."
+              },
+              {
+                "image": "rId11"
+              }
+            ],
+            "referral": [
+              {
+                "text": "Let us know if you experience these because we can treat these without a prescription."
+              }
+            ],
             "lifestyle": [
               {
                 "image": "rId12"
@@ -2113,7 +2222,11 @@ export const s4Sections: S4Section[] = [
     "notes": [],
     "tables": [
       {
-        "notes": [],
+        "notes": [
+          "Note: Pantoprazole = no interaction / Rabeprazole = interaction with digoxin / Lansoprazole = interaction with tacrolimus, no OTC / Esomeprazole & Omeprazole = interaction with CYP2C19, CYP3A4",
+          "Note: PPIs & H2RA = there are stronger than antacids but can take longer to work / Antacids work by neutralizing excess acid so they work quicker but they are not that strong",
+          "Note: Gaviscon (alginate in gaviscon) forms a protective barrier over stomach contents, which help prevent acid from coming up into the esophagus"
+        ],
         "rows": [
           {
             "className": [
@@ -2188,11 +2301,7 @@ export const s4Sections: S4Section[] = [
   {
     "id": "antiemetics",
     "title": "Antiemetics",
-    "notes": [
-      "Note: Pantoprazole = no interaction / Rabeprazole = interaction with digoxin / Lansoprazole = interaction with tacrolimus, no OTC / Esomeprazole & Omeprazole = interaction with CYP2C19, CYP3A4",
-      "Note: PPIs & H2RA = there are stronger than antacids but can take longer to work / Antacids work by neutralizing excess acid so they work quicker but they are not that strong",
-      "Note: Gaviscon (alginate in gaviscon) forms a protective barrier over stomach contents, which help prevent acid from coming up into the esophagus"
-    ],
+    "notes": [],
     "tables": [
       {
         "notes": [],
@@ -2649,42 +2758,97 @@ export const s4Sections: S4Section[] = [
             ],
             "medicine": [
               {
-                "text": "LABA or LAMA"
+                "text": "LABA"
               }
             ],
             "labels": [
               {
-                "text": "-"
+                "text": "—"
               }
             ],
             "indication": [
               {
-                "text": "This medicine keeps your airways open longer and reduces your number of asthma attack/COPD exacerbation"
+                "text": "This medicine keeps your airways open longer and reduces your number of asthma attack/COPD exacerbation."
               }
             ],
             "instruction": [
               {
                 "text": "Take every day …"
+              },
+              {
+                "text": "(Maintenance treatment: use this medicine every day even if you feel better.)"
               }
             ],
             "sideEffects": [
               {
-                "text": "-"
+                "text": "—"
               }
             ],
             "referral": [
               {
-                "text": "-"
+                "text": "—"
               }
             ],
             "lifestyle": [
               {
-                "text": "-"
+                "text": "—"
               }
             ]
           },
           {
-            "className": [],
+            "className": [
+              {
+                "text": "Preventers"
+              }
+            ],
+            "medicine": [
+              {
+                "text": "LAMA"
+              }
+            ],
+            "labels": [
+              {
+                "text": "—"
+              }
+            ],
+            "indication": [
+              {
+                "text": "This medicine keeps your airways open longer and reduces your number of asthma attack/COPD exacerbation."
+              }
+            ],
+            "instruction": [
+              {
+                "text": "Take every day …"
+              },
+              {
+                "text": "(Long-acting anticholinergics: do not use for immediate relief of symptoms.)"
+              }
+            ],
+            "sideEffects": [
+              {
+                "text": "Do not allow the powder or mist to come into contact with your eyes. If using a nebuliser, close your eyes or wear eye protection during nebulisation."
+              },
+              {
+                "text": "Do not drive or operate machinery until you know how this medicine affects you, as it can cause dizziness or affect your vision."
+              }
+            ],
+            "referral": [
+              {
+                "text": "Tell your doctor if you notice any eye pain or discomfort, blurred vision or visual halos, or difficulty urinating."
+              }
+            ],
+            "lifestyle": [
+              {
+                "text": "—"
+              }
+            ]
+          },
+          {
+            "className": [
+              {
+                "text": "Preventers"
+              }
+            ],
             "medicine": [
               {
                 "text": "Steroids"
@@ -2692,32 +2856,41 @@ export const s4Sections: S4Section[] = [
             ],
             "labels": [
               {
-                "text": "-"
+                "text": "14"
+              },
+              {
+                "image": "label14"
               }
             ],
             "indication": [
               {
-                "text": "This medicine reduces the inflammation in your lungs and your number of asthma attack/COPD exacerbation"
+                "text": "This medicine reduces the inflammation in your lungs and your number of asthma attack/COPD exacerbation."
               }
             ],
             "instruction": [
               {
                 "text": "Take every day …"
+              },
+              {
+                "text": "RINSE MOUTH after each use"
+              },
+              {
+                "image": "label14"
               }
             ],
             "sideEffects": [
               {
-                "text": "-"
+                "text": "—"
               }
             ],
             "referral": [
               {
-                "text": "-"
+                "text": "—"
               }
             ],
             "lifestyle": [
               {
-                "text": "-"
+                "text": "—"
               }
             ]
           }

@@ -1,10 +1,10 @@
-import type { S4Block, S4Note, S4Row } from "@/lib/s4-counselling";
+import type { S4Block, S4Column, S4Note, S4Row } from "@/lib/s4-counselling";
 import { s4Sections } from "@/lib/s4-counselling";
 
 const labelImages: Record<string, { src: string; alt: string }> = {
   rId4: {
     src: "/counselling/s4-labels/label-21.jpg",
-    alt: "Label 21. Take once weekly on the same day.",
+    alt: "Label 20. Take once weekly on the same day.",
   },
   rId5: {
     src: "/counselling/s4-labels/label-8.jpg",
@@ -20,7 +20,7 @@ const labelImages: Record<string, { src: string; alt: string }> = {
   },
   rId8: {
     src: "/counselling/s4-labels/label-20.jpg",
-    alt: "Label 20. Special handling and disposal required. Ask your pharmacist.",
+    alt: "Label 21. Special handling and disposal required. Ask your pharmacist.",
   },
   rId9: {
     src: "/counselling/s4-labels/label-b.jpg",
@@ -28,7 +28,7 @@ const labelImages: Record<string, { src: string; alt: string }> = {
   },
   rId10: {
     src: "/counselling/s4-labels/label-18.jpg",
-    alt: "Label 18 / Label A. Swallow whole. Do not crush or chew.",
+    alt: "Label A. Swallow whole. Do not crush or chew.",
   },
   rId11: {
     src: "/counselling/s4-labels/label-12.jpg",
@@ -36,7 +36,11 @@ const labelImages: Record<string, { src: string; alt: string }> = {
   },
   rId12: {
     src: "/counselling/s4-labels/label-13.jpg",
-    alt: "Label 13. Avoid eating grapefruit or drinking grapefruit juice while being treated with this medicine.",
+    alt: "Label 18. Avoid eating grapefruit or drinking grapefruit juice while being treated with this medicine.",
+  },
+  label14: {
+    src: "/counselling/s4-labels/label-14.jpeg",
+    alt: "Label 14. Rinse mouth with water after each use.",
   },
   rId13: {
     src: "/counselling/s4-labels/label-9.jpg",
@@ -76,7 +80,7 @@ const labelImages: Record<string, { src: string; alt: string }> = {
   },
 };
 
-const columns: { key: keyof S4Row; label: string }[] = [
+const columns: { key: S4Column; label: string }[] = [
   { key: "className", label: "Class" },
   { key: "medicine", label: "Medicine" },
   { key: "labels", label: "Labels" },
@@ -114,13 +118,34 @@ function Blocks({ blocks }: { blocks: S4Block[] }) {
   );
 }
 
+function spanOrigin(rows: S4Row[], rowIndex: number, key: S4Column) {
+  for (let index = rowIndex; index >= 0; index -= 1) {
+    const span = rows[index].spans?.[key];
+    if (span && span > 1 && index + span > rowIndex) return index;
+  }
+  return rowIndex;
+}
+
+function NoteBody({ notes }: { notes: S4Note[] }) {
+  return notes.map((note, index) =>
+    typeof note === "string" ? <p key={index}>{note}</p> : <LabelImage key={index} id={note.image} />,
+  );
+}
+
 function Notes({ notes }: { notes: S4Note[] }) {
   if (notes.length === 0) return null;
   return (
     <div className="space-y-3 border-b border-line bg-[#f3ecdf] px-4 py-4 text-sm leading-6 text-ink">
-      {notes.map((note, index) =>
-        typeof note === "string" ? <p key={index}>{note}</p> : <LabelImage key={index} id={note.image} />,
-      )}
+      <NoteBody notes={notes} />
+    </div>
+  );
+}
+
+function TableCallout({ notes }: { notes: S4Note[] }) {
+  if (notes.length === 0) return null;
+  return (
+    <div className="mb-4 space-y-3 rounded-lg border border-line bg-[#f3ecdf] px-4 py-3 text-sm leading-6 text-ink">
+      <NoteBody notes={notes} />
     </div>
   );
 }
@@ -144,7 +169,7 @@ export function S4Counselling() {
                 {table.heading ? (
                   <h3 className="mb-3 text-lg font-bold text-ink">{table.heading}</h3>
                 ) : null}
-                <Notes notes={table.notes} />
+                <TableCallout notes={table.notes} />
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[88rem] border-collapse text-left text-sm leading-6 text-ink">
                     <thead className="bg-moss text-paper">
@@ -157,25 +182,31 @@ export function S4Counselling() {
                       </tr>
                     </thead>
                     <tbody>
-                      {table.rows.map((row, rowIndex) => (
-                        <tr
-                          key={rowIndex}
-                          className={rowIndex % 2 === 0 ? "bg-paper" : "bg-paper-raised"}
-                        >
-                          {columns.map((column) => (
-                            <td
-                              key={column.key}
-                              className={[
-                                "border-t border-line px-3 py-3 align-top",
-                                column.key === "className" ? "sticky left-0 min-w-36 font-medium" : "min-w-44",
-                                rowIndex % 2 === 0 ? "bg-paper" : "bg-paper-raised",
-                              ].join(" ")}
-                            >
-                              <Blocks blocks={row[column.key]} />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
+                      {table.rows.map((row, rowIndex) => {
+                        const band = spanOrigin(table.rows, rowIndex, "className");
+                        const raised = band % 2 === 1;
+                        return (
+                          <tr key={rowIndex} className={raised ? "bg-paper-raised" : "bg-paper"}>
+                            {columns.map((column) => {
+                              if (spanOrigin(table.rows, rowIndex, column.key) !== rowIndex) return null;
+                              const span = row.spans?.[column.key];
+                              return (
+                                <td
+                                  key={column.key}
+                                  rowSpan={span && span > 1 ? span : undefined}
+                                  className={[
+                                    "border-t border-line px-3 py-3 align-top",
+                                    column.key === "className" ? "sticky left-0 z-10 min-w-36 font-medium" : "min-w-44",
+                                    raised ? "bg-paper-raised" : "bg-paper",
+                                  ].join(" ")}
+                                >
+                                  <Blocks blocks={row[column.key]} />
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
