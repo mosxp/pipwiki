@@ -43,7 +43,10 @@ const clinicalTools = [
   { href: "/impetigo-triage", title: "Impetigo Management" },
 ];
 
-const lawLinks = [{ href: "/qld-law", title: "QLD Law" }];
+const lawLinks = [
+  { href: "/qld-law", title: "QLD Law" },
+  { href: "/vic-law", title: "VIC Law" },
+];
 
 export function WikiShell({
   notes,
@@ -91,7 +94,7 @@ export function WikiShell({
     : clinicalTools;
   const laws = needle
     ? lawLinks.filter((item) => {
-        const haystack = `law ${item.title} qld pharmacy`.toLocaleLowerCase();
+        const haystack = `law pharmacy ${item.title}`.toLocaleLowerCase();
         return haystack.includes(needle);
       })
     : lawLinks;
@@ -268,7 +271,7 @@ export function WikiShell({
 
         <div
           ref={scrollerRef}
-          className="min-h-0 flex-1 overflow-y-auto pt-14 md:pt-0"
+          className="min-h-0 flex-1 scroll-smooth overflow-y-auto pt-14 md:pt-0"
         >
           {children}
         </div>
