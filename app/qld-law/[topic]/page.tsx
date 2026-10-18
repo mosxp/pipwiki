@@ -10,6 +10,7 @@ import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-pract
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
+import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
 import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
@@ -61,6 +62,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0019/1490500/fs-as-of-right-immunisation-medicine-authorisation.pdf",
     content: <AsOfRightAuthorisation />,
+  },
+  "qscript-pharmaceutical-professions-and-guide": {
+    subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0036/1196676/fs-pharmacy-professions-qscript.pdf",
+    content: <QscriptGuide />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
