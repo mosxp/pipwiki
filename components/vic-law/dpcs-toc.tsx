@@ -135,10 +135,12 @@ export function RefocusNav({ items }: { items: TocItem[] }) {
     const nav = navRef.current;
     const scroller = nav ? scrollParent(nav) : null;
     if (!nav || !scroller) return;
+    const navEl = nav;
+    const scrollerEl = scroller;
     const ids = tocIdsFor(items);
 
     function currentId() {
-      const line = scroller.getBoundingClientRect().top + 48;
+      const line = scrollerEl.getBoundingClientRect().top + 48;
       let current = ids[0];
       for (const id of ids) {
         const heading = document.getElementById(id);
@@ -153,7 +155,7 @@ export function RefocusNav({ items }: { items: TocItem[] }) {
 
     function onClick(event: MouseEvent) {
       const link = (event.target as Element | null)?.closest?.("a[href^='#']");
-      if (!link || !nav.contains(link)) return;
+      if (!link || !navEl.contains(link)) return;
       const id = link.getAttribute("href")?.slice(1);
       const target = id ? document.getElementById(id) : null;
       if (!id || !target) return;
@@ -162,18 +164,18 @@ export function RefocusNav({ items }: { items: TocItem[] }) {
       event.stopPropagation();
       const top =
         target.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top +
-        scroller.scrollTop -
+        scrollerEl.getBoundingClientRect().top +
+        scrollerEl.scrollTop -
         32;
-      scroller.scrollTo({ top, behavior: "smooth" });
+      scrollerEl.scrollTo({ top, behavior: "smooth" });
       history.pushState(null, "", `#${id}`);
     }
 
     onScroll();
-    scroller.addEventListener("scroll", onScroll, { passive: true });
+    scrollerEl.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("click", onClick, true);
     return () => {
-      scroller.removeEventListener("scroll", onScroll);
+      scrollerEl.removeEventListener("scroll", onScroll);
       window.removeEventListener("click", onClick, true);
     };
   }, [items]);

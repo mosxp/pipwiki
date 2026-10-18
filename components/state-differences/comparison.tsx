@@ -229,15 +229,15 @@ const legislationRows: { topic: string; cells: string[] }[] = [
   },
 ];
 
-const s4Fields: { field: string; cells: React.ReactNode[] }[] = [
-  { field: "Prescriber name", cells: states.map(() => <Required key="name" />) },
-  { field: "Prescriber address", cells: states.map(() => <Required key="address" />) },
+const s4Fields: { topic: string; cells: React.ReactNode[] }[] = [
+  { topic: "Prescriber name", cells: states.map(() => <Required key="name" />) },
+  { topic: "Prescriber address", cells: states.map(() => <Required key="address" />) },
   {
-    field: "Prescriber phone",
+    topic: "Prescriber phone",
     cells: states.map((state) => (state === "QLD" ? <NotRequired key={state} /> : <Required key={state} />)),
   },
   {
-    field: "Prescriber qualification",
+    topic: "Prescriber qualification",
     cells: states.map((state) =>
       state === "QLD" || state === "ACT" || state === "NT" ? (
         <Required key={state} />
@@ -247,18 +247,18 @@ const s4Fields: { field: string; cells: React.ReactNode[] }[] = [
     ),
   },
   {
-    field: "Prescriber signature (in ink)",
+    topic: "Prescriber signature (in ink)",
     cells: states.map(() => <Required key="sign" />),
   },
-  { field: "Patient name", cells: states.map(() => <Required key="patient" />) },
-  { field: "Patient address", cells: states.map(() => <Required key="patient-address" />) },
-  { field: "Date written", cells: states.map(() => <Required key="date" />) },
-  { field: "Medicine name", cells: states.map(() => <Required key="med" />) },
-  { field: "Medicine strength", cells: states.map(() => <Required key="strength" />) },
-  { field: "Medicine directions", cells: states.map(() => <Required key="directions" />) },
-  { field: "Medicine quantity", cells: states.map(() => <Required key="qty" />) },
+  { topic: "Patient name", cells: states.map(() => <Required key="patient" />) },
+  { topic: "Patient address", cells: states.map(() => <Required key="patient-address" />) },
+  { topic: "Date written", cells: states.map(() => <Required key="date" />) },
+  { topic: "Medicine name", cells: states.map(() => <Required key="med" />) },
+  { topic: "Medicine strength", cells: states.map(() => <Required key="strength" />) },
+  { topic: "Medicine directions", cells: states.map(() => <Required key="directions" />) },
+  { topic: "Medicine quantity", cells: states.map(() => <Required key="qty" />) },
   {
-    field: "Number of repeats (if issued)",
+    topic: "Number of repeats (if issued)",
     cells: states.map(() => <Required key="repeats" />),
   },
 ];
