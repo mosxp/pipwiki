@@ -24,6 +24,7 @@ import { SelfPrescribeOffence } from "@/components/qld-law/self-prescribe-offenc
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
 import { UnapprovedMedicinalCannabis } from "@/components/qld-law/unapproved-medicinal-cannabis";
 import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
+import { TherapeuticVapes } from "@/components/qld-law/therapeutic-vapes";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
 
 const topicNotes: Record<
@@ -182,6 +183,12 @@ const topicNotes: Record<
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0032/1256756/fs-prescribing-dispensing-unapproved-medicinal-cannabis.pdf",
     content: <UnapprovedMedicinalCannabis />,
+  },
+  "therapeutic-vapes": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Special & Restricted Medicines",
+    factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1364975/fs-therapeutic-vapes.pdf",
+    content: <TherapeuticVapes />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
