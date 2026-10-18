@@ -46,6 +46,7 @@ const clinicalTools = [
 const lawLinks = [
   { href: "/qld-law", title: "QLD Law" },
   { href: "/vic-law", title: "VIC Law" },
+  { href: "/state-differences", title: "State Differences" },
 ];
 
 export function WikiShell({
