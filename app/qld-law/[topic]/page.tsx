@@ -9,6 +9,7 @@ import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
+import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
@@ -88,6 +89,12 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
     factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0030/1142976/fs-relevant-institutions.pdf",
     content: <RelevantInstitutions />,
+  },
+  "pharmacists-key-legislative-requirements": {
+    subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0020/1023383/what-pharmacists-need-to-know.pdf",
+    content: <PharmacistRequirements />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
