@@ -15,6 +15,7 @@ import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
 import { PrescriberScopes } from "@/components/qld-law/prescriber-scopes";
+import { Psychostimulants } from "@/components/qld-law/psychostimulants";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
@@ -158,6 +159,13 @@ const topicNotes: Record<
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0016/1111507/image-based-prescriptions.pdf",
     content: <ImageBasedPrescriptions />,
+  },
+  "prescribing-psychostimulants": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Special & Restricted Medicines",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0021/1160391/fs-prescribing-psychostimulants.pdf",
+    content: <Psychostimulants />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
