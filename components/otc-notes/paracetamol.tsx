@@ -34,7 +34,10 @@ function Section({
 
 function Subhead({ id, children }: { id: string; children: React.ReactNode }) {
   return (
-    <h3 id={id} className="scroll-mt-8 text-[11px] font-medium tracking-[0.14em] text-moss uppercase">
+    <h3
+      id={id}
+      className="scroll-mt-8 rounded-lg border-2 border-moss bg-moss/10 px-4 py-2 text-lg font-bold tracking-tight text-ink"
+    >
       {children}
     </h3>
   );
