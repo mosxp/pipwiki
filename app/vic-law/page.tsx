@@ -123,13 +123,21 @@ export default function VicLawPage() {
 
       <div className="mt-10 space-y-8">
         <QuickLinks />
-        <section>
+        <section className="space-y-4">
           <Link
             href="/vic-law/dpcs-reg-2017"
             className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
           >
             <h2 className="font-serif text-2xl tracking-tight text-stone-900">
               DPCS Regulations 2017 Notes
+            </h2>
+          </Link>
+          <Link
+            href="/vic-law/dpcs-act-1981"
+            className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
+          >
+            <h2 className="font-serif text-2xl tracking-tight text-stone-900">
+              DPCS Act 1981 &amp; SafeScript Notes
             </h2>
           </Link>
         </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TocItem = {
   id: string;
@@ -84,7 +84,9 @@ const toc: TocItem[] = [
   },
 ];
 
-const tocIds = toc.flatMap((item) => [item.id, ...(item.children?.map((child) => child.id) ?? [])]);
+function tocIdsFor(items: TocItem[]) {
+  return items.flatMap((item) => [item.id, ...(item.children?.map((child) => child.id) ?? [])]);
+}
 
 function scrollParent(node: HTMLElement) {
   let current = node.parentElement;
@@ -124,18 +126,21 @@ function TocLink({
   );
 }
 
-export function DpcsToc() {
+export function RefocusNav({ items }: { items: TocItem[] }) {
+  const tocIds = tocIdsFor(items);
+  const navRef = useRef<HTMLElement>(null);
   const [activeId, setActiveId] = useState(tocIds[0]);
 
   useEffect(() => {
-    const first = document.getElementById(tocIds[0]);
-    const scroller = first ? scrollParent(first) : null;
-    if (!scroller) return;
+    const nav = navRef.current;
+    const scroller = nav ? scrollParent(nav) : null;
+    if (!nav || !scroller) return;
+    const ids = tocIdsFor(items);
 
     function currentId() {
       const line = scroller.getBoundingClientRect().top + 48;
-      let current = tocIds[0];
-      for (const id of tocIds) {
+      let current = ids[0];
+      for (const id of ids) {
         const heading = document.getElementById(id);
         if (heading && heading.getBoundingClientRect().top <= line) current = id;
       }
@@ -148,7 +153,7 @@ export function DpcsToc() {
 
     function onClick(event: MouseEvent) {
       const link = (event.target as Element | null)?.closest?.("a[href^='#']");
-      if (!link || !scroller.contains(link) || !link.closest("[data-dpcs-toc]")) return;
+      if (!link || !nav.contains(link)) return;
       const id = link.getAttribute("href")?.slice(1);
       const target = id ? document.getElementById(id) : null;
       if (!id || !target) return;
@@ -171,10 +176,10 @@ export function DpcsToc() {
       scroller.removeEventListener("scroll", onScroll);
       window.removeEventListener("click", onClick, true);
     };
-  }, []);
+  }, [items]);
 
   useEffect(() => {
-    const link = document.querySelector<HTMLAnchorElement>(`[data-toc-link="${activeId}"]`);
+    const link = navRef.current?.querySelector<HTMLElement>(`[data-toc-link="${activeId}"]`);
     const list = link?.closest<HTMLElement>("[data-toc-list]");
     if (!link || !list) return;
 
@@ -188,8 +193,8 @@ export function DpcsToc() {
 
   return (
     <nav
+      ref={navRef}
       aria-label="On this page"
-      data-dpcs-toc=""
       className="lg:sticky lg:top-8 lg:self-start"
     >
       <div className="rounded-lg border border-line bg-paper-raised px-3 py-4">
@@ -200,7 +205,7 @@ export function DpcsToc() {
           data-toc-list=""
           className="mt-3 max-h-72 space-y-0.5 overflow-y-auto lg:max-h-[calc(100vh-8rem)]"
         >
-          {toc.map((item) => (
+          {items.map((item) => (
             <li key={item.id}>
               <span data-toc-link={item.id}>
                 <TocLink id={item.id} label={item.label} active={activeId === item.id} />
@@ -220,4 +225,8 @@ export function DpcsToc() {
       </div>
     </nav>
   );
+}
+
+export function DpcsToc() {
+  return <RefocusNav items={toc} />;
 }
