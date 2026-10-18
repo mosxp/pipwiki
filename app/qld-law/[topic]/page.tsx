@@ -81,12 +81,6 @@ const topicNotes: Record<
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
     content: <ExtendedPracticeAuthorities />,
   },
-  "approved-persons-extended-practice-authorities": {
-    subtitle: "QLD Pharmacy Law - Medicine - General",
-    factsheet:
-      "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
-    content: <ExtendedPracticeAuthorities />,
-  },
   "as-of-right-authorisation-for-immunisation-medicines": {
     subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
     factsheet:

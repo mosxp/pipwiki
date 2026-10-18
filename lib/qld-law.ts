@@ -50,24 +50,8 @@ export const qldLawSections: LawNode[] = [
         title: "Approved Persons",
         children: [
           {
-            title: "Extended Practice Authorities (EPA)",
-            slug: "approved-persons-extended-practice-authorities",
-          },
-          {
             title: "As-of-Right Authorisation for Immunisation Medicines",
             slug: "as-of-right-authorisation-for-immunisation-medicines",
-          },
-          {
-            title: "QScript: Pharmaceutical Professions and QScript Guide",
-            slug: "qscript-pharmaceutical-professions-and-guide",
-          },
-          {
-            title: "Offence to Self-Prescribe and/or Self-Administer High-Risk Medicines",
-            slug: "offence-to-self-prescribe-or-self-administer",
-          },
-          {
-            title: "Prescriber Bag Stock vs. Prescriptions (Avoiding False QScript Flags)",
-            slug: "prescriber-bag-stock-vs-prescriptions",
           },
           {
             title: "Relevant Institutions (Aged Care, Hospitals, Prisons & Detention Centres)",
@@ -100,6 +84,23 @@ export const qldLawSections: LawNode[] = [
               {
                 title: "Image-Based Prescriptions (MPMR 2021)",
                 slug: "image-based-prescriptions",
+              },
+            ],
+          },
+          {
+            title: "Doctor's Bag, Self-Prescribing & QScript",
+            children: [
+              {
+                title: "QScript: Pharmaceutical Professions and QScript Guide",
+                slug: "qscript-pharmaceutical-professions-and-guide",
+              },
+              {
+                title: "Offence to Self-Prescribe and/or Self-Administer High-Risk Medicines",
+                slug: "offence-to-self-prescribe-or-self-administer",
+              },
+              {
+                title: "Prescriber Bag Stock vs. Prescriptions (Avoiding False QScript Flags)",
+                slug: "prescriber-bag-stock-vs-prescriptions",
               },
             ],
           },
