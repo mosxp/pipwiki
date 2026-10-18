@@ -11,6 +11,7 @@ import { ImageBasedPrescriptions } from "@/components/qld-law/image-based-prescr
 import { InterstatePrescriptions } from "@/components/qld-law/interstate-prescriptions";
 import { LawfulPrescriptions } from "@/components/qld-law/lawful-prescriptions";
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
+import { MdmaPsilocybine } from "@/components/qld-law/mdma-psilocybine";
 import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PharmacistRequirements } from "@/components/qld-law/pharmacist-requirements";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
@@ -21,6 +22,7 @@ import { QscriptGuide } from "@/components/qld-law/qscript-guide";
 import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
 import { SelfPrescribeOffence } from "@/components/qld-law/self-prescribe-offence";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
+import { UnapprovedMedicinalCannabis } from "@/components/qld-law/unapproved-medicinal-cannabis";
 import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
 import { allLawTopics, getLawTopic } from "@/lib/qld-law";
 
@@ -166,6 +168,20 @@ const topicNotes: Record<
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0021/1160391/fs-prescribing-psychostimulants.pdf",
     content: <Psychostimulants />,
+  },
+  "schedule-8-mdma-and-psilocybine": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Special & Restricted Medicines",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1246780/mpa-s8-mdma-S8-psilocybine.pdf",
+    content: <MdmaPsilocybine />,
+  },
+  "unapproved-medicinal-cannabis": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Special & Restricted Medicines",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0032/1256756/fs-prescribing-dispensing-unapproved-medicinal-cannabis.pdf",
+    content: <UnapprovedMedicinalCannabis />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
