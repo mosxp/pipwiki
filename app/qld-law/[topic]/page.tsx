@@ -12,6 +12,7 @@ import { MedicinesFramework } from "@/components/qld-law/medicines-framework";
 import { PrescriberBag } from "@/components/qld-law/prescriber-bag";
 import { PurposesOfTheAct } from "@/components/qld-law/purposes-of-the-act";
 import { QscriptGuide } from "@/components/qld-law/qscript-guide";
+import { RelevantInstitutions } from "@/components/qld-law/relevant-institutions";
 import { SelfPrescribeOffence } from "@/components/qld-law/self-prescribe-offence";
 import { SubstanceAuthorities } from "@/components/qld-law/substance-authorities";
 import { SubstanceManagementPlans } from "@/components/qld-law/substance-management-plans";
@@ -82,6 +83,11 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0026/1159316/fs-offence-selfprescribe-administer-highriskmeds.pdf",
     content: <PrescriberBag />,
+  },
+  "relevant-institutions": {
+    subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
+    factsheet: "https://www.health.qld.gov.au/__data/assets/pdf_file/0030/1142976/fs-relevant-institutions.pdf",
+    content: <RelevantInstitutions />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
