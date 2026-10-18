@@ -54,6 +54,21 @@ const toc = [
   },
 ];
 
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-3.5 shrink-0" aria-hidden="true">
+      <path
+        d="M6 3.5H3.5v9h9V10M8.5 3.5H12.5V7.5M12.5 3.5 7 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function BackHome() {
   return (
     <Link
@@ -76,6 +91,18 @@ export default function StateDifferencesPage() {
         Comprehensive cross-jurisdictional notes, statutory differences, and national framework
         comparisons across Australian states and territories.
       </p>
+      <div className="mt-5">
+        <p className="text-[11px] font-medium tracking-[0.14em] text-moss uppercase">Reference</p>
+        <a
+          href="https://shop.psa.org.au/psa-pricebook-entries/ethics-and-dispensing-in-pharmacy-practice-2023-3/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
+        >
+          PSA Ethics and Dispensing in Pharmacy Practice
+          <ExternalLinkIcon />
+        </a>
+      </div>
       <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
         <RefocusNav items={toc} />
         <div className="min-w-0 lg:col-span-3">
