@@ -6,6 +6,8 @@ import { ApprovedPersons } from "@/components/qld-law/approved-persons";
 import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { DepartmentalStandardCompounding } from "@/components/qld-law/departmental-standard-compounding";
+import { DepartmentalStandardSubstanceManagementPlans } from "@/components/qld-law/departmental-standard-substance-management-plans";
+import { DepartmentalStandardElectronicPrescription } from "@/components/qld-law/departmental-standard-electronic-prescription";
 import { DepartmentalStandardMonitoredMedicines } from "@/components/qld-law/departmental-standard-monitored-medicines";
 import { DepartmentalStandardPseudoephedrine } from "@/components/qld-law/departmental-standard-pseudoephedrine";
 import { DepartmentalStandardSecureStorage } from "@/components/qld-law/departmental-standard-secure-storage";
@@ -302,6 +304,39 @@ const topicNotes: Record<
       },
     ],
     content: <DepartmentalStandardCompounding />,
+  },
+  "departmental-standard-substance-management-plans": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Substance Management Plans for Medicines",
+        text: "Departmental Standard – Substance Management Plans for Medicines (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0023/1108940/ds-substance-management-plans-medicines.pdf",
+      },
+    ],
+    content: <DepartmentalStandardSubstanceManagementPlans />,
+  },
+  "departmental-standard-electronic-prescription-management-system": {
+    subtitle: "QLD Pharmacy Law - Departmental Standards - Medicines",
+    factsheets: [
+      {
+        label: "Departmental Standard – Requirements for an Electronic Prescription Management System",
+        text: "Departmental Standard – Requirements for an Electronic Prescription Management System (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0028/1108936/ds-electronic-prescription-management-system.pdf",
+      },
+    ],
+    content: <DepartmentalStandardElectronicPrescription />,
+  },
+  "extended-practice-authorities-pharmacists": {
+    subtitle: "QLD Pharmacy Law",
+    factsheets: [
+      {
+        label: "Extended Practice Authority – Pharmacists",
+        text: "Extended Practice Authority – Pharmacists (PDF)",
+        href: "https://www.health.qld.gov.au/__data/assets/pdf_file/0027/1108944/epa-pharmacists.pdf",
+      },
+    ],
+    content: null,
   },
   "categories-of-medicines-and-dealings": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
