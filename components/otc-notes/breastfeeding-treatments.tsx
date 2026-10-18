@@ -361,7 +361,7 @@ export function BreastfeedingTreatments() {
 
       <TopicCard
         id="parasites"
-        title="Parasites & Thrush"
+        title="Parasites (Worms, Head Lice & Scabies)"
         rows={[
           {
             condition: "Worm infestations",
@@ -411,6 +411,13 @@ export function BreastfeedingTreatments() {
             ),
             avoid: dash,
           },
+        ]}
+      />
+
+      <TopicCard
+        id="vaginal-thrush"
+        title="Vaginal Thrush"
+        rows={[
           {
             condition: "Vaginal thrush",
             canUse: (

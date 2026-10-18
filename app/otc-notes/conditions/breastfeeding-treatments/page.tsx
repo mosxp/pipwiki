@@ -17,7 +17,34 @@ const toc = [
   { id: "cough-throat", label: "Cough & Sore Throat" },
   { id: "cold-sores", label: "Cold Sores & Mouth Ulcers" },
   { id: "gastrointestinal", label: "Gastrointestinal & Haemorrhoids" },
-  { id: "parasites", label: "Parasites & Thrush" },
+  { id: "parasites", label: "Parasites (Worms, Head Lice & Scabies)" },
+  { id: "vaginal-thrush", label: "Vaginal Thrush" },
+];
+
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="size-3.5 shrink-0" aria-hidden="true">
+      <path
+        d="M6 3.5H3.5v9h9V10M8.5 3.5H12.5V7.5M12.5 3.5 7 9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const references = [
+  {
+    text: "The Royal Women's Hospital - Medicines, Drugs and Breastfeeding",
+    href: "https://www.thewomens.org.au/health-information/breastfeeding/medicines-drugs-and-breastfeeding",
+  },
+  {
+    text: "The Royal Women's Hospital - Medicines in Breastfeeding Fact Sheet (PDF)",
+    href: "https://www.thewomens.org.au/images/uploads/fact-sheets/Medicines-in-breastfeeding-151018.pdf",
+  },
 ];
 
 function BackToConditions() {
@@ -41,6 +68,24 @@ export default function BreastfeedingTreatmentsPage() {
       <p className="mt-3 max-w-3xl text-lg leading-7 text-ink-soft">
         Over-the-Counter Management, Safe Medications, and Safeguards During Lactation
       </p>
+      <div className="mt-5">
+        <p className="text-[11px] font-medium tracking-[0.14em] text-moss uppercase">References</p>
+        <ul className="mt-2 flex flex-col gap-1.5">
+          {references.map((item) => (
+            <li key={item.href}>
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-amber-800 underline hover:text-amber-950"
+              >
+                {item.text}
+                <ExternalLinkIcon />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
         <RefocusNav items={toc} />
         <div className="min-w-0 lg:col-span-3">
