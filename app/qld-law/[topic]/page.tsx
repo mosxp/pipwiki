@@ -7,6 +7,7 @@ import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authori
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
+import { ImageBasedPrescriptions } from "@/components/qld-law/image-based-prescriptions";
 import { InterstatePrescriptions } from "@/components/qld-law/interstate-prescriptions";
 import { LawfulPrescriptions } from "@/components/qld-law/lawful-prescriptions";
 import { MedicineCategories } from "@/components/qld-law/medicine-categories";
@@ -150,6 +151,13 @@ const topicNotes: Record<
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0020/1161641/fs-interstate-prescribing.pdf",
     content: <InterstatePrescriptions />,
+  },
+  "image-based-prescriptions": {
+    subtitle:
+      "QLD Pharmacy Law - Medicine - Functional and Technical Requirements - Prescription",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0016/1111507/image-based-prescriptions.pdf",
+    content: <ImageBasedPrescriptions />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
