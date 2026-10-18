@@ -5,11 +5,17 @@ import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { qldLawSections, type LawNode } from "@/lib/qld-law";
 
+const sharedTopicRoutes: Record<string, string> = {
+  "approved-persons-extended-practice-authorities": "general-extended-practice-authorities",
+};
+
 function TopicLink({ topic }: { topic: LawNode }) {
+  const slug = topic.slug ? (sharedTopicRoutes[topic.slug] ?? topic.slug) : "";
+
   return (
     <li>
       <Link
-        href={`/qld-law/${topic.slug}`}
+        href={`/qld-law/${slug}`}
         className="block rounded-md px-2 py-1.5 text-sm leading-6 text-ink/90 hover:bg-paper hover:text-ink"
       >
         {topic.title}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/disclaimer";
 import { ApprovedPersons } from "@/components/qld-law/approved-persons";
+import { AsOfRightAuthorisation } from "@/components/qld-law/as-of-right-authorisation";
 import { DepartmentalStandards } from "@/components/qld-law/departmental-standards";
 import { EmergencyOrders } from "@/components/qld-law/emergency-orders";
 import { ExtendedPracticeAuthorities } from "@/components/qld-law/extended-practice-authorities";
@@ -48,6 +49,18 @@ const topicNotes: Record<string, { subtitle: string; factsheet: string; content:
     factsheet:
       "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
     content: <ExtendedPracticeAuthorities />,
+  },
+  "approved-persons-extended-practice-authorities": {
+    subtitle: "QLD Pharmacy Law - Medicine - General",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0035/1108979/fs-ext-practice-authorities.pdf",
+    content: <ExtendedPracticeAuthorities />,
+  },
+  "as-of-right-authorisation-for-immunisation-medicines": {
+    subtitle: "QLD Pharmacy Law - Medicine - Approved Persons",
+    factsheet:
+      "https://www.health.qld.gov.au/__data/assets/pdf_file/0019/1490500/fs-as-of-right-immunisation-medicine-authorisation.pdf",
+    content: <AsOfRightAuthorisation />,
   },
   "substance-management-plans": {
     subtitle: "QLD Pharmacy Law - Medicine - General",
