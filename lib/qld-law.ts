@@ -122,6 +122,16 @@ export const qldLawSections: LawNode[] = [
             ],
           },
           {
+            title: "Monitored Medicines",
+            children: [
+              { title: "Monitored Medicines & QScript", slug: "monitored-medicines-qscript" },
+              {
+                title: "QOTP: Queensland Opioid Treatment Program",
+                slug: "qotp-queensland-opioid-treatment-program",
+              },
+            ],
+          },
+          {
             title: "S8 Safe",
             children: [
               {
@@ -135,16 +145,6 @@ export const qldLawSections: LawNode[] = [
             ],
           },
         ],
-      },
-    ],
-  },
-  {
-    title: "Monitored Medicines",
-    children: [
-      { title: "Monitored Medicines & Qscript", slug: "monitored-medicines-and-qscript" },
-      {
-        title: "QOTP: Queensland Opioid Treatment Program",
-        slug: "queensland-opioid-treatment-program",
       },
     ],
   },
