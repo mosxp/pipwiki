@@ -231,7 +231,7 @@ export function WikiShell({
               </h2>
               <ul>
                 {otc.map((item) => {
-                  const active = path === item.href;
+                  const active = path === item.href || path.startsWith(`${item.href}/`);
                   return (
                     <li key={item.href}>
                       <Link
