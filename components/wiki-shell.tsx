@@ -49,6 +49,11 @@ const clinicalTools = [
   { href: "/impetigo-triage", title: "Impetigo Management" },
 ];
 
+const serviceResources = [
+  { href: "/service-resources/immunisation", title: "Immunisation" },
+  { href: "/service-resources/admin-medicines-by-inj", title: "Admin Medicines by Inj." },
+];
+
 const lawLinks = [
   { href: "/qld-law", title: "QLD Law" },
   { href: "/vic-law", title: "VIC Law" },
@@ -197,6 +202,9 @@ export function WikiShell({
   const tools = clinicalTools.filter((tool) =>
     matchesQuery(needle, "clinical tools", tool.title, "triage", search.pages[tool.href]),
   );
+  const services = serviceResources.filter((item) =>
+    matchesQuery(needle, "service resources", item.title, search.pages[item.href]),
+  );
   const laws = lawLinks.filter((item) =>
     matchesQuery(needle, "law", "pharmacy", item.title, search.pages[item.href]),
   );
@@ -212,6 +220,7 @@ export function WikiShell({
   const counsellingInNotes = groups.some((group) => group.category === "Counselling");
   const matchCount = needle
     ? tools.length +
+      services.length +
       laws.length +
       otc.length +
       medicine.length +
@@ -326,6 +335,28 @@ export function WikiShell({
             </section>
           ) : null}
 
+          {services.length > 0 ? (
+            <section className="mb-5">
+              <CategoryHeading>Service Resources</CategoryHeading>
+              <ul>
+                {services.map((item) => {
+                  const active = path === item.href || path.startsWith(`${item.href}/`);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                        className={linkClass(active)}
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
+
           {laws.length > 0 ? (
             <section className="mb-5">
               <CategoryHeading>LAW</CategoryHeading>
@@ -416,6 +447,7 @@ export function WikiShell({
 
           {groups.length === 0 &&
           tools.length === 0 &&
+          services.length === 0 &&
           laws.length === 0 &&
           otc.length === 0 &&
           counselling.length === 0 &&
