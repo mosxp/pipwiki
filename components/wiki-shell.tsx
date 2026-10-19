@@ -70,6 +70,7 @@ const counsellingLinks = [
 const medicineLinks = [
   { href: "/medicine-notes/asthma-copd-chart", title: "Asthma & COPD Medications Chart" },
   { href: "/medicine-notes/insulin-chart", title: "Insulin Chart" },
+  { href: "/medicine-notes/medicinal-cannabis", title: "Medicinal Cannabis" },
 ];
 
 function searchTerms(query: string) {

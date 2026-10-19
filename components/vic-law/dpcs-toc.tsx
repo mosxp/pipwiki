@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 type TocItem = {
   id: string;
@@ -126,9 +126,33 @@ function TocLink({
   );
 }
 
-export function RefocusNav({ items }: { items: TocItem[] }) {
+function Chevron({ direction }: { direction: "left" | "right" }) {
+  return (
+    <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden="true">
+      <path
+        d={direction === "left" ? "M10 3.5 5.5 8 10 12.5" : "M6 3.5 10.5 8 6 12.5"}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function RefocusNav({
+  items,
+  collapsed = false,
+  onToggle,
+}: {
+  items: TocItem[];
+  collapsed?: boolean;
+  onToggle?: () => void;
+}) {
   const tocIds = tocIdsFor(items);
   const navRef = useRef<HTMLElement>(null);
+  const listId = useId();
   const [activeId, setActiveId] = useState(tocIds[0]);
 
   useEffect(() => {
@@ -199,33 +223,104 @@ export function RefocusNav({ items }: { items: TocItem[] }) {
       aria-label="On this page"
       className="lg:sticky lg:top-8 lg:self-start"
     >
-      <div className="rounded-lg border border-line bg-paper-raised px-3 py-4">
-        <p className="px-2.5 text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
-          On this page
-        </p>
-        <ul
-          data-toc-list=""
-          className="mt-3 max-h-72 space-y-0.5 overflow-y-auto lg:max-h-[calc(100vh-8rem)]"
+      <div
+        className={[
+          "rounded-lg border border-line bg-paper-raised",
+          collapsed ? "p-1.5" : "px-3 py-4",
+        ].join(" ")}
+      >
+        <div className={collapsed ? "flex justify-center" : "flex items-center justify-between gap-2"}>
+          {collapsed ? null : (
+            <p className="px-2.5 text-[11px] font-medium tracking-[0.16em] text-moss uppercase">
+              On this page
+            </p>
+          )}
+          {onToggle ? (
+            <button
+              type="button"
+              aria-expanded={!collapsed}
+              aria-controls={listId}
+              aria-label={collapsed ? "Show sections" : "Hide sections"}
+              title={collapsed ? "Show sections" : "Hide sections"}
+              onClick={onToggle}
+              className="grid size-7 shrink-0 place-items-center rounded-full border border-moss bg-moss text-paper shadow-sm transition-colors hover:bg-[#244c3d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-moss"
+            >
+              <Chevron direction={collapsed ? "right" : "left"} />
+            </button>
+          ) : null}
+        </div>
+        <div
+          className={[
+            "grid transition-[grid-template-rows] duration-300 ease-in-out motion-reduce:transition-none",
+            collapsed ? "grid-rows-[0fr]" : "mt-3 grid-rows-[1fr]",
+          ].join(" ")}
         >
-          {items.map((item) => (
-            <li key={item.id}>
-              <span data-toc-link={item.id}>
-                <TocLink id={item.id} label={item.label} active={activeId === item.id} />
-              </span>
-              {item.children ? (
-                <ul className="mt-0.5 space-y-0.5">
-                  {item.children.map((child) => (
-                    <li key={child.id} data-toc-link={child.id}>
-                      <TocLink id={child.id} label={child.label} active={activeId === child.id} nested />
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+          <ul
+            id={listId}
+            data-toc-list=""
+            inert={collapsed ? true : undefined}
+            className={[
+              "min-h-0 max-h-72 space-y-0.5 lg:max-h-[calc(100vh-8rem)]",
+              collapsed ? "overflow-hidden" : "overflow-y-auto",
+            ].join(" ")}
+          >
+            {items.map((item) => (
+              <li key={item.id}>
+                <span data-toc-link={item.id}>
+                  <TocLink id={item.id} label={item.label} active={activeId === item.id} />
+                </span>
+                {item.children ? (
+                  <ul className="mt-0.5 space-y-0.5">
+                    {item.children.map((child) => (
+                      <li key={child.id} data-toc-link={child.id}>
+                        <TocLink id={child.id} label={child.label} active={activeId === child.id} nested />
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </nav>
+  );
+}
+
+export function TocFrame({
+  items,
+  children,
+  storageKey,
+}: {
+  items: TocItem[];
+  children: ReactNode;
+  storageKey?: string;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (!storageKey) return;
+    setCollapsed(localStorage.getItem(`pipwiki-toc-${storageKey}`) === "hidden");
+  }, [storageKey]);
+
+  function toggle() {
+    setCollapsed((current) => {
+      const next = !current;
+      if (storageKey) localStorage.setItem(`pipwiki-toc-${storageKey}`, next ? "hidden" : "shown");
+      return next;
+    });
+  }
+
+  return (
+    <div
+      className="mt-8 grid grid-cols-1 items-start gap-8 transition-[grid-template-columns] duration-300 ease-in-out motion-reduce:transition-none lg:[grid-template-columns:var(--toc-col)_minmax(0,1fr)]"
+      style={{ ["--toc-col" as string]: collapsed ? "3.25rem" : "calc((100% - 6rem) / 4)" }}
+    >
+      <div className="sticky top-8 self-start overflow-hidden">
+        <RefocusNav items={items} collapsed={collapsed} onToggle={toggle} />
+      </div>
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }
 
