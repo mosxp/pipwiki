@@ -42,6 +42,10 @@ const pageSources: Record<string, string[]> = {
     "components/medicine-notes/asthma-copd-chart.tsx",
     "app/medicine-notes/asthma-copd-chart/page.tsx",
   ],
+  "/medicine-notes/insulin-chart": [
+    "components/medicine-notes/insulin-chart.tsx",
+    "app/medicine-notes/insulin-chart/page.tsx",
+  ],
 };
 
 function collectFiles(relativePath: string): string[] {

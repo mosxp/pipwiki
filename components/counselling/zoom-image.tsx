@@ -6,10 +6,12 @@ export function ZoomImage({
   src,
   alt,
   className = "h-auto max-h-36 w-auto",
+  buttonClassName = "",
 }: {
   src: string;
   alt: string;
   className?: string;
+  buttonClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -29,7 +31,7 @@ export function ZoomImage({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="cursor-pointer overflow-hidden rounded border border-line bg-white text-left shadow-sm transition-shadow hover:shadow-md"
+        className={`cursor-pointer overflow-hidden rounded border border-line bg-white text-left shadow-sm transition-shadow hover:shadow-md ${buttonClassName}`}
       >
         <img src={src} alt={alt} className={className} />
       </button>

@@ -69,6 +69,7 @@ const counsellingLinks = [
 
 const medicineLinks = [
   { href: "/medicine-notes/asthma-copd-chart", title: "Asthma & COPD Medications Chart" },
+  { href: "/medicine-notes/insulin-chart", title: "Insulin Chart" },
 ];
 
 function searchTerms(query: string) {
