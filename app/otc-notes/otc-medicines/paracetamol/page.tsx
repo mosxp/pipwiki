@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { ParacetamolNotes } from "@/components/otc-notes/paracetamol";
-import { RefocusNav } from "@/components/vic-law/dpcs-toc";
+import { TocFrame } from "@/components/vic-law/dpcs-toc";
 
 export const metadata: Metadata = {
   title: "Paracetamol",
@@ -47,24 +47,21 @@ function BackToOtcMedicines() {
 
 export default function ParacetamolPage() {
   return (
-    <article className="mx-auto w-full max-w-7xl px-6 py-12 md:px-10 md:py-16 xl:px-14">
+    <article className="mx-auto w-full max-w-full px-6 py-12 md:py-16">
       <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">OTC Medicines</p>
       <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">Paracetamol</h1>
       <p className="mt-3 max-w-3xl text-lg leading-7 text-ink-soft">
         Over-the-Counter Medication Reference &amp; Clinical Triage Guide
       </p>
-      <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-        <RefocusNav items={toc} />
-        <div className="min-w-0 lg:col-span-3">
-          <BackToOtcMedicines />
-          <div className="mt-8">
-            <ParacetamolNotes />
-          </div>
-          <div className="mt-10">
-            <BackToOtcMedicines />
-          </div>
+      <TocFrame items={toc} storageKey="paracetamol">
+        <BackToOtcMedicines />
+        <div className="mt-8">
+          <ParacetamolNotes />
         </div>
-      </div>
+        <div className="mt-10">
+          <BackToOtcMedicines />
+        </div>
+      </TocFrame>
       <Disclaimer />
     </article>
   );

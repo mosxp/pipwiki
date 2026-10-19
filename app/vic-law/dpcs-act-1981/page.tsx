@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { DpcsAct } from "@/components/vic-law/dpcs-act";
-import { RefocusNav } from "@/components/vic-law/dpcs-toc";
+import { TocFrame } from "@/components/vic-law/dpcs-toc";
 
 export const metadata: Metadata = {
   title: "DPCS Act 1981 & SafeScript (VIC)",
@@ -59,7 +59,7 @@ function BackToHub() {
 
 export default function DpcsAct1981Page() {
   return (
-    <article className="mx-auto w-full max-w-7xl px-6 py-12 md:px-10 md:py-16 xl:px-14">
+    <article className="mx-auto w-full max-w-full px-6 py-12 md:py-16">
       <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">
         VIC Pharmacy Law
       </p>
@@ -69,18 +69,15 @@ export default function DpcsAct1981Page() {
       <p className="mt-3 text-lg leading-7 text-ink-soft">
         Victorian Act-Level Legislation &amp; Real-Time Monitoring Notes
       </p>
-      <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-        <RefocusNav items={toc} />
-        <div className="min-w-0 lg:col-span-3">
-          <BackToHub />
-          <div className="mt-8">
-            <DpcsAct />
-          </div>
-          <div className="mt-10">
-            <BackToHub />
-          </div>
+      <TocFrame items={toc} storageKey="dpcs-act-1981">
+        <BackToHub />
+        <div className="mt-8">
+          <DpcsAct />
         </div>
-      </div>
+        <div className="mt-10">
+          <BackToHub />
+        </div>
+      </TocFrame>
       <Disclaimer />
     </article>
   );
