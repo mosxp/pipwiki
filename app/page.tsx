@@ -1,6 +1,6 @@
 import { Disclaimer } from "@/components/disclaimer";
 
-const dashboardCards = ["Clinical tools", "Counselling"];
+const dashboardCards = ["Clinical tools", "Counselling", "Medicine Notes"];
 
 export default function Home() {
   return (

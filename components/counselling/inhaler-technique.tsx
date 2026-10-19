@@ -533,6 +533,86 @@ export function InhalerTechnique() {
         </div>
       </Section>
 
+      <Section id="nebuliser" title="Nebuliser Guidance & Comparison">
+        <div className="space-y-2 text-sm leading-6">
+          <p>A nebuliser creates an aerosol, a fine mist, for inhalation through a mouthpiece or face mask.</p>
+          <p>A nebuliser needs a higher dose than a pMDI because lung deposition is less efficient.</p>
+          <p>There is a higher risk of viral spread from droplets and aerosols. Avoid use if possible.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[40rem] border-collapse text-left text-sm leading-6 text-ink">
+            <thead className="bg-moss text-paper">
+              <tr>
+                <th className="px-3 py-2 font-medium">Comparison</th>
+                <th className="px-3 py-2 font-medium">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-paper">
+                <td className="border-t border-line px-3 py-3 align-top font-medium">pMDI + spacer</td>
+                <td className="border-t border-line px-3 py-3 align-top">
+                  <p>Equally effective for acute asthma and COPD exacerbations.</p>
+                  <p className="mt-2">Preferred: safer, cleaner, and easier.</p>
+                </td>
+              </tr>
+              <tr className="bg-paper-raised">
+                <td className="border-t border-line px-3 py-3 align-top font-medium">Nebuliser</td>
+                <td className="border-t border-line px-3 py-3 align-top">
+                  <p>Reserved for severe exacerbations, in hospital.</p>
+                  <p className="mt-2">Used when large, prolonged doses are needed.</p>
+                  <p className="mt-2">Home nebuliser use only in special cases.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <h3 className="font-serif text-xl tracking-tight">Safety and hygiene</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[40rem] border-collapse text-left text-sm leading-6 text-ink">
+            <thead className="bg-moss text-paper">
+              <tr>
+                <th className="px-3 py-2 font-medium">Concern</th>
+                <th className="px-3 py-2 font-medium">Guidance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="bg-paper">
+                <td className="border-t border-line px-3 py-3 align-top font-medium">Eye and skin irritation</td>
+                <td className="border-t border-line px-3 py-3 align-top">
+                  Use a mouthpiece rather than a mask, or wear eye protection and wash the face after use.
+                </td>
+              </tr>
+              <tr className="bg-paper-raised">
+                <td className="border-t border-line px-3 py-3 align-top font-medium">Microbial contamination</td>
+                <td className="border-t border-line px-3 py-3 align-top">
+                  Clean and maintain the nebuliser properly. Replace the nebuliser bowl and filter regularly.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="rounded-lg border border-line bg-[#f3ecdf] px-4 py-3 text-sm leading-6">
+          <p>Evidence for mixing nebuliser solutions is limited. Mix solutions only just before use.</p>
+          <p className="mt-2">After mixing, check for cloudiness or precipitation.</p>
+          <p className="mt-2">
+            Compatible 2-drug combinations: salbutamol + ipratropium, salbutamol + budesonide, and ipratropium +
+            budesonide.
+          </p>
+          <p className="mt-2">
+            For 3 or more drugs, check{" "}
+            <a
+              href="https://www.sps.nhs.uk"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-moss underline decoration-1 underline-offset-4"
+            >
+              www.sps.nhs.uk
+            </a>
+            .
+          </p>
+        </div>
+      </Section>
+
       <Section id="respimat" title="Respimat">
         <DeviceBlock device={respimat} />
       </Section>

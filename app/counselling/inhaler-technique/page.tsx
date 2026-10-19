@@ -17,6 +17,7 @@ const toc = [
     label: "Mist Inhalers",
     children: [
       { id: "pmdi", label: "pMDI Inhalers & Spacers" },
+      { id: "nebuliser", label: "Nebuliser Guidance & Comparison" },
       { id: "respimat", label: "Respimat" },
       { id: "autohaler", label: "Autohaler" },
     ],
