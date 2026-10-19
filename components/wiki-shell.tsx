@@ -57,6 +57,7 @@ const otcLinks = [
 const counsellingLinks = [
   { href: "/counselling/common-s4-counselling", title: "Common S4 Counselling" },
   { href: "/counselling/cals", title: "CALs" },
+  { href: "/counselling/inhaler-technique", title: "Inhaler Technique" },
 ];
 
 export function WikiShell({
