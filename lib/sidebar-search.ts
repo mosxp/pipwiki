@@ -7,7 +7,10 @@ const pageSources: Record<string, string[]> = {
   "/hc-triage": ["app/hc-triage/page.tsx"],
   "/uti-triage": ["app/uti-triage/page.tsx"],
   "/impetigo-triage": ["app/impetigo-triage/page.tsx"],
-  "/service-resources/immunisation": ["app/service-resources/immunisation/page.tsx"],
+  "/service-resources/immunisation": [
+    "app/service-resources/immunisation/page.tsx",
+    "components/service-resources/immunisation.tsx",
+  ],
   "/service-resources/admin-medicines-by-inj": [
     "app/service-resources/admin-medicines-by-inj",
     "components/service-resources/vitamin-b12.tsx",
