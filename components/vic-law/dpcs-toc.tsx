@@ -8,7 +8,7 @@ type TocItem = {
   children?: { id: string; label: string }[];
 };
 
-const toc: TocItem[] = [
+export const dpcsRegulationsToc: TocItem[] = [
   {
     id: "chapter-breakdown",
     label: "Chapter Breakdown",
@@ -325,5 +325,5 @@ export function TocFrame({
 }
 
 export function DpcsToc() {
-  return <RefocusNav items={toc} />;
+  return <RefocusNav items={dpcsRegulationsToc} />;
 }

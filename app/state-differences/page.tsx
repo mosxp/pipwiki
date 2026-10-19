@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { StateComparison } from "@/components/state-differences/comparison";
-import { RefocusNav } from "@/components/vic-law/dpcs-toc";
+import { TocFrame } from "@/components/vic-law/dpcs-toc";
 
 export const metadata: Metadata = {
   title: "Comparative State Pharmacy Legislation & Jurisdictional Matrix",
@@ -82,7 +82,7 @@ function BackHome() {
 
 export default function StateDifferencesPage() {
   return (
-    <article className="mx-auto w-full max-w-7xl px-6 py-12 md:px-10 md:py-16 xl:px-14">
+    <article className="mx-auto w-full max-w-full px-6 py-12 md:py-16">
       <p className="text-[11px] font-medium tracking-[0.18em] text-moss uppercase">Law</p>
       <h1 className="mt-3 font-serif text-4xl tracking-tight text-ink md:text-5xl">
         Comparative State Pharmacy Legislation &amp; Jurisdictional Matrix
@@ -103,18 +103,15 @@ export default function StateDifferencesPage() {
           <ExternalLinkIcon />
         </a>
       </div>
-      <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-4">
-        <RefocusNav items={toc} />
-        <div className="min-w-0 lg:col-span-3">
-          <BackHome />
-          <div className="mt-8">
-            <StateComparison />
-          </div>
-          <div className="mt-10">
-            <BackHome />
-          </div>
+      <TocFrame items={toc} storageKey="state-differences">
+        <BackHome />
+        <div className="mt-8">
+          <StateComparison />
         </div>
-      </div>
+        <div className="mt-10">
+          <BackHome />
+        </div>
+      </TocFrame>
       <Disclaimer />
     </article>
   );
