@@ -34,6 +34,14 @@ export default function CounsellingPage() {
           <h2 className="font-serif text-2xl tracking-tight text-stone-900">Common S4 Counselling</h2>
         </Link>
         <Link
+          href="/counselling/cals"
+          className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-stone-900">
+            CALs (Cautionary Advisory Labels)
+          </h2>
+        </Link>
+        <Link
           href="/notes/ms2step"
           className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
         >
