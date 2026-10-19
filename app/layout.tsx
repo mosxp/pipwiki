@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Literata } from "next/font/google";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import { WikiShell } from "@/components/wiki-shell";
 import { getAllNotes } from "@/lib/notes";
+import { getSidebarSearch } from "@/lib/sidebar-search";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   const notes = getAllNotes();
+  const search = getSidebarSearch();
 
   return (
     <html
@@ -41,7 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="h-full overflow-hidden bg-paper font-sans text-ink">
         <AuthWrapper>
-          <WikiShell notes={notes}>{children}</WikiShell>
+          <WikiShell notes={notes} search={search}>
+            {children}
+          </WikiShell>
         </AuthWrapper>
       </body>
     </html>
