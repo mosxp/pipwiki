@@ -58,6 +58,7 @@ const counsellingLinks = [
   { href: "/counselling/common-s4-counselling", title: "Common S4 Counselling" },
   { href: "/counselling/cals", title: "CALs" },
   { href: "/counselling/inhaler-technique", title: "Inhaler Technique" },
+  { href: "/counselling/patch-counselling", title: "Patch counselling" },
 ];
 
 const medicineLinks = [
