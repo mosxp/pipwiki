@@ -43,6 +43,18 @@ export default function ImmunisationPage() {
       <TocFrame items={toc} storageKey="immunisation">
         <BackHome />
         <div className="mt-8">
+          <Link
+            href="/service-resources/immunisation/recommended-needle-size"
+            className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
+          >
+            <h2 className="font-serif text-2xl tracking-tight text-ink">Recommended Needle Size</h2>
+            <p className="mt-2 text-sm leading-6 text-ink-soft">
+              Gauge and length specifications, insertion angles for IM, SC, and ID injections, and color-coded needle
+              identification guides.
+            </p>
+          </Link>
+        </div>
+        <div className="mt-8">
           <Immunisation />
         </div>
         <div className="mt-10">

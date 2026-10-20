@@ -8,8 +8,9 @@ const pageSources: Record<string, string[]> = {
   "/uti-triage": ["app/uti-triage/page.tsx"],
   "/impetigo-triage": ["app/impetigo-triage/page.tsx"],
   "/service-resources/immunisation": [
-    "app/service-resources/immunisation/page.tsx",
+    "app/service-resources/immunisation",
     "components/service-resources/immunisation.tsx",
+    "components/service-resources/recommended-needle-size.tsx",
   ],
   "/service-resources/admin-medicines-by-inj": [
     "app/service-resources/admin-medicines-by-inj",
