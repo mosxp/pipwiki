@@ -26,15 +26,22 @@ export default function OtcMedicinesPage() {
       <div className="mt-6">
         <BackHome />
       </div>
-      <p className="mt-8 text-base leading-7 text-ink-soft">
-        Over-the-counter medicine reference notes. This note has not been written yet.
-      </p>
-      <div className="mt-8">
+      <div className="mt-8 space-y-4">
         <Link
           href="/otc-notes/otc-medicines/paracetamol"
-          className="block rounded-lg border border-stone-200 bg-white p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-stone-50 hover:shadow-md"
+          className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
         >
-          <h2 className="font-serif text-2xl tracking-tight text-stone-900">Paracetamol</h2>
+          <h2 className="font-serif text-2xl tracking-tight text-ink">Paracetamol</h2>
+        </Link>
+        <Link
+          href="/otc-notes/otc-medicines/aspirin"
+          className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-ink">Aspirin (High Dose)</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">
+            High-dose aspirin reference notes, safety checklist, contraindications, Reye’s syndrome risks, CALs, and
+            product lineups.
+          </p>
         </Link>
       </div>
       <div className="mt-10">

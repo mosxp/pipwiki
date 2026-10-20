@@ -22,6 +22,7 @@ const pageSources: Record<string, string[]> = {
   "/otc-notes/otc-medicines": [
     "app/otc-notes/otc-medicines",
     "components/otc-notes/paracetamol.tsx",
+    "components/otc-notes/aspirin.tsx",
   ],
   "/otc-notes/conditions": [
     "app/otc-notes/conditions",

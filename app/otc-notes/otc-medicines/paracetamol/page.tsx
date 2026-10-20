@@ -32,6 +32,16 @@ const toc = [
     ],
   },
   { id: "dosage-guidelines", label: "4. Dosage Guidelines" },
+  {
+    id: "combinations",
+    label: "5. Paracetamol Combinations",
+    children: [
+      { id: "ibuprofen-150", label: "Ibuprofen 150 mg" },
+      { id: "ibuprofen-200", label: "Ibuprofen 200 mg" },
+      { id: "diphenhydramine", label: "Diphenhydramine" },
+      { id: "metoclopramide", label: "Metoclopramide" },
+    ],
+  },
 ];
 
 function BackToOtcMedicines() {

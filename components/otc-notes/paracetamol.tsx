@@ -1,3 +1,5 @@
+import { ZoomImage } from "@/components/counselling/zoom-image";
+
 function Strong({
   children,
   tone = "ink",
@@ -67,6 +69,15 @@ function BulletList({ items }: { items: React.ReactNode[] }) {
         <li key={index}>{item}</li>
       ))}
     </ul>
+  );
+}
+
+function ProductThumb({ src, alt, caption }: { src: string; alt: string; caption: string }) {
+  return (
+    <figure className="w-44">
+      <ZoomImage src={src} alt={alt} className="h-auto max-h-36 w-full object-contain" buttonClassName="block w-full" />
+      <figcaption className="mt-2 text-xs leading-5 text-ink-soft">{caption}</figcaption>
+    </figure>
   );
 }
 
@@ -386,6 +397,145 @@ export function ParacetamolNotes() {
             ],
           ]}
         />
+      </Section>
+
+      <Section id="combinations" title="5. Paracetamol Combinations">
+        <Subhead id="ibuprofen-150">Paracetamol 500 mg + ibuprofen 150 mg</Subhead>
+        <DataTable
+          headers={["Form", "Product", "Pack and schedule"]}
+          minWidth="44rem"
+          rows={[
+            [
+              "Tablet",
+              "Maxigesic",
+              <>
+                12 tablets, <Strong tone="moss">S2</Strong> (Pharmacy Medicine). 30 tablets,{" "}
+                <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+            [
+              "Powder for oral solution",
+              "Maxigesic Cold & Flu Hot Drink. Ibuprofen (as lysine) 150 mg. Lemon flavour.",
+              <>
+                10 sachets, <Strong tone="moss">S2</Strong> (Pharmacy Medicine).
+              </>,
+            ],
+          ]}
+        />
+        <div className="flex flex-wrap items-end gap-4">
+          <ProductThumb
+            src="/otc-notes/paracetamol/maxigesic.png"
+            alt="Maxigesic film coated tablets, paracetamol 500 mg and ibuprofen 150 mg, pharmacist only medicine, 30 tablets"
+            caption="Maxigesic tablets"
+          />
+          <ProductThumb
+            src="/otc-notes/paracetamol/maxigesic-hot-drink.png"
+            alt="Maxigesic Cold and Flu Hot Drink, paracetamol 500 mg and ibuprofen as lysine 150 mg, 10 sachets, lemon flavour"
+            caption="Maxigesic Cold & Flu Hot Drink"
+          />
+        </div>
+
+        <Subhead id="ibuprofen-200">Paracetamol 500 mg + ibuprofen 200 mg</Subhead>
+        <DataTable
+          headers={["Form", "Product", "Pack and schedule"]}
+          minWidth="44rem"
+          rows={[
+            [
+              "Tablet",
+              "Nuromol. Mersynofen.",
+              <>
+                6 and 12 tablets, <Strong tone="moss">S2</Strong> (Pharmacy Medicine). 24 tablets and 30 tablets,{" "}
+                <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+            [
+              "Liquid capsule",
+              "Nuromol. Wagner Health Liquigesic.",
+              <>
+                10 capsules, <Strong tone="moss">S2</Strong> (Pharmacy Medicine). 20 capsules,{" "}
+                <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+          ]}
+        />
+        <div className="flex flex-wrap items-end gap-4">
+          <ProductThumb
+            src="/otc-notes/paracetamol/nuromol.png"
+            alt="Nuromol tablets, ibuprofen 200 mg and paracetamol 500 mg, pharmacy medicine, 12 tablets"
+            caption="Nuromol tablets"
+          />
+          <ProductThumb
+            src="/otc-notes/paracetamol/mersynofen.png"
+            alt="Mersynofen tablets, ibuprofen 200 mg and paracetamol 500 mg, pharmacy medicine, 12 tablets"
+            caption="Mersynofen tablets"
+          />
+          <ProductThumb
+            src="/otc-notes/paracetamol/nuromol-liquid-capsules.png"
+            alt="Nuromol liquid capsules, ibuprofen 200 mg and paracetamol 500 mg, pharmacy medicine, 10 liquid capsules"
+            caption="Nuromol liquid capsules"
+          />
+          <ProductThumb
+            src="/otc-notes/paracetamol/liquigesic.png"
+            alt="Wagner Health Liquigesic liquid capsules, ibuprofen 200 mg and paracetamol 500 mg, pharmacy medicine, 10 liquid capsules"
+            caption="Wagner Health Liquigesic"
+          />
+        </div>
+
+        <Subhead id="diphenhydramine">Paracetamol 500 mg + diphenhydramine 25 mg</Subhead>
+        <DataTable
+          headers={["Form", "Product", "Pack and schedule"]}
+          minWidth="44rem"
+          rows={[
+            [
+              "Tablet",
+              "MersynoNight Night Time Pain Relief. Each tablet contains paracetamol 500 mg and diphenhydramine hydrochloride 25 mg.",
+              <>
+                20 tablets, <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+          ]}
+        />
+        <div className="flex flex-wrap items-end gap-4">
+          <ProductThumb
+            src="/otc-notes/paracetamol/mersynonight.png"
+            alt="MersynoNight Night Time Pain Relief tablets, paracetamol 500 mg and diphenhydramine hydrochloride 25 mg, pharmacist only medicine, 20 tablets"
+            caption="MersynoNight"
+          />
+        </div>
+
+        <Subhead id="metoclopramide">Paracetamol 500 mg + metoclopramide 5 mg</Subhead>
+        <DataTable
+          headers={["Form", "Product", "Pack and schedule"]}
+          minWidth="44rem"
+          rows={[
+            [
+              "Tablet",
+              "Anagraine. Each tablet contains metoclopramide hydrochloride 5 mg and paracetamol 500 mg.",
+              <>
+                8 tablets, <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+            [
+              "Capsule",
+              "Metomax. Rapid and effective relief of headache and nausea due to migraine. Each capsule contains paracetamol 500 mg and metoclopramide 5 mg (as HCl).",
+              <>
+                10 capsules, <Strong tone="alert">S3</Strong> (Pharmacist Only Medicine).
+              </>,
+            ],
+          ]}
+        />
+        <div className="flex flex-wrap items-end gap-4">
+          <ProductThumb
+            src="/otc-notes/paracetamol/anagraine.png"
+            alt="Anagraine tablets, metoclopramide hydrochloride 5 mg and paracetamol 500 mg, pharmacist only medicine, 8 tablets"
+            caption="Anagraine tablets"
+          />
+          <ProductThumb
+            src="/otc-notes/paracetamol/metomax.png"
+            alt="Metomax capsules, paracetamol 500 mg and metoclopramide 5 mg, rapid and effective relief of headache and nausea due to migraine, 10 capsules"
+            caption="Metomax capsules"
+          />
+        </div>
       </Section>
     </div>
   );
