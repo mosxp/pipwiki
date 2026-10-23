@@ -43,6 +43,15 @@ export default function OtcMedicinesPage() {
             product lineups.
           </p>
         </Link>
+        <Link
+          href="/otc-notes/otc-medicines/nsaids"
+          className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-ink">NSAIDs</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">
+            Non-steroidal anti-inflammatory drugs reference notes and individual medicine guides.
+          </p>
+        </Link>
       </div>
       <div className="mt-10">
         <BackHome />
