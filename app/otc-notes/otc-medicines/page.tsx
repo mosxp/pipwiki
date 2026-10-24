@@ -52,6 +52,16 @@ export default function OtcMedicinesPage() {
             Non-steroidal anti-inflammatory drugs reference notes and individual medicine guides.
           </p>
         </Link>
+        <Link
+          href="/otc-notes/otc-medicines/cold-and-flu"
+          className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-ink">Oral Cold &amp; Flu Products</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">
+            Comprehensive reference guide for oral cold, flu, decongestant, cough, lozenge, and complementary herbal
+            products.
+          </p>
+        </Link>
       </div>
       <div className="mt-10">
         <BackHome />
