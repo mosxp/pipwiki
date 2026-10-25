@@ -29,6 +29,7 @@ const pageSources: Record<string, string[]> = {
     "components/otc-notes/mefenamic-acid.tsx",
     "components/otc-notes/celecoxib.tsx",
     "components/otc-notes/cold-and-flu.tsx",
+    "components/otc-notes/oral-antihistamines.tsx",
   ],
   "/otc-notes/conditions": [
     "app/otc-notes/conditions",

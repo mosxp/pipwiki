@@ -62,6 +62,16 @@ export default function OtcMedicinesPage() {
             products.
           </p>
         </Link>
+        <Link
+          href="/otc-notes/otc-medicines/oral-antihistamines"
+          className="block rounded-lg border border-line bg-paper-raised p-6 shadow-sm transition-[background-color,box-shadow] duration-200 hover:bg-paper hover:shadow-md"
+        >
+          <h2 className="font-serif text-2xl tracking-tight text-ink">Oral Antihistamines</h2>
+          <p className="mt-2 text-sm leading-6 text-ink-soft">
+            Comprehensive reference for sedating and less-sedating antihistamines, indications, safety screening, and
+            product lineups.
+          </p>
+        </Link>
       </div>
       <div className="mt-10">
         <BackHome />
